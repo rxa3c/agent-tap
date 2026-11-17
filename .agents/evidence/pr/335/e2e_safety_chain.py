@@ -1,7 +1,7 @@
 """Isolated E2E for the macOS monitor safety chain (PR #335).
 
-Exercises the real ``claude_tap.global_inject`` code and the real
-``claude-tap monitor-restore`` CLI entrypoint against a throwaway ``$HOME`` so
+Exercises the real ``agent_tap.global_inject`` code and the real
+``agent-tap monitor-restore`` CLI entrypoint against a throwaway ``$HOME`` so
 the developer's real ``~/.claude`` / ``~/.codex`` are never touched.
 
 Covers the automatable portion of the maintainer's requested E2E:
@@ -68,12 +68,12 @@ def check(cond: bool, msg: str) -> None:
 
 
 def main() -> int:
-    tmp = Path(tempfile.mkdtemp(prefix="claude-tap-e2e-"))
+    tmp = Path(tempfile.mkdtemp(prefix="agent-tap-e2e-"))
     os.environ["HOME"] = str(tmp)
     os.environ["CODEX_HOME"] = str(tmp / ".codex")
 
     # Real code under test, imported after $HOME is redirected.
-    from claude_tap import global_inject as gi
+    from agent_tap import global_inject as gi
 
     claude_path = tmp / ".claude" / "settings.json"
     codex_path = tmp / ".codex" / "config.toml"
@@ -117,26 +117,26 @@ def main() -> int:
         check(not p.with_name(p.name + ".tap-backup").exists(), f"{p.name} backup removed")
 
     # -- Step 6: force-quit while active -> monitor-restore recovers ---------
-    print("\n== Step 6: force-quit while active -> claude-tap monitor-restore ==")
-    orphan = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(120)", "claude_tap", "--tap-no-launch"])
+    print("\n== Step 6: force-quit while active -> agent-tap monitor-restore ==")
+    orphan = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(120)", "agent_tap", "--tap-no-launch"])
     time.sleep(0.3)
     # Enable with the orphan recorded, then simulate a force-quit by NOT calling
     # disable(): injected config + monitor-state remain on disk, app is gone.
     gi.enable(
         claude_port=CLAUDE_PORT,
         codex_port=CODEX_PORT,
-        processes=[{"pid": orphan.pid, "command": "claude_tap --tap-no-launch"}],
+        processes=[{"pid": orphan.pid, "command": "agent_tap --tap-no-launch"}],
     )
     check(gi.is_active(), "state present after simulated force-quit (injection left behind)")
     check(f"127.0.0.1:{CLAUDE_PORT}" in claude_path.read_text(), "config still injected pre-restore")
 
-    # Real recovery command: `claude-tap monitor-restore`.
+    # Real recovery command: `agent-tap monitor-restore`.
     proc = subprocess.run(
         [
             sys.executable,
             "-c",
-            "import sys; sys.argv=['claude-tap','monitor-restore']; "
-            "from claude_tap.cli import main_entry; main_entry()",
+            "import sys; sys.argv=['agent-tap','monitor-restore']; "
+            "from agent_tap.cli import main_entry; main_entry()",
         ],
         env={**os.environ, "HOME": str(tmp), "CODEX_HOME": str(tmp / ".codex")},
         capture_output=True,

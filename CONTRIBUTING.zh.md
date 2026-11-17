@@ -2,7 +2,7 @@
 
 [English](CONTRIBUTING.md)
 
-感谢你考虑为 `claude-tap` 做出贡献。
+感谢你考虑为 `agent-tap` 做出贡献。
 
 本项目是面向 AI 编程客户端的本地代理和 trace 查看器。变更可能影响请求路由、凭证处理、trace 文件和生成的 HTML，因此范围明确的小型 PR 更便于 review。
 
@@ -18,15 +18,15 @@
 ## 开发环境
 
 ```bash
-git clone https://github.com/liaohch3/claude-tap.git
-cd claude-tap
+git clone https://github.com/rxa3c/agent-tap.git
+cd agent-tap
 uv sync --extra dev
 ```
 
 开发时运行本地 CLI：
 
 ```bash
-uv run python -m claude_tap --help
+uv run python -m agent_tap --help
 ```
 
 ## 本地检查

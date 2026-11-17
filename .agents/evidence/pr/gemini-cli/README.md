@@ -5,16 +5,16 @@ Generated from real Gemini CLI OAuth / Code Assist runs on 2026-05-13.
 ## Commands
 
 ```bash
-PROMPT='Real claude-tap validation for Gemini. Use shell to run pwd and test whether pyproject.toml exists. Then answer with exactly: VALIDATION_CLIENT=gemini, PWD=<pwd>, PYPROJECT_EXISTS=<true|false>.'
-timeout 240 uv run python -m claude_tap --tap-client gemini --tap-output-dir .traces/real-validation --tap-no-open --tap-no-update-check -- --skip-trust -p "$PROMPT" --yolo --output-format text
+PROMPT='Real agent-tap validation for Gemini. Use shell to run pwd and test whether pyproject.toml exists. Then answer with exactly: VALIDATION_CLIENT=gemini, PWD=<pwd>, PYPROJECT_EXISTS=<true|false>.'
+timeout 240 uv run python -m agent_tap --tap-client gemini --tap-output-dir .traces/real-validation --tap-no-open --tap-no-update-check -- --skip-trust -p "$PROMPT" --yolo --output-format text
 
-PROMPT='Second-turn claude-tap validation for Gemini. Continue the previous session. Use shell to run: printf "VALIDATION_CLIENT=gemini SECOND_TURN=true\n"; pwd. Then answer with exactly those two facts.'
-timeout 240 uv run python -m claude_tap --tap-client gemini --tap-output-dir .traces/real-validation --tap-no-open --tap-no-update-check -- --skip-trust --resume latest -p "$PROMPT" --yolo --output-format text
+PROMPT='Second-turn agent-tap validation for Gemini. Continue the previous session. Use shell to run: printf "VALIDATION_CLIENT=gemini SECOND_TURN=true\n"; pwd. Then answer with exactly those two facts.'
+timeout 240 uv run python -m agent_tap --tap-client gemini --tap-output-dir .traces/real-validation --tap-no-open --tap-no-update-check -- --skip-trust --resume latest -p "$PROMPT" --yolo --output-format text
 ```
 
 ## Results
 
-- First turn: `.traces/real-validation/2026-05-13/trace_121407.jsonl`, 15 POST records, final output `VALIDATION_CLIENT=gemini, PWD=/home/liaohch3/src/github.com/liaohch3/claude-tap-3, PYPROJECT_EXISTS=true`.
+- First turn: `.traces/real-validation/2026-05-13/trace_121407.jsonl`, 15 POST records, final output `VALIDATION_CLIENT=gemini, PWD=/home/liaohch3/src/github.com/liaohch3/agent-tap-3, PYPROJECT_EXISTS=true`.
 - Resume turn: `.traces/real-validation/2026-05-13/trace_121438.jsonl`, 13 POST records, final output `VALIDATION_CLIENT=gemini SECOND_TURN=true` plus the repo path.
 - Hosts captured: `cloudcode-pa.googleapis.com`, `oauth2.googleapis.com`, and `play.googleapis.com`.
 - Generation endpoint captured: `/v1internal:streamGenerateContent?alt=sse`.

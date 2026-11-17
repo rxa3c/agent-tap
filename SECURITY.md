@@ -1,6 +1,6 @@
 # Security Policy
 
-`claude-tap` intercepts and records API traffic from local AI coding clients. Security reports may involve credentials, proxy routing, generated certificates, trace files, or private prompt data.
+`agent-tap` intercepts and records API traffic from local AI coding clients. Security reports may involve credentials, proxy routing, generated certificates, trace files, or private prompt data.
 
 ## Supported Versions
 

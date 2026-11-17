@@ -50,7 +50,7 @@ EOF
       exit 0
       ;;
     *--json\\ files*)
-      echo 'claude_tap/viewer.html'
+      echo 'agent_tap/viewer.html'
       exit 0
       ;;
   esac

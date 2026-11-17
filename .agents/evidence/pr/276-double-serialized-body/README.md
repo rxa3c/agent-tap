@@ -1,6 +1,6 @@
 # PR #276 double-serialized request body evidence
 
-`double-serialized-viewer.png` was captured from a real `python -m claude_tap`
+`double-serialized-viewer.png` was captured from a real `python -m agent_tap`
 reverse-proxy run against a local fake Claude Code binary and a local fake
 upstream server.
 
@@ -14,15 +14,15 @@ payload = json.dumps(json.dumps(inner)).encode()
 The run confirmed both required behaviors:
 
 - The fake upstream still received the original one-pass parsed JSON string, so
-  claude-tap did not mutate the request bytes sent upstream.
+  agent-tap did not mutate the request bytes sent upstream.
 - The stored trace request body was a dict, allowing the viewer to render the
   user message normally instead of showing an opaque escaped JSON string.
 
 Validation commands:
 
 ```bash
-uv run ruff check claude_tap/forward_proxy.py claude_tap/proxy.py tests/test_e2e.py tests/test_request_body_parsing.py
-uv run ruff format --check claude_tap/forward_proxy.py claude_tap/proxy.py tests/test_e2e.py tests/test_request_body_parsing.py
+uv run ruff check agent_tap/forward_proxy.py agent_tap/proxy.py tests/test_e2e.py tests/test_request_body_parsing.py
+uv run ruff format --check agent_tap/forward_proxy.py agent_tap/proxy.py tests/test_e2e.py tests/test_request_body_parsing.py
 uv run pytest tests/test_request_body_parsing.py tests/test_e2e.py::test_double_serialized_request_body -q
 python scripts/check_screenshots.py .agents/evidence/pr/276-double-serialized-body
 ```

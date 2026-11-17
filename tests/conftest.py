@@ -7,8 +7,8 @@ from pathlib import Path
 
 import pytest
 
-from claude_tap.cli_clients import _extend_no_proxy
-from claude_tap.trace_store import get_trace_store, reset_trace_store
+from agent_tap.cli_clients import _extend_no_proxy
+from agent_tap.trace_store import get_trace_store, reset_trace_store
 
 
 def playwright_skip_reason() -> str | None:
@@ -30,7 +30,7 @@ def playwright_skip_reason() -> str | None:
 
 
 def trace_db_path(trace_dir: str | Path) -> Path:
-    return Path(trace_dir) / "claude-tap-test.sqlite3"
+    return Path(trace_dir) / "agent-tap-test.sqlite3"
 
 
 def e2e_env(env: dict[str, str], trace_dir: str | Path) -> dict[str, str]:
@@ -91,7 +91,7 @@ def trace_db(tmp_path, monkeypatch):
 @pytest.fixture
 def temp_trace_dir():
     """Create a temporary directory for trace output."""
-    trace_dir = tempfile.mkdtemp(prefix="claude_tap_test_")
+    trace_dir = tempfile.mkdtemp(prefix="agent_tap_test_")
     yield trace_dir
     shutil.rmtree(trace_dir, ignore_errors=True)
 
@@ -99,7 +99,7 @@ def temp_trace_dir():
 @pytest.fixture
 def temp_bin_dir():
     """Create a temporary directory for fake binaries."""
-    bin_dir = tempfile.mkdtemp(prefix="claude_tap_bin_")
+    bin_dir = tempfile.mkdtemp(prefix="agent_tap_bin_")
     yield bin_dir
     shutil.rmtree(bin_dir, ignore_errors=True)
 

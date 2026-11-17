@@ -9,7 +9,7 @@ generated HTML viewers unless they are fully redacted.
 
 ## Environment
 
-- claude-tap version:
+- agent-tap version:
 - Client: Claude Code / Codex CLI / other
 - OS:
 - Python version:

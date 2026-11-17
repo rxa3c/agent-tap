@@ -1,5 +1,5 @@
 ---
-owner: claude-tap-maintainers
+owner: agent-tap-maintainers
 last_reviewed: 2026-05-06
 source_of_truth: AGENTS.md
 ---
@@ -18,7 +18,7 @@ uv run pytest tests/ -x --timeout=60
 
 # Coverage Targets
 
-Coverage gates are configured in `pyproject.toml` under `[tool.claude_tap.coverage]`.
+Coverage gates are configured in `pyproject.toml` under `[tool.agent_tap.coverage]`.
 
 - Backend Python project coverage: at least `65%`.
 - Backend Python incremental coverage: at least `80%` of changed executable package lines.

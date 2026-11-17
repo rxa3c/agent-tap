@@ -19,7 +19,7 @@ uv run python scripts/check_screenshots.py .agents/evidence/pr/418-cursor-transc
 The seed script:
 
 1. Copies the real nested transcript
-   `~/.cursor/projects/Users-youngcan-claude-tap/agent-transcripts/0b95c4b6-03e2-4780-8c3a-124f43625297/0b95c4b6-03e2-4780-8c3a-124f43625297.jsonl`
+   `~/.cursor/projects/Users-youngcan-agent-tap/agent-transcripts/0b95c4b6-03e2-4780-8c3a-124f43625297/0b95c4b6-03e2-4780-8c3a-124f43625297.jsonl`
    into `.traces/418-cursor-transcript-only/cursor-home/`
 2. Imports it through `import_cursor_transcripts()` into
    `.traces/418-cursor-transcript-only/traces.sqlite3`

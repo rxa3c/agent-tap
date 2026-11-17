@@ -6,7 +6,7 @@ tags: testing, e2e, integration, tmux
 
 # Real E2E Test Skill
 
-Run real end-to-end tests that start `claude-tap` from local source, connect to the
+Run real end-to-end tests that start `agent-tap` from local source, connect to the
 real Claude CLI, and verify trace output.
 
 ## Prerequisites

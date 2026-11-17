@@ -1,1 +1,1 @@
-"""Real E2E tests for claude-tap with actual Claude CLI integration."""
+"""Real E2E tests for agent-tap with actual Claude CLI integration."""

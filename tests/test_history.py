@@ -7,8 +7,8 @@ from pathlib import Path
 
 import pytest
 
-from claude_tap.history import cleanup_trace_sessions, delete_trace_history, migrate_legacy_traces
-from claude_tap.trace_store import TraceStore, get_trace_store, reset_trace_store
+from agent_tap.history import cleanup_trace_sessions, delete_trace_history, migrate_legacy_traces
+from agent_tap.trace_store import TraceStore, get_trace_store, reset_trace_store
 
 
 def _write_legacy_session(base: Path, stem: str, *, date: str = "2026-05-01") -> Path:
@@ -412,7 +412,7 @@ def test_cleanup_trace_sessions_removes_stale_active_sessions(trace_db) -> None:
 async def test_live_viewer_delete_history_endpoint(trace_db, tmp_path: Path) -> None:
     import aiohttp
 
-    from claude_tap import LiveViewerServer
+    from agent_tap import LiveViewerServer
 
     _write_legacy_session(tmp_path, "trace_delete_me", date="2026-05-01")
     migrate_legacy_traces(tmp_path)
@@ -445,7 +445,7 @@ async def test_shared_dashboard_delete_history_requires_force_for_active_session
 ) -> None:
     import aiohttp
 
-    from claude_tap import LiveViewerServer
+    from agent_tap import LiveViewerServer
 
     _write_legacy_session(tmp_path, "trace_delete_me", date="2026-05-01")
     migrate_legacy_traces(tmp_path)

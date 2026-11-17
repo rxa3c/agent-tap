@@ -1,8 +1,8 @@
 # Claude Code 搭配 DeepSeek API
 
-本文说明如何让 Claude Code 通过 DeepSeek 的 Anthropic 兼容 API 运行，并用 `claude-tap` 捕获这条流量。
+本文说明如何让 Claude Code 通过 DeepSeek 的 Anthropic 兼容 API 运行，并用 `agent-tap` 捕获这条流量。
 
-DeepSeek 官方 Claude Code 集成会把 Claude Code 指向 `https://api.deepseek.com/anthropic`，主模型使用 `deepseek-v4-pro[1m]`。如果同时使用 `claude-tap`，继续保留这套 Claude Code 环境即可。`claude-tap` 会先从 `ANTHROPIC_BASE_URL` 读取 DeepSeek 上游，再把 Claude Code 指向本地代理。
+DeepSeek 官方 Claude Code 集成会把 Claude Code 指向 `https://api.deepseek.com/anthropic`，主模型使用 `deepseek-v4-pro[1m]`。如果同时使用 `agent-tap`，继续保留这套 Claude Code 环境即可。`agent-tap` 会先从 `ANTHROPIC_BASE_URL` 读取 DeepSeek 上游，再把 Claude Code 指向本地代理。
 
 English version: [Claude Code with DeepSeek API](deepseek-claude-code.md).
 
@@ -23,23 +23,23 @@ export CLAUDE_CODE_EFFORT_LEVEL=max
 export ANTHROPIC_BASE_URL=https://api.deepseek.com/anthropic
 ```
 
-`claude-tap` 会在改写被启动的 Claude Code 进程之前，把当前 `ANTHROPIC_BASE_URL` 作为真实上游目标。只有想手动覆盖时才需要传 `--tap-target`。
+`agent-tap` 会在改写被启动的 Claude Code 进程之前，把当前 `ANTHROPIC_BASE_URL` 作为真实上游目标。只有想手动覆盖时才需要传 `--tap-target`。
 
-## 使用 claude-tap 捕获
+## 使用 agent-tap 捕获
 
-正常启动 `claude-tap`：
+正常启动 `agent-tap`：
 
 ```bash
-claude-tap -- --permission-mode bypassPermissions
+agent-tap -- --permission-mode bypassPermissions
 ```
 
 一次性非交互 smoke test：
 
 ```bash
-claude-tap \
+agent-tap \
   -- \
   --permission-mode bypassPermissions \
-  -p 'Use Bash to run pwd, then reply with DEEPSEEK_CLAUDE_TAP_OK.'
+  -p 'Use Bash to run pwd, then reply with DEEPSEEK_AGENT_TAP_OK.'
 ```
 
 进程退出后打开自动生成的 HTML：
@@ -51,7 +51,7 @@ open .traces/*/trace_*.html
 也可以从 JSONL 重新导出 HTML：
 
 ```bash
-claude-tap export .traces/2026-05-06/trace_153111.jsonl -o trace.html
+agent-tap export .traces/2026-05-06/trace_153111.jsonl -o trace.html
 ```
 
 ## TLS 与本地代理
@@ -60,18 +60,18 @@ claude-tap export .traces/2026-05-06/trace_153111.jsonl -o trace.html
 
 ```bash
 # macOS/Homebrew 常见路径是 /etc/ssl/cert.pem。
-SSL_CERT_FILE=/etc/ssl/cert.pem claude-tap
+SSL_CERT_FILE=/etc/ssl/cert.pem agent-tap
 ```
 
 Debian/Ubuntu 的系统 CA bundle 通常是 `/etc/ssl/certs/ca-certificates.crt`。
 
 ## 兼容性说明
 
-Claude Code 2.1.128 和 2.1.131 可能把 `metadata.user_id` 作为 JSON 字符串发送。DeepSeek 的 Anthropic 兼容端点会拒绝这个值，因为它只接受字母、数字、下划线和连字符。`claude-tap` 只会在上游目标是 `https://api.deepseek.com/anthropic` 时规范化非法的 `metadata.user_id`；默认 Anthropic 流量保持不变。
+Claude Code 2.1.128 和 2.1.131 可能把 `metadata.user_id` 作为 JSON 字符串发送。DeepSeek 的 Anthropic 兼容端点会拒绝这个值，因为它只接受字母、数字、下划线和连字符。`agent-tap` 只会在上游目标是 `https://api.deepseek.com/anthropic` 时规范化非法的 `metadata.user_id`；默认 Anthropic 流量保持不变。
 
 DeepSeek 对 Claude Code 启动时的 `/v1/models?limit=1000` 预检可能返回 `404`。只要 `/v1/messages` 成功，Claude Code 仍可继续运行。下面的验证运行设置了 `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1`，用于减少无关启动流量。
 
-`claude-tap` 会脱敏 `Authorization` / `x-api-key` 请求头，但不会全局清洗 prompt、请求 body 或工具输出。不要把 key 写进 prompt、脚本输出或 trace 内容里。
+`agent-tap` 会脱敏 `Authorization` / `x-api-key` 请求头，但不会全局清洗 prompt、请求 body 或工具输出。不要把 key 写进 prompt、脚本输出或 trace 内容里。
 
 ## 已验证运行
 
@@ -82,7 +82,7 @@ DeepSeek 对 Claude Code 启动时的 `/v1/models?limit=1000` 预检可能返回
 - Claude Code 主对话模型：`deepseek-v4-pro[1m]`
 - Claude Code 标题和辅助调用模型：`deepseek-v4-flash`
 - `ANTHROPIC_BASE_URL=https://api.deepseek.com/anthropic`
-- `claude-tap`
+- `agent-tap`
 - `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1`
 
 真实 tmux 串行运行结果：

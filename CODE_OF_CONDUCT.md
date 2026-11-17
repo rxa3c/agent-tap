@@ -2,7 +2,7 @@
 
 ## Our Standard
 
-This project should be a respectful, practical place to discuss `claude-tap`, local proxying, trace inspection, and related developer tooling.
+This project should be a respectful, practical place to discuss `agent-tap`, local proxying, trace inspection, and related developer tooling.
 
 Examples of constructive behavior:
 

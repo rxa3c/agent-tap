@@ -1,6 +1,6 @@
 # Parameter JSON order evidence
 
-Both screenshots were captured with ego-browser from official claude-tap self-contained viewers generated from a real local Codex reverse-proxy session using the Responses API and MiniMax-M3.1-Flash-Preview. The comparison is captured request turns 2 and 3; turn 1 was retained to preserve viewer numbering.
+Both screenshots were captured with ego-browser from official agent-tap self-contained viewers generated from a real local Codex reverse-proxy session using the Responses API and MiniMax-M3.1-Flash-Preview. The comparison is captured request turns 2 and 3; turn 1 was retained to preserve viewer numbering.
 
 The local source was exported to `.traces/trace_parameter_order_redacted.jsonl`. For privacy, the evidence projection retains only request `model`, `stream`, and `client_metadata`, removes request headers and response payloads, and consistently pseudonymizes UUIDs, including UUIDs inside the turn-metadata JSON string. Parameter key order and value equality are preserved. The JSONL and generated viewers remain local and are not committed.
 

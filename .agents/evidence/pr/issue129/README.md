@@ -4,19 +4,19 @@ Date: 2026-05-07
 
 This evidence validates the viewer wording change from PR #133 against a real
 Claude Code session routed through the DeepSeek Anthropic-compatible API with
-`claude-tap`.
+`agent-tap`.
 
 ## Environment
 
 - Claude Code: 2.1.132
 - Upstream target: `https://api.deepseek.com/anthropic`
-- claude-tap mode: reverse proxy
+- agent-tap mode: reverse proxy
 - Trace source: `.traces/deepseek-issue129-manual-1778145043/2026-05-07/trace_091044.jsonl`
 - HTML source: `.traces/deepseek-issue129-manual-1778145043/2026-05-07/trace_091044.html`
 
 The trace files are local evidence and are not committed because they may
 contain prompt or environment context. Authentication headers are redacted by
-claude-tap.
+agent-tap.
 
 ## Prompt Coverage
 

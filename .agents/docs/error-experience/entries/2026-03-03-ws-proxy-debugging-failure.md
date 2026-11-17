@@ -16,7 +16,7 @@ within minutes pinpointed the exact problem.
 
 ## Root Cause (of the Bug)
 
-`claude_tap/proxy.py` line 379 had `proxy=None` hardcoded in
+`agent_tap/proxy.py` line 379 had `proxy=None` hardcoded in
 `session.ws_connect()`. This explicitly bypassed the Clash Verge proxy
 (`http://127.0.0.1:7897`) that all HTTP requests used successfully.
 

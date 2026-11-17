@@ -6,10 +6,10 @@ from pathlib import Path
 
 import pytest
 
-from claude_tap import parse_args
-from claude_tap.cli import CLIENT_CONFIGS, run_client
-from claude_tap.cursor_metadata import CursorConversationMeta
-from claude_tap.cursor_transcript import (
+from agent_tap import parse_args
+from agent_tap.cli import CLIENT_CONFIGS, run_client
+from agent_tap.cursor_metadata import CursorConversationMeta
+from agent_tap.cursor_transcript import (
     CursorTranscriptWatcher,
     _cursor_project_slug,
     _load_transcript,
@@ -115,7 +115,7 @@ async def test_run_client_cursor_transcript_only_skips_proxy_env(monkeypatch) ->
     monkeypatch.delenv("ALL_PROXY", raising=False)
     monkeypatch.delenv("all_proxy", raising=False)
     monkeypatch.setenv("NO_PROXY", "example.com")
-    monkeypatch.setattr("claude_tap.cli.shutil.which", lambda _: "/tmp/cursor-agent")
+    monkeypatch.setattr("agent_tap.cli.shutil.which", lambda _: "/tmp/cursor-agent")
     monkeypatch.setattr(asyncio, "create_subprocess_exec", fake_create_subprocess_exec)
     monkeypatch.setattr("sys.stdin.isatty", lambda: False)
 
@@ -158,7 +158,7 @@ async def test_import_cursor_transcripts_appends_viewer_friendly_records(trace_d
     ]
     _write_transcript(transcript, rows)
 
-    from claude_tap.trace_store import get_trace_store
+    from agent_tap.trace_store import get_trace_store
 
     store = get_trace_store()
     watcher = await import_cursor_transcripts(since=0, home=tmp_path, store=store)
@@ -208,7 +208,7 @@ async def test_import_cursor_transcripts_preserves_tool_uses(trace_db, tmp_path:
     ]
     _write_transcript(transcript, rows)
 
-    from claude_tap.trace_store import get_trace_store
+    from agent_tap.trace_store import get_trace_store
 
     store = get_trace_store()
     watcher = await import_cursor_transcripts(since=0, home=tmp_path, store=store)
@@ -253,7 +253,7 @@ async def test_cursor_flat_and_nested_same_id_shares_one_session(trace_db, tmp_p
     _write_transcript(nested, rows)
     _write_transcript(flat, rows)
 
-    from claude_tap.trace_store import get_trace_store
+    from agent_tap.trace_store import get_trace_store
 
     store = get_trace_store()
     watcher = CursorTranscriptWatcher(since=0, home=tmp_path, store=store)
@@ -298,7 +298,7 @@ async def test_cursor_transcript_watcher_keeps_conversations_in_separate_session
         ],
     )
 
-    from claude_tap.trace_store import get_trace_store
+    from agent_tap.trace_store import get_trace_store
 
     store = get_trace_store()
     watcher = CursorTranscriptWatcher(since=0, home=tmp_path, store=store)
@@ -326,7 +326,7 @@ async def test_cursor_transcript_watcher_incremental_and_dedupe(trace_db, tmp_pa
     ]
     _write_transcript(transcript, initial)
 
-    from claude_tap.trace_store import get_trace_store
+    from agent_tap.trace_store import get_trace_store
 
     store = get_trace_store()
     watcher = CursorTranscriptWatcher(since=0, home=tmp_path, store=store)
@@ -378,7 +378,7 @@ async def test_cursor_transcript_enriches_model_from_local_chat_store(trace_db, 
     conn.commit()
     conn.close()
 
-    from claude_tap.trace_store import get_trace_store
+    from agent_tap.trace_store import get_trace_store
 
     store = get_trace_store()
     watcher = await import_cursor_transcripts(since=0, home=tmp_path, store=store)
@@ -403,7 +403,7 @@ async def test_cursor_transcript_records_launch_model_hint(trace_db, tmp_path: P
         ],
     )
 
-    from claude_tap.trace_store import get_trace_store
+    from agent_tap.trace_store import get_trace_store
 
     store = get_trace_store()
     watcher = await import_cursor_transcripts(since=0, home=tmp_path, store=store, model="grok-code")
@@ -440,7 +440,7 @@ async def test_cursor_transcript_auto_model_defers_to_metadata(trace_db, tmp_pat
     conn.commit()
     conn.close()
 
-    from claude_tap.trace_store import get_trace_store
+    from agent_tap.trace_store import get_trace_store
 
     store = get_trace_store()
     watcher = await import_cursor_transcripts(since=0, home=tmp_path, store=store, model="auto")
@@ -462,8 +462,8 @@ async def test_cursor_meta_cache_retries_empty_until_populated(trace_db, tmp_pat
             {"role": "assistant", "message": {"content": [{"type": "text", "text": "yo"}]}},
         ],
     )
-    from claude_tap.cursor_metadata import CursorConversationMeta
-    from claude_tap.trace_store import get_trace_store
+    from agent_tap.cursor_metadata import CursorConversationMeta
+    from agent_tap.trace_store import get_trace_store
 
     calls = {"n": 0}
 
@@ -475,7 +475,7 @@ async def test_cursor_meta_cache_retries_empty_until_populated(trace_db, tmp_pat
             return CursorConversationMeta(context_tokens_used=99, context_token_limit=1000, source="composerData")
         return CursorConversationMeta(model="late-model", context_tokens_used=99, source="chat-store")
 
-    monkeypatch.setattr("claude_tap.cursor_transcript.resolve_cursor_conversation_meta", fake_resolve)
+    monkeypatch.setattr("agent_tap.cursor_transcript.resolve_cursor_conversation_meta", fake_resolve)
     store = get_trace_store()
     watcher = CursorTranscriptWatcher(since=0, home=tmp_path, store=store)
     assert watcher._meta_for(transcript).model == ""
@@ -499,7 +499,7 @@ async def test_cursor_transcript_watcher_resets_when_file_shrinks(trace_db, tmp_
     ]
     _write_transcript(transcript, long_rows)
 
-    from claude_tap.trace_store import get_trace_store
+    from agent_tap.trace_store import get_trace_store
 
     store = get_trace_store()
     watcher = CursorTranscriptWatcher(since=0, home=tmp_path, store=store)
@@ -610,7 +610,7 @@ async def test_watcher_get_summary_and_start_stop(trace_db, tmp_path: Path) -> N
             {"role": "assistant", "message": {"content": [{"type": "text", "text": "pong"}]}},
         ],
     )
-    from claude_tap.trace_store import get_trace_store
+    from agent_tap.trace_store import get_trace_store
 
     store = get_trace_store()
     watcher = CursorTranscriptWatcher(
@@ -634,7 +634,7 @@ async def test_watcher_get_summary_and_start_stop(trace_db, tmp_path: Path) -> N
 async def test_async_main_cursor_transcript_only_skips_proxy(monkeypatch, tmp_path: Path, capsys) -> None:
     from unittest.mock import AsyncMock
 
-    from claude_tap import async_main, parse_args
+    from agent_tap import async_main, parse_args
 
     class FakeWatcher:
         def __init__(self, **kwargs):
@@ -670,11 +670,11 @@ async def test_async_main_cursor_transcript_only_skips_proxy(monkeypatch, tmp_pa
     ca_calls: list[object] = []
 
     monkeypatch.setenv("CLOUDTAP_DB", str(tmp_path / "cursor-async-main.sqlite3"))
-    monkeypatch.setattr("claude_tap.cli.run_client", fake_run_client)
-    monkeypatch.setattr("claude_tap.cli.CursorTranscriptWatcher", FakeWatcher)
-    monkeypatch.setattr("claude_tap.cli.ensure_ca", lambda: ca_calls.append("ca") or (Path("c"), Path("k")))
+    monkeypatch.setattr("agent_tap.cli.run_client", fake_run_client)
+    monkeypatch.setattr("agent_tap.cli.CursorTranscriptWatcher", FakeWatcher)
+    monkeypatch.setattr("agent_tap.cli.ensure_ca", lambda: ca_calls.append("ca") or (Path("c"), Path("k")))
     monkeypatch.setattr(
-        "claude_tap.cli.ensure_shared_dashboard",
+        "agent_tap.cli.ensure_shared_dashboard",
         AsyncMock(return_value=("http://127.0.0.1:9/dashboard", False)),
     )
 
@@ -703,7 +703,7 @@ async def test_async_main_cursor_transcript_only_skips_proxy(monkeypatch, tmp_pa
 
 @pytest.mark.asyncio
 async def test_async_main_cursor_no_launch_watch_only(monkeypatch, tmp_path: Path, capsys) -> None:
-    from claude_tap import async_main, parse_args
+    from agent_tap import async_main, parse_args
 
     class FakeWatcher:
         last_since: float | None = None
@@ -748,9 +748,9 @@ async def test_async_main_cursor_no_launch_watch_only(monkeypatch, tmp_path: Pat
         return "http://127.0.0.1:9/dashboard", True
 
     monkeypatch.setenv("CLOUDTAP_DB", str(tmp_path / "cursor-no-launch.sqlite3"))
-    monkeypatch.setattr("claude_tap.cli.CursorTranscriptWatcher", FakeWatcher)
-    monkeypatch.setattr("claude_tap.cli.asyncio.sleep", fake_sleep)
-    monkeypatch.setattr("claude_tap.cli.ensure_shared_dashboard", slow_dashboard)
+    monkeypatch.setattr("agent_tap.cli.CursorTranscriptWatcher", FakeWatcher)
+    monkeypatch.setattr("agent_tap.cli.asyncio.sleep", fake_sleep)
+    monkeypatch.setattr("agent_tap.cli.ensure_shared_dashboard", slow_dashboard)
 
     args = parse_args(
         [
@@ -780,7 +780,7 @@ async def test_watcher_skips_user_only_transcript_until_assistant(trace_db, tmp_
         transcript,
         [{"role": "user", "message": {"content": [{"type": "text", "text": "waiting"}]}}],
     )
-    from claude_tap.trace_store import get_trace_store
+    from agent_tap.trace_store import get_trace_store
 
     store = get_trace_store()
     watcher = CursorTranscriptWatcher(since=0, home=tmp_path, store=store)
@@ -842,7 +842,7 @@ def test_backfill_cursor_transcript_request_fields_writes_tools_and_system(trace
     conn.commit()
     conn.close()
 
-    from claude_tap.trace_store import get_trace_store
+    from agent_tap.trace_store import get_trace_store
 
     store = get_trace_store()
     session_id = store.create_session(client="cursor", proxy_mode="transcript")
@@ -880,7 +880,7 @@ def test_backfill_cursor_transcript_request_fields_writes_tools_and_system(trace
 @pytest.mark.asyncio
 async def test_cursor_watcher_backfills_existing_records_on_first_sync(trace_db, tmp_path: Path) -> None:
     conversation_id = "watcher-backfill"
-    from claude_tap.trace_store import get_trace_store
+    from agent_tap.trace_store import get_trace_store
 
     store = get_trace_store()
     session_id = store.create_session(client="cursor", proxy_mode="transcript")
@@ -927,7 +927,7 @@ async def test_cursor_transcript_imports_system_prompt_from_chat_store(trace_db,
     conn.commit()
     conn.close()
 
-    from claude_tap.trace_store import get_trace_store
+    from agent_tap.trace_store import get_trace_store
 
     store = get_trace_store()
     watcher = await import_cursor_transcripts(since=0, home=tmp_path, store=store)

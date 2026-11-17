@@ -4,9 +4,9 @@
 
 ## `check_coverage.py`
 
-检查后端 Python 代码及 `claude_tap/viewer.html` 内嵌 JavaScript、CSS 的项目和增量覆盖率。
+检查后端 Python 代码及 `agent_tap/viewer.html` 内嵌 JavaScript、CSS 的项目和增量覆盖率。
 
-目标在 `pyproject.toml` 的 `[tool.claude_tap.coverage]` 中配置：
+目标在 `pyproject.toml` 的 `[tool.agent_tap.coverage]` 中配置：
 
 - Python 项目覆盖率：`python_total_min`
 - Python 包内变更的可执行行覆盖率：`python_diff_min`
@@ -53,7 +53,7 @@ CI 同时在独立的 `pr-policy` job 和现有必需的 `lint` job 中运行此
 
 ## `translate_i18n.py`
 
-通过 OpenRouter 翻译 `claude_tap/viewer_i18n.json` 中缺失的界面文本。
+通过 OpenRouter 翻译 `agent_tap/viewer_i18n.json` 中缺失的界面文本。
 
 脚本读取查看器 i18n JSON，找到同时存在于 `en`、`zh-CN`，但在其他支持的语言（`ja`、`ko`、`fr`、`ar`、`de`、`ru`）中缺失的 key，并将翻译写回原文件。
 
@@ -80,7 +80,7 @@ python scripts/translate_i18n.py --model google/gemini-2.5-flash
 ```bash
 # Use a custom file/object name (future CLI i18n support)
 python scripts/translate_i18n.py --target cli --dry-run
-python scripts/translate_i18n.py --file claude_tap/cli.py --object-name I18N --dry-run
+python scripts/translate_i18n.py --file agent_tap/cli.py --object-name I18N --dry-run
 ```
 
 ## `check_changelog.py`

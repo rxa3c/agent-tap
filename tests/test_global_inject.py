@@ -9,8 +9,8 @@ from pathlib import Path
 
 import pytest
 
-from claude_tap import global_inject
-from claude_tap.cli import main_entry
+from agent_tap import global_inject
+from agent_tap.cli import main_entry
 
 
 @pytest.fixture(autouse=True)
@@ -284,12 +284,12 @@ def test_claude_does_not_rewrite_native_aws_bedrock_url(_home: Path) -> None:
 
 
 def test_disable_can_terminate_recorded_monitor_processes(_home: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    state_file = _home / ".claude-tap" / "monitor-state.json"
+    state_file = _home / ".agent-tap" / "monitor-state.json"
     state_file.parent.mkdir(parents=True)
     state_file.write_text(json.dumps({"files": [], "processes": [{"pid": 4321, "role": "claude proxy"}]}))
     signals: list[tuple[int, signal.Signals]] = []
 
-    monkeypatch.setattr(global_inject, "_monitor_process_command", lambda _pid: "python -m claude_tap --tap-no-launch")
+    monkeypatch.setattr(global_inject, "_monitor_process_command", lambda _pid: "python -m agent_tap --tap-no-launch")
     monkeypatch.setattr(global_inject, "_pid_exists", lambda _pid: False)
     monkeypatch.setattr(os, "kill", lambda pid, sig: signals.append((pid, signal.Signals(sig))))
 
@@ -302,8 +302,8 @@ def test_disable_can_terminate_recorded_monitor_processes(_home: Path, monkeypat
 def test_terminate_proxies_on_ports_kills_matching_listeners(monkeypatch: pytest.MonkeyPatch) -> None:
     listeners = {19528: [4321], 19529: [5432]}
     commands = {
-        4321: "python -m claude_tap --tap-no-launch --tap-client claude --tap-port 19528",
-        5432: "python -m claude_tap --tap-no-launch --tap-client codex --tap-port 19529",
+        4321: "python -m agent_tap --tap-no-launch --tap-client claude --tap-port 19528",
+        5432: "python -m agent_tap --tap-no-launch --tap-client codex --tap-port 19529",
     }
     killed: list[int] = []
     monkeypatch.setattr(global_inject, "_listening_pids_for_port", lambda port: listeners.get(port, []))
@@ -319,9 +319,9 @@ def test_terminate_proxies_on_ports_skips_self_and_unrelated_listeners(monkeypat
     self_pid = os.getpid()
     listeners = {19528: [self_pid, 9999, 4321]}
     commands = {
-        self_pid: "python -m claude_tap --tap-no-launch --tap-client claude --tap-port 19528",
+        self_pid: "python -m agent_tap --tap-no-launch --tap-client claude --tap-port 19528",
         9999: "nginx: worker process",  # unrelated process happens to hold the port
-        4321: "python -m claude_tap --tap-no-launch --tap-client claude --tap-port 19528",
+        4321: "python -m agent_tap --tap-no-launch --tap-client claude --tap-port 19528",
     }
     killed: list[int] = []
     monkeypatch.setattr(global_inject, "_listening_pids_for_port", lambda port: listeners.get(port, []))
@@ -336,7 +336,7 @@ def test_terminate_proxies_on_ports_skips_self_and_unrelated_listeners(monkeypat
 def test_recorded_proxy_processes_are_running_requires_both_proxy_roles(
     _home: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    state_file = _home / ".claude-tap" / "monitor-state.json"
+    state_file = _home / ".agent-tap" / "monitor-state.json"
     state_file.parent.mkdir(parents=True)
     state_file.write_text(
         json.dumps(
@@ -351,9 +351,9 @@ def test_recorded_proxy_processes_are_running_requires_both_proxy_roles(
         )
     )
     commands = {
-        1111: "python -m claude_tap dashboard",
-        2222: "python -m claude_tap --tap-no-launch --tap-client claude",
-        3333: "python -m claude_tap --tap-no-launch --tap-client codex",
+        1111: "python -m agent_tap dashboard",
+        2222: "python -m agent_tap --tap-no-launch --tap-client claude",
+        3333: "python -m agent_tap --tap-no-launch --tap-client codex",
     }
     monkeypatch.setattr(global_inject, "_monitor_process_command", lambda pid: commands[pid])
 
@@ -363,7 +363,7 @@ def test_recorded_proxy_processes_are_running_requires_both_proxy_roles(
 def test_recorded_proxy_processes_are_running_rejects_missing_or_stale_proxy(
     _home: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    state_file = _home / ".claude-tap" / "monitor-state.json"
+    state_file = _home / ".agent-tap" / "monitor-state.json"
     state_file.parent.mkdir(parents=True)
     state_file.write_text(
         json.dumps(
@@ -377,7 +377,7 @@ def test_recorded_proxy_processes_are_running_rejects_missing_or_stale_proxy(
         )
     )
     commands = {
-        2222: "python -m claude_tap --tap-no-launch --tap-client claude",
+        2222: "python -m agent_tap --tap-no-launch --tap-client claude",
         3333: "",
     }
     monkeypatch.setattr(global_inject, "_monitor_process_command", lambda pid: commands[pid])
@@ -388,7 +388,7 @@ def test_recorded_proxy_processes_are_running_rejects_missing_or_stale_proxy(
 def test_recorded_proxy_processes_are_running_accepts_live_proxy_ports_with_stale_state_pids(
     _home: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    state_file = _home / ".claude-tap" / "monitor-state.json"
+    state_file = _home / ".agent-tap" / "monitor-state.json"
     state_file.parent.mkdir(parents=True)
     state_file.write_text(
         json.dumps(
@@ -402,8 +402,8 @@ def test_recorded_proxy_processes_are_running_accepts_live_proxy_ports_with_stal
         )
     )
     commands = {
-        4444: "python -m claude_tap --tap-no-launch --tap-client claude --tap-port 19528",
-        5555: "python -m claude_tap --tap-no-launch --tap-client codex --tap-port 19529",
+        4444: "python -m agent_tap --tap-no-launch --tap-client claude --tap-port 19528",
+        5555: "python -m agent_tap --tap-no-launch --tap-client codex --tap-port 19529",
     }
     monkeypatch.setattr(global_inject, "_listening_pids_for_port", lambda port: {19528: [4444], 19529: [5555]}[port])
     monkeypatch.setattr(global_inject, "_monitor_process_command", lambda pid: commands[pid])
@@ -414,21 +414,21 @@ def test_recorded_proxy_processes_are_running_accepts_live_proxy_ports_with_stal
 def test_recorded_proxy_processes_are_running_rejects_wrong_live_proxy_port(
     _home: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    state_file = _home / ".claude-tap" / "monitor-state.json"
+    state_file = _home / ".agent-tap" / "monitor-state.json"
     state_file.parent.mkdir(parents=True)
     state_file.write_text(json.dumps({"files": [], "processes": []}))
     monkeypatch.setattr(global_inject, "_listening_pids_for_port", lambda _port: [4444])
     monkeypatch.setattr(
         global_inject,
         "_monitor_process_command",
-        lambda _pid: "python -m claude_tap --tap-no-launch --tap-client claude --tap-port 19528",
+        lambda _pid: "python -m agent_tap --tap-no-launch --tap-client claude --tap-port 19528",
     )
 
     assert global_inject.recorded_proxy_processes_are_running(claude_port=19528, codex_port=19529) is False
 
 
 def test_disable_ignores_invalid_state_and_restores_no_files(_home: Path) -> None:
-    state_file = _home / ".claude-tap" / "monitor-state.json"
+    state_file = _home / ".agent-tap" / "monitor-state.json"
     state_file.parent.mkdir(parents=True)
     state_file.write_text("not-json{{")
 
@@ -465,7 +465,7 @@ def test_terminate_recorded_processes_filters_and_kills_stubborn_process(
     unrelated_pid = current_pid + 1
     stubborn_pid = current_pid + 2
     exiting_pid = current_pid + 3
-    state_file = _home / ".claude-tap" / "monitor-state.json"
+    state_file = _home / ".agent-tap" / "monitor-state.json"
     state_file.parent.mkdir(parents=True)
     state_file.write_text(
         json.dumps(
@@ -484,8 +484,8 @@ def test_terminate_recorded_processes_filters_and_kills_stubborn_process(
     )
     commands = {
         unrelated_pid: "python unrelated.py",
-        stubborn_pid: "python -m claude_tap dashboard",
-        exiting_pid: "python -m claude_tap --tap-no-launch",
+        stubborn_pid: "python -m agent_tap dashboard",
+        exiting_pid: "python -m agent_tap --tap-no-launch",
     }
     alive_checks = {stubborn_pid: [True, True, True], exiting_pid: [True, False]}
     signals: list[tuple[int, signal.Signals]] = []
@@ -534,9 +534,9 @@ def test_disable_is_noop_without_state(_home: Path) -> None:
 def test_main_entry_routes_monitor_restore(monkeypatch: pytest.MonkeyPatch) -> None:
     restored: list[str] = []
 
-    monkeypatch.setattr("sys.argv", ["claude-tap", "monitor-restore"])
+    monkeypatch.setattr("sys.argv", ["agent-tap", "monitor-restore"])
     monkeypatch.setattr(
-        "claude_tap.global_inject.disable",
+        "agent_tap.global_inject.disable",
         lambda *, terminate_processes=False: restored.append(str(terminate_processes)),
     )
 

@@ -10,8 +10,8 @@ labeling Codex `request.body.input` as normal `Messages`.
 
 Artifacts:
 
-- JSONL: `/Users/liaohch3/Desktop/claude-tap-jsonl-samples/trace_100137.jsonl`
-- HTML: `/Users/liaohch3/Desktop/claude-tap-jsonl-samples/trace_100137.html`
+- JSONL: `/Users/liaohch3/Desktop/agent-tap-jsonl-samples/trace_100137.jsonl`
+- HTML: `/Users/liaohch3/Desktop/agent-tap-jsonl-samples/trace_100137.html`
 
 Selected entry:
 
@@ -33,7 +33,7 @@ Observed after the fix:
 ## Screenshot
 
 - `pr75-codex-request-context-label.png`
-  - Source viewer: `/Users/liaohch3/Desktop/claude-tap-jsonl-samples/trace_100137.html`
+  - Source viewer: `/Users/liaohch3/Desktop/agent-tap-jsonl-samples/trace_100137.html`
   - Captures the selected `Turn 20` entry after the viewer fix
 
 ## Local validation
@@ -45,7 +45,7 @@ uv run ruff check .
 uv run ruff format --check .
 uv run pytest tests/ -x --timeout=60
 uv run python scripts/check_screenshots.py .agents/evidence/pr/pr75
-uv run python scripts/verify_screenshots.py /Users/liaohch3/Desktop/claude-tap-jsonl-samples/trace_100137.html
+uv run python scripts/verify_screenshots.py /Users/liaohch3/Desktop/agent-tap-jsonl-samples/trace_100137.html
 ```
 
 Results:

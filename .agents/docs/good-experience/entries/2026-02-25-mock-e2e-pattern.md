@@ -6,15 +6,15 @@
 ## 模式描述
 
 现有 E2E 测试套件（`tests/test_e2e.py`）采用了全 mock 方案，
-可在无外部依赖的情况下测试整个 claude-tap pipeline：
+可在无外部依赖的情况下测试整个 agent-tap pipeline：
 
 1. **Fake upstream server** - 在后台线程运行 aiohttp server，
    模拟 Anthropic API，同时返回 non-streaming 与 streaming（SSE）响应。
 
 2. **Fake Claude script** - 在 PATH 中放置临时 Python 脚本作为 `claude` CLI。
-   它向 `ANTHROPIC_BASE_URL`（由 claude-tap 设置为 proxy 地址）发送 HTTP 请求并打印结果。
+   它向 `ANTHROPIC_BASE_URL`（由 agent-tap 设置为 proxy 地址）发送 HTTP 请求并打印结果。
 
-3. **真实 claude-tap** - 以子进程方式运行真实 `claude_tap` module，
+3. **真实 agent-tap** - 以子进程方式运行真实 `agent_tap` module，
    并通过 `--tap-target` 指向 fake upstream。
 
 ## 为什么效果好
@@ -29,7 +29,7 @@
 
 - `run_fake_upstream_in_thread()` 使用 `threading.Event` 做同步
 - Fake Claude 脚本由 `_create_fake_claude()` 创建并设为可执行
-- 临时 bin 目录会 prepend 到 `PATH`，让 claude-tap 找到 fake `claude`
+- 临时 bin 目录会 prepend 到 `PATH`，让 agent-tap 找到 fake `claude`
 - 端口硬编码（19199、19200 等）保持测试隔离
 - Trace 文件写入 `tempfile.mkdtemp()`，断言后清理
 

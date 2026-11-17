@@ -1,21 +1,21 @@
 ---
-name: openclaw-claude-tap-setup
-description: Configure and launch claude-tap as a local proxy for OpenClaw integration. Use when setting up claude-tap with OpenClaw, troubleshooting API proxy issues, or managing trace collection in an OpenClaw environment.
+name: openclaw-agent-tap-setup
+description: Configure and launch agent-tap as a local proxy for OpenClaw integration. Use when setting up agent-tap with OpenClaw, troubleshooting API proxy issues, or managing trace collection in an OpenClaw environment.
 ---
 
-# Claude Tap Setup Guide (Required Reading for OpenClaw Integration)
+# Agent Tap Setup Guide (Required Reading for OpenClaw Integration)
 
-Simplified Chinese version: [OpenClaw 集成的 Claude Tap 设置指南](OPENCLAW_README.zh.md).
+Simplified Chinese version: [OpenClaw 集成的 Agent Tap 设置指南](OPENCLAW_README.zh.md).
 
 ## Background
 
-OpenClaw can trace model API requests through a local proxy such as claude-tap. Once configured, all API requests destined for a given model provider are forwarded through the local proxy to the upstream endpoint, while requests and responses are recorded for debugging.
+OpenClaw can trace model API requests through a local proxy such as agent-tap. Once configured, all API requests destined for a given model provider are forwarded through the local proxy to the upstream endpoint, while requests and responses are recorded for debugging.
 
 **Important: After pointing a provider's `baseUrl` in openclaw.json to the local proxy, you MUST ensure the proxy process is running. Otherwise, API requests will fail with connection refused, bringing down the entire OpenClaw service.**
 
 ## Configuration
 
-### 1. claude-tap Configuration in openclaw.json
+### 1. agent-tap Configuration in openclaw.json
 
 Add a `baseUrl` pointing to the local proxy under `models.providers.<provider>` in `~/.openclaw/openclaw.json`. Example for Anthropic:
 
@@ -29,7 +29,7 @@ Add a `baseUrl` pointing to the local proxy under `models.providers.<provider>` 
         "models": [
           {
             "id": "claude-sonnet-4-6",
-            "name": "Claude Sonnet 4.6 (via claude-tap)",
+            "name": "Claude Sonnet 4.6 (via agent-tap)",
             "api": "anthropic-messages",
             "reasoning": false,
             "input": ["text", "image"],
@@ -50,35 +50,35 @@ Add a `baseUrl` pointing to the local proxy under `models.providers.<provider>` 
 ```
 
 **Key fields:**
-- `baseUrl`: Must point to the address and port claude-tap listens on (default `http://127.0.0.1:8787`)
+- `baseUrl`: Must point to the address and port agent-tap listens on (default `http://127.0.0.1:8787`)
 - Other fields: Configure model parameters as needed
 
-### 2. Starting claude-tap
+### 2. Starting agent-tap
 
-After configuring `openclaw.json`, **you MUST start claude-tap before starting OpenClaw**.
+After configuring `openclaw.json`, **you MUST start agent-tap before starting OpenClaw**.
 
 #### API Proxy Only (No Frontend)
 
 ```bash
-nohup claude-tap \
+nohup agent-tap \
   --tap-port 8787 \
   --tap-host 127.0.0.1 \
   --tap-no-launch \
   --tap-no-open \
-  > ~/.openclaw/logs/claude-tap.log 2>&1 &
+  > ~/.openclaw/logs/agent-tap.log 2>&1 &
 ```
 
 #### API Proxy + Live Viewer Frontend
 
 ```bash
-nohup claude-tap \
+nohup agent-tap \
   --tap-port 8787 \
   --tap-host 127.0.0.1 \
   --tap-no-launch \
   --tap-no-open \
   --tap-live \
   --tap-live-port 8788 \
-  > ~/.openclaw/logs/claude-tap.log 2>&1 &
+  > ~/.openclaw/logs/agent-tap.log 2>&1 &
 ```
 
 **Parameter Reference:**
@@ -94,15 +94,15 @@ nohup claude-tap \
 
 **Security Notice: You MUST specify `--tap-host 127.0.0.1` to ensure both the proxy and frontend listen only on the loopback address. Without this flag, `--tap-no-launch` mode defaults to binding `0.0.0.0`, exposing the port to the public network.**
 
-### 3. Verifying claude-tap Is Running
+### 3. Verifying agent-tap Is Running
 
 ```bash
 # Check whether the ports are listening
 ss -tlnp | grep -E "8787|8788"
 
 # Expected output (both ports should be bound to 127.0.0.1 and in LISTEN state):
-# LISTEN  0  128  127.0.0.1:8787  0.0.0.0:*  users:(("claude-tap",...))
-# LISTEN  0  128  127.0.0.1:8788  0.0.0.0:*  users:(("claude-tap",...))
+# LISTEN  0  128  127.0.0.1:8787  0.0.0.0:*  users:(("agent-tap",...))
+# LISTEN  0  128  127.0.0.1:8788  0.0.0.0:*  users:(("agent-tap",...))
 # If you see 0.0.0.0:8787, the port is publicly exposed — stop immediately
 # and restart with --tap-host 127.0.0.1
 
@@ -111,7 +111,7 @@ curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8787/
 # A 404 response means the proxy is running (no handler on the root path is expected)
 
 # Check the process
-ps aux | grep claude-tap | grep -v grep
+ps aux | grep agent-tap | grep -v grep
 ```
 
 ### 4. Accessing the Live Viewer Frontend
@@ -127,13 +127,13 @@ Then open `http://127.0.0.1:8788` in your local browser.
 ## Startup / Restart Order (Critical)
 
 ```
-1. Start claude-tap (port 8787)
+1. Start agent-tap (port 8787)
 2. Verify the port is listening (ss -tlnp | grep 8787 — confirm LISTEN state)
 3. Verify proxy connectivity (curl http://127.0.0.1:8787/ — expect 404)
 4. Only after both checks pass, restart the OpenClaw gateway
 ```
 
-**NEVER restart the gateway while claude-tap is not ready. You must confirm that the claude-tap port is listening and the proxy is reachable before restarting the gateway.**
+**NEVER restart the gateway while agent-tap is not ready. You must confirm that the agent-tap port is listening and the proxy is reachable before restarting the gateway.**
 
 **If the order is reversed, the proxy is not started, or verification is skipped, all model API calls routed through the proxy will fail (connection refused), effectively bringing the service down.**
 
@@ -141,16 +141,16 @@ Then open `http://127.0.0.1:8788` in your local browser.
 
 ### API Service Down / Cannot Call Models
 
-1. Check whether the claude-tap process exists: `ps aux | grep claude-tap`
+1. Check whether the agent-tap process exists: `ps aux | grep agent-tap`
 2. Check whether the port is listening: `ss -tlnp | grep 8787`
-3. If not running, start claude-tap following the steps above
+3. If not running, start agent-tap following the steps above
 4. Restart the OpenClaw gateway
 
-### Removing claude-tap
+### Removing agent-tap
 
 Delete the `baseUrl` field (or the entire custom provider block) from `~/.openclaw/openclaw.json` so that OpenClaw connects directly to the provider's official API. Then restart the gateway.
 
 ## Logs
 
-- claude-tap log: `~/.openclaw/logs/claude-tap.log`
+- agent-tap log: `~/.openclaw/logs/agent-tap.log`
 - Trace files are saved by default in: `./.traces/`

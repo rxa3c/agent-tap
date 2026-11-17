@@ -6,7 +6,7 @@
 
 ## 问题
 
-Claude Code 退出后，`claude-tap` 尝试打印摘要并生成 HTML 输出，
+Claude Code 退出后，`agent-tap` 尝试打印摘要并生成 HTML 输出，
 却每次都触发 `suspended (tty output)`。
 
 ## 影响
@@ -16,8 +16,8 @@ Claude Code 退出后，`claude-tap` 尝试打印摘要并生成 HTML 输出，
 
 ## 根因
 
-`claude-tap` 通过 `tcsetpgrp` 把终端前台控制权交给 Claude Code 子进程。
-当子进程退出时，`claude-tap` 仍处于后台进程组。任何终端写操作都会触发 `SIGTTOU`，
+`agent-tap` 通过 `tcsetpgrp` 把终端前台控制权交给 Claude Code 子进程。
+当子进程退出时，`agent-tap` 仍处于后台进程组。任何终端写操作都会触发 `SIGTTOU`，
 导致进程被挂起，因此 `finally` 块（HTML 生成与摘要）无法运行。
 
 ## 修复

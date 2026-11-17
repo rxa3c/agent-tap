@@ -33,7 +33,7 @@ def _seed_store() -> tuple[str, str]:
     if lock_path.exists():
         lock_path.unlink()
 
-    from claude_tap.trace_store import get_trace_store, reset_trace_store
+    from agent_tap.trace_store import get_trace_store, reset_trace_store
 
     reset_trace_store()
     store = get_trace_store()
@@ -79,7 +79,7 @@ def _seed_store() -> tuple[str, str]:
 async def _capture(stale_empty_id: str) -> None:
     from playwright.async_api import async_playwright
 
-    from claude_tap.live import LiveViewerServer
+    from agent_tap.live import LiveViewerServer
 
     server = LiveViewerServer(port=0, dashboard_mode=True)
     port = await server.start()

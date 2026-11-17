@@ -18,9 +18,9 @@ DEFAULT_MODEL = "google/gemini-2.5-flash"
 LANG_ORDER = ["ja", "ko", "fr", "ar", "de", "ru"]
 
 TARGET_CONFIG = {
-    "viewer": {"file": "claude_tap/viewer_i18n.json", "object_name": "I18N"},
+    "viewer": {"file": "agent_tap/viewer_i18n.json", "object_name": "I18N"},
     # Future scope: if CLI gains i18n object, this target can be used directly.
-    "cli": {"file": "claude_tap/cli.py", "object_name": "I18N"},
+    "cli": {"file": "agent_tap/cli.py", "object_name": "I18N"},
 }
 
 
@@ -232,8 +232,8 @@ def request_openrouter_translation(
         headers={
             "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json",
-            "HTTP-Referer": "https://github.com/liaohch3/claude-tap",
-            "X-Title": "claude-tap i18n helper",
+            "HTTP-Referer": "https://github.com/rxa3c/agent-tap",
+            "X-Title": "agent-tap i18n helper",
         },
         method="POST",
     )

@@ -2,10 +2,10 @@
 
 ## What changed
 
-`_start_background_update()` and `update_main()` in `claude_tap/cli_update.py`
+`_start_background_update()` and `update_main()` in `agent_tap/cli_update.py`
 now pass `subprocess.CREATE_NO_WINDOW` on Windows to prevent a visible Python
 console window from flashing during background auto-updates or explicit
-`claude-tap update` runs.
+`agent-tap update` runs.
 
 ## Evidence
 

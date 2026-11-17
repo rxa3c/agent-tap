@@ -8,9 +8,9 @@ from types import SimpleNamespace
 
 import pytest
 
-from claude_tap import cli_clients
-from claude_tap.cli import CLIENT_CONFIGS, parse_args, run_client
-from claude_tap.forward_proxy import ForwardProxyServer
+from agent_tap import cli_clients
+from agent_tap.cli import CLIENT_CONFIGS, parse_args, run_client
+from agent_tap.forward_proxy import ForwardProxyServer
 
 _CA_PEM = "-----BEGIN CERTIFICATE-----\nTAPCA\nLINE2\n-----END CERTIFICATE-----\n"
 
@@ -134,7 +134,7 @@ def test_workbuddy_existing_processes_filters_current_pid(monkeypatch: pytest.Mo
         return SimpleNamespace(
             returncode=0,
             stdout=(
-                f"{current_pid} claude-tap --tap-client workbuddy\n"
+                f"{current_pid} agent-tap --tap-client workbuddy\n"
                 "201 /Applications/WorkBuddy.app/Contents/MacOS/Electron\n"
                 "202 /Applications/WorkBuddy.app/Contents/Resources/app.asar.unpacked/cli/bin/codebuddy\n"
             ),
@@ -175,11 +175,11 @@ async def test_run_client_workbuddy_refuses_when_app_running(
         raise AssertionError("WorkBuddy must not be launched while it is running")
 
     monkeypatch.setattr(
-        "claude_tap.cli_clients._resolve_client_executable",
+        "agent_tap.cli_clients._resolve_client_executable",
         lambda client, cfg, client_cmd: "/Applications/WorkBuddy.app/Contents/MacOS/Electron",
     )
     monkeypatch.setattr(
-        "claude_tap.cli_clients._workbuddy_existing_processes",
+        "agent_tap.cli_clients._workbuddy_existing_processes",
         lambda: ["201 /Applications/WorkBuddy.app/Contents/MacOS/Electron"],
     )
     monkeypatch.setattr(asyncio, "create_subprocess_exec", fail_create_subprocess_exec)
@@ -209,15 +209,15 @@ async def test_run_client_workbuddy_forward_launches_with_proxy_env(
         return _DummyProc()
 
     monkeypatch.setattr(
-        "claude_tap.cli_clients._resolve_client_executable",
+        "agent_tap.cli_clients._resolve_client_executable",
         lambda client, cfg, client_cmd: "/Applications/WorkBuddy.app/Contents/MacOS/Electron",
     )
-    monkeypatch.setattr("claude_tap.cli_clients._workbuddy_existing_processes", lambda: [])
+    monkeypatch.setattr("agent_tap.cli_clients._workbuddy_existing_processes", lambda: [])
     monkeypatch.setattr(asyncio, "create_subprocess_exec", fake_create_subprocess_exec)
     monkeypatch.setattr("sys.stdin.isatty", lambda: False)
-    monkeypatch.setattr("claude_tap.cli_clients._ensure_app_frontmost", lambda pid: True)
-    monkeypatch.setattr("claude_tap.cli_clients._workbuddy_host_pids", lambda: set())
-    monkeypatch.setattr("claude_tap.cli_clients._WORKBUDDY_RELAUNCH_WAIT_SECONDS", 0)
+    monkeypatch.setattr("agent_tap.cli_clients._ensure_app_frontmost", lambda pid: True)
+    monkeypatch.setattr("agent_tap.cli_clients._workbuddy_host_pids", lambda: set())
+    monkeypatch.setattr("agent_tap.cli_clients._WORKBUDDY_RELAUNCH_WAIT_SECONDS", 0)
 
     code = await run_client(43123, [], client="workbuddy", proxy_mode="forward", ca_cert_path=ca_path)
 
@@ -325,7 +325,7 @@ async def test_workbuddy_relaunch_not_reported_after_normal_quit(monkeypatch: py
     def host_pids() -> set[int]:
         nonlocal calls
         calls += 1
-        return {4321}  # only the host claude-tap spawned, still shutting down
+        return {4321}  # only the host agent-tap spawned, still shutting down
 
     monkeypatch.setattr(cli_clients, "_workbuddy_host_pids", host_pids)
 
@@ -344,19 +344,19 @@ async def test_run_client_workbuddy_warns_when_relaunched_outside_tap(
 
     monkeypatch.setenv("WORKBUDDY_CONFIG_DIR", str(tmp_path / "workbuddy-home"))
     monkeypatch.setattr(
-        "claude_tap.cli_clients._resolve_client_executable",
+        "agent_tap.cli_clients._resolve_client_executable",
         lambda client, cfg, client_cmd: "/Applications/WorkBuddy.app/Contents/MacOS/Electron",
     )
-    monkeypatch.setattr("claude_tap.cli_clients._workbuddy_existing_processes", lambda: [])
-    monkeypatch.setattr("claude_tap.cli_clients._workbuddy_host_pids", lambda: {777})
-    monkeypatch.setattr("claude_tap.cli_clients._ensure_app_frontmost", lambda pid: True)
+    monkeypatch.setattr("agent_tap.cli_clients._workbuddy_existing_processes", lambda: [])
+    monkeypatch.setattr("agent_tap.cli_clients._workbuddy_host_pids", lambda: {777})
+    monkeypatch.setattr("agent_tap.cli_clients._ensure_app_frontmost", lambda pid: True)
     monkeypatch.setattr(asyncio, "create_subprocess_exec", fake_create_subprocess_exec)
     monkeypatch.setattr("sys.stdin.isatty", lambda: False)
 
     code = await run_client(43123, [], client="workbuddy", proxy_mode="forward", ca_cert_path=None)
 
     assert code == 0
-    assert "started again outside claude-tap" in capsys.readouterr().err
+    assert "started again outside agent-tap" in capsys.readouterr().err
 
 
 def test_workbuddy_stale_ca_bundle_warning(
@@ -377,9 +377,9 @@ def test_workbuddy_stale_ca_bundle_warning(
     bundle.write_text("-----BEGIN CERTIFICATE-----\nOTHER\n-----END CERTIFICATE-----\n")
     cli_clients._warn_if_workbuddy_ca_bundle_is_stale(ca_path)
     out = capsys.readouterr().err
-    assert "does not include the claude-tap CA" in out
+    assert "does not include the agent-tap CA" in out
     assert str(bundle) in out
-    assert bundle.exists(), "claude-tap must not modify WorkBuddy's cache"
+    assert bundle.exists(), "agent-tap must not modify WorkBuddy's cache"
 
     # WorkBuddy joins certificates with its own line breaks; compare ignoring whitespace.
     bundle.write_text(
@@ -416,7 +416,7 @@ _WORKBUDDY_SSE = (
 async def _start_fake_workbuddy_upstream(tmp_path: Path):
     from aiohttp import web
 
-    from claude_tap.certs import CertificateAuthority, ensure_ca
+    from agent_tap.certs import CertificateAuthority, ensure_ca
 
     upstream_ca = CertificateAuthority(*ensure_ca(tmp_path / "upstream-ca"))
     seen: list[dict] = []
@@ -457,9 +457,9 @@ async def test_workbuddy_forward_capture_decodes_gzip_and_skips_account_traffic(
     import aiohttp
     from yarl import URL
 
-    from claude_tap.certs import CertificateAuthority, ensure_ca
-    from claude_tap.trace import TraceWriter
-    from claude_tap.trace_store import TraceStore
+    from agent_tap.certs import CertificateAuthority, ensure_ca
+    from agent_tap.trace import TraceWriter
+    from agent_tap.trace_store import TraceStore
 
     ca_cert_path, ca_key_path = ensure_ca(tmp_path / "ca")
     upstream_port, upstream_runner, seen = await _start_fake_workbuddy_upstream(tmp_path)

@@ -4,8 +4,8 @@ Date: 2026-10-19
 
 ## Failure
 
-Scheduled runs [39070567461](https://github.com/liaohch3/claude-tap/actions/runs/39070567461)
-and [39167455090](https://github.com/liaohch3/claude-tap/actions/runs/39167455090)
+Scheduled runs 39070567461 (upstream)
+and 39167455090 (upstream)
 failed while generating charts. The script replaced all GraphQL errors with a
 generic message, hiding the cause.
 
@@ -14,7 +14,7 @@ generic message, hiding the cause.
 The exact query succeeded locally with the maintainer account. A diagnostic run
 using the existing workflow and its unchanged read-only token returned
 `Resource not accessible by integration`:
-[run 39249803396](https://github.com/liaohch3/claude-tap/actions/runs/39249803396).
+run 39249803396 (upstream).
 This distinguished an authorization failure from a network or rendering failure.
 
 ## Correction

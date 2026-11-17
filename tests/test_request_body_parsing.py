@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import json
 
-from claude_tap.proxy import _parse_request_body_for_trace
-from claude_tap.trace_encoding import looks_like_binary_text
+from agent_tap.proxy import _parse_request_body_for_trace
+from agent_tap.trace_encoding import looks_like_binary_text
 
 
 def test_parse_request_body_for_trace_unwraps_double_serialized_object() -> None:

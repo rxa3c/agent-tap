@@ -1,5 +1,5 @@
 {
-  "capture_kind": "Real Claude Code interactive tmux conversation through claude-tap; no --print mode",
+  "capture_kind": "Real Claude Code interactive tmux conversation through agent-tap; no --print mode",
   "source_commit": "f46b869492b97e85ae2943ba902bd7e46a4b6c4e",
   "session_id": "d85a9160-18a3-4305-ae45-e6be91eeed0d",
   "model": "deepseek-flash",

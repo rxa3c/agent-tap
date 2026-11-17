@@ -23,7 +23,7 @@ only executable discovery points at the probe.
 
 ## Authenticated real Codex run
 
-Run on Linux on 2026-10-25, from `/tmp/claude-tap-474-20261025`, using
+Run on Linux on 2026-10-25, from `/tmp/agent-tap-474-20261025`, using
 Codex CLI 0.159.0 and real ChatGPT OAuth. These are actual model responses,
 not fixture responses. Each command ran in a dedicated tmux session.
 
@@ -41,14 +41,14 @@ The real upstream is `https://chatgpt.com/backend-api/codex`.
 
 ```bash
 export CLOUDTAP_DB="$PWD/.traces/issue474-codex/traces.sqlite3"
-uv run claude-tap --tap-client codex --tap-proxy-mode reverse \
+uv run agent-tap --tap-client codex --tap-proxy-mode reverse \
   --tap-target https://chatgpt.com/backend-api/codex \
   --tap-no-open --tap-no-live --tap-store-stream-events -- \
   exec -m gpt-6-luna -C /tmp/ct474-codex-workspace \
   --skip-git-repo-check --json --dangerously-bypass-approvals-and-sandbox \
   "Use separate shell calls to run pwd, list files, read project.toml, and write codex_report.txt."
 
-uv run claude-tap --tap-client codex \
+uv run agent-tap --tap-client codex \
   --tap-target https://chatgpt.com/backend-api/codex \
   --tap-no-open --tap-no-live --tap-store-stream-events -- \
   exec resume 01a1734c-39f0-7b80-99e2-0397d8207aca -m gpt-6-luna \

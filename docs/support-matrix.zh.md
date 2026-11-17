@@ -1,5 +1,5 @@
 ---
-owner: claude-tap-maintainers
+owner: agent-tap-maintainers
 last_reviewed: 2026-08-13
 source_of_truth: AGENTS.md
 ---
@@ -67,9 +67,9 @@ English version: [Support Matrix](support-matrix.md).
 | `openclaw` | `reverse` | 尽量补丁被选中的 OpenClaw provider 配置；否则 fallback 到对应 provider 的 base URL 环境变量 |
 | `pi` | `forward` | 多 provider；Pi 可以使用 OpenAI Codex OAuth 和自定义 model registry provider，forward proxy 不依赖单一 base URL 覆盖即可捕获流量 |
 | `hermes` | `forward` | 多 provider 的 Python agent；`httpx` 与 `requests` 都原生认 `HTTPS_PROXY`，forward proxy 捕获是最自然的默认 |
-| `cursor` | `transcript`（既非 reverse 也非 forward） | 对话只来自 `~/.cursor/projects/*/agent-transcripts/*.jsonl`。最短命令 `claude-tap --tap-client cursor` 会启动 `cursor-agent` 并实时 watch 写入 dashboard（**每个 Cursor 会话 JSONL 对应一个独立 tap session**）；`--tap-no-launch` 仅 watch IDE。不启动 HTTPS 代理 / CA |
+| `cursor` | `transcript`（既非 reverse 也非 forward） | 对话只来自 `~/.cursor/projects/*/agent-transcripts/*.jsonl`。最短命令 `agent-tap --tap-client cursor` 会启动 `cursor-agent` 并实时 watch 写入 dashboard（**每个 Cursor 会话 JSONL 对应一个独立 tap session**）；`--tap-no-launch` 仅 watch IDE。不启动 HTTPS 代理 / CA |
 | `qoder` | `forward` | Qoder CLI 会访问多个 Qoder 服务端点，且没有可靠的单一 base URL 覆盖能力 |
-| `agy` | `forward` | Antigravity 会访问多个 Google / Antigravity 端点；claude-tap 用 `HTTPS_PROXY` 捕获辅助流量，并用 `CLOUD_CODE_URL` 捕获 Code Assist 模型流量 |
+| `agy` | `forward` | Antigravity 会访问多个 Google / Antigravity 端点；agent-tap 用 `HTTPS_PROXY` 捕获辅助流量，并用 `CLOUD_CODE_URL` 捕获 Code Assist 模型流量 |
 | `codebuddy` | `reverse` | 单 provider，原生支持 `CODEBUDDY_BASE_URL` 环境变量；支持 `--settings` 环境变量注入；上游 endpoint 自动从 CodeBuddy 登录缓存识别 |
 | `workbuddy` | `forward` | Electron 桌面端在启动内置 agent CLI 前会移除 `CODEBUDDY_*`、`HTTPS_PROXY` 和 `NODE_EXTRA_CA_CERTS`，只重新注入它自己的代理设置和从钥匙串生成的 CA bundle；因此不支持 reverse 模式 |
 
@@ -77,7 +77,7 @@ English version: [Support Matrix](support-matrix.md).
 
 ## 子命令 argv 改写
 
-部分客户端会把长期运行的守护进程委托给操作系统服务管理器（launchd / systemd / schtasks）。被托管派生出的守护进程**不会**继承我们注入的代理 / CA 环境，trace 抓取会静默失败。claude-tap 会检测这些模式并把 argv 改写为前台等价命令：
+部分客户端会把长期运行的守护进程委托给操作系统服务管理器（launchd / systemd / schtasks）。被托管派生出的守护进程**不会**继承我们注入的代理 / CA 环境，trace 抓取会静默失败。agent-tap 会检测这些模式并把 argv 改写为前台等价命令：
 
 | 客户端 | 命中的 argv | 改写为 | 原因 |
 |--------|-------------|--------|------|
@@ -87,7 +87,7 @@ English version: [Support Matrix](support-matrix.md).
 
 > **注意：** Gateway 模式只有在配置的消息平台（Slack、Telegram 等）推送消息给 bot 时才会产生 trace。
 > 若没有活跃的平台集成，gateway 不会发起 LLM 请求，也不会生成任何 trace。
-> 本地抓 trace 请使用 TUI 模式（`claude-tap --tap-client hermes`）。
+> 本地抓 trace 请使用 TUI 模式（`agent-tap --tap-client hermes`）。
 
 ## URL 构造规则
 
@@ -153,62 +153,62 @@ strip = CLIENT_CONFIGS[client].reverse_strip_path_prefix(target)
 
 ```bash
 # API Key 模式
-uv run python -m claude_tap --tap-client codex --tap-no-launch --tap-port 0
+uv run python -m agent_tap --tap-client codex --tap-no-launch --tap-port 0
 # 验证日志里的上游 URL 正确
 
 # OAuth 模式
-uv run python -m claude_tap --tap-client codex \
+uv run python -m agent_tap --tap-client codex \
   --tap-target https://chatgpt.com/backend-api/codex --tap-no-launch --tap-port 0
 # 验证日志里的上游 URL 正确
 
 # Cursor：启动 cursor-agent + 实时 transcript watch + dashboard
-uv run python -m claude_tap --tap-client cursor
+uv run python -m agent_tap --tap-client cursor
 # 在启动的 agent 里聊天，验证 dashboard 出现可读 transcript turns
 
 # 只 watch IDE Agent
-uv run python -m claude_tap --tap-client cursor --tap-no-launch
+uv run python -m agent_tap --tap-client cursor --tap-no-launch
 
 # Codex App
-uv run python -m claude_tap --tap-client codexapp
+uv run python -m agent_tap --tap-client codexapp
 # 如果 Codex App 已在运行，先退出它，让新启动的进程继承代理/CA 环境。
 # 启动或继续一个 Codex App 任务，并验证 dashboard 只收到 /backend-api/codex/responses
 # 的 HTTP/WebSocket 记录；其他 Codex App 产品流量会照常转发但不会记录 trace。
 
 # Qoder CLI
-uv run python -m claude_tap --tap-client qoder -- -p "Reply OK" --permission-mode dont_ask
+uv run python -m agent_tap --tap-client qoder -- -p "Reply OK" --permission-mode dont_ask
 # 验证 stdout 包含 assistant 响应，trace 包含 Qoder 端点记录
 
 # Antigravity CLI（macOS）
-uv run python -m claude_tap --tap-client agy --tap-live
+uv run python -m agent_tap --tap-client agy --tap-live
 # 首次运行时，验证 macOS 只要求解锁用户 login keychain，不要求 sudo/admin 写 System keychain。
 # 然后验证 trace 包含 /v1internal:streamGenerateContent 模型记录。
 
 # Kimi CLI（旧版 kimi-cli）
-uv run python -m claude_tap --tap-client kimi -- --thinking
+uv run python -m agent_tap --tap-client kimi -- --thinking
 
 # Kimi Code CLI
-uv run python -m claude_tap --tap-client kimi-code -- --thinking
+uv run python -m agent_tap --tap-client kimi-code -- --thinking
 # 验证 trace 包含 /chat/completions 记录和 thinking/text 输出
 
 # Gemini CLI
-uv run python -m claude_tap --tap-client gemini -- -p "Reply OK" --yolo --output-format text
+uv run python -m agent_tap --tap-client gemini -- -p "Reply OK" --yolo --output-format text
 # 验证 trace 包含 Google OAuth / Code Assist API 记录
 
 # Grok Build CLI
-uv run python -m claude_tap --tap-client grok -- -p "Reply OK"
+uv run python -m agent_tap --tap-client grok -- -p "Reply OK"
 # 验证 trace 包含 /v1/responses 记录，以及 Grok request、response 和 token 用量
 
 # Pi
-uv run python -m claude_tap --tap-client pi -- \
+uv run python -m agent_tap --tap-client pi -- \
   --model openai-codex/gpt-5.3-codex-spark -p "Reply OK"
 # 验证 trace 包含 chatgpt.com/backend-api 记录和可读的 OpenAI Responses 区块
 
 # CodeBuddy（登录后自动识别端点）
-uv run python -m claude_tap --tap-client codebuddy -- -p "Reply OK"
+uv run python -m agent_tap --tap-client codebuddy -- -p "Reply OK"
 # 验证 trace 包含 /v2/chat/completions 记录,且响应有非零 token 计数
 
 # WorkBuddy（macOS；先完全退出 WorkBuddy）
-uv run python -m claude_tap --tap-client workbuddy
+uv run python -m agent_tap --tap-client workbuddy
 # 发送一条会触发工具调用的消息；确认 dashboard 出现 /v2/chat/completions 记录，
 # 包含请求 messages、流式回复和工具调用；账号/登录流量不应出现。
 ```
@@ -218,29 +218,29 @@ uv run python -m claude_tap --tap-client workbuddy
 ```bash
 # 基于 tmux 的真实验证
 tmux new-session -d -s verify \
-  "uv run python -m claude_tap --tap-client codex --tap-target TARGET --tap-no-launch --tap-port 8080"
+  "uv run python -m agent_tap --tap-client codex --tap-target TARGET --tap-no-launch --tap-port 8080"
 # 另一个窗口中：
 OPENAI_BASE_URL=http://127.0.0.1:8080/v1 codex exec "Reply: OK"
 ```
 
 ```bash
 # Cursor CLI 真实验证（transcript-only）
-uv run python -m claude_tap --tap-client cursor -- -p --trust --model auto \
+uv run python -m agent_tap --tap-client cursor -- -p --trust --model auto \
   "Use tools to inspect the workspace and reply OK"
 # 验证生成的 HTML 包含 cursor-transcript turns 和 tool_use blocks。
-# 或监听 IDE Agent：claude-tap --tap-client cursor --tap-no-launch
+# 或监听 IDE Agent：agent-tap --tap-client cursor --tap-no-launch
 ```
 
 ```bash
 # Gemini CLI 真实验证
-uv run python -m claude_tap --tap-client gemini -- -p \
+uv run python -m agent_tap --tap-client gemini -- -p \
   "Use tools to inspect the workspace and reply OK" --yolo --output-format text
 # 验证 trace 包含 cloudcode-pa.googleapis.com / streamGenerateContent 记录。
 ```
 
 ```bash
 # Pi + OpenAI Codex OAuth 真实验证
-uv run python -m claude_tap --tap-client pi -- \
+uv run python -m agent_tap --tap-client pi -- \
   --model openai-codex/gpt-5.3-codex-spark --tools bash -p \
   "Use bash to inspect the workspace and reply OK"
 # 验证生成的 viewer 展示 Tools、System Prompt、Messages、Response、

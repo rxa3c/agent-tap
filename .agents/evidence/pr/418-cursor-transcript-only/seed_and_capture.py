@@ -38,12 +38,12 @@ REAL_TRANSCRIPT = (
     Path.home()
     / ".cursor"
     / "projects"
-    / "Users-youngcan-claude-tap"
+    / "Users-youngcan-agent-tap"
     / "agent-transcripts"
     / "0b95c4b6-03e2-4780-8c3a-124f43625297"
     / "0b95c4b6-03e2-4780-8c3a-124f43625297.jsonl"
 )
-PROJECT_SLUG = "Users-youngcan-claude-tap"
+PROJECT_SLUG = "Users-youngcan-agent-tap"
 CURSOR_SESSION_ID = "0b95c4b6-03e2-4780-8c3a-124f43625297"
 
 
@@ -78,8 +78,8 @@ async def _import_real_transcript() -> str:
     if lock_path.exists():
         lock_path.unlink()
 
-    from claude_tap.cursor_transcript import import_cursor_transcripts
-    from claude_tap.trace_store import get_trace_store, reset_trace_store
+    from agent_tap.cursor_transcript import import_cursor_transcripts
+    from agent_tap.trace_store import get_trace_store, reset_trace_store
 
     reset_trace_store()
     store = get_trace_store()
@@ -110,7 +110,7 @@ async def _import_real_transcript() -> str:
 async def _capture(session_id: str) -> None:
     from playwright.async_api import async_playwright
 
-    from claude_tap.live import LiveViewerServer
+    from agent_tap.live import LiveViewerServer
 
     server = LiveViewerServer(port=0, dashboard_mode=True)
     port = await server.start()

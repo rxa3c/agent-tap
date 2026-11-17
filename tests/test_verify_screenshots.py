@@ -9,7 +9,7 @@ from pathlib import Path
 
 import pytest
 
-from claude_tap.viewer import _generate_html_viewer
+from agent_tap.viewer import _generate_html_viewer
 from tests.conftest import playwright_skip_reason
 
 # verify_viewer_html launches chromium, so the package alone is not enough.
@@ -45,7 +45,7 @@ def test_verify_viewer_html_accepts_explicit_empty_trace_state(tmp_path: Path) -
 def test_verify_viewer_html_still_rejects_unloaded_file_picker(tmp_path: Path) -> None:
     module = _load_module()
     html_path = tmp_path / "viewer.html"
-    html_path.write_text((Path(__file__).resolve().parent.parent / "claude_tap" / "viewer.html").read_text())
+    html_path.write_text((Path(__file__).resolve().parent.parent / "agent_tap" / "viewer.html").read_text())
 
     issues = module.verify_viewer_html(str(html_path))
 

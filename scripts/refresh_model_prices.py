@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Regenerate claude_tap/model_prices.json from LiteLLM's public price table.
+"""Regenerate agent_tap/model_prices.json from LiteLLM's public price table.
 
 The upstream file is ~1.8 MB and covers every model LiteLLM knows, including
-embeddings, rerankers and providers claude-tap cannot proxy. Vendoring it whole
+embeddings, rerankers and providers agent-tap cannot proxy. Vendoring it whole
 would dwarf the rest of the package data, so this script keeps only chat models
-from providers claude-tap can capture, and only the fields the pricing adapter
+from providers agent-tap can capture, and only the fields the pricing adapter
 reads.
 
 The upstream commit is required, not optional: a cost figure quoted from a
@@ -29,7 +29,7 @@ from pathlib import Path
 from typing import Any
 
 UPSTREAM_PATH = "model_prices_and_context_window.json"
-OUTPUT_PATH = Path(__file__).resolve().parent.parent / "claude_tap" / "model_prices.json"
+OUTPUT_PATH = Path(__file__).resolve().parent.parent / "agent_tap" / "model_prices.json"
 
 _SHA_RE = re.compile(r"^[0-9a-f]{7,40}$")
 
@@ -39,7 +39,7 @@ def pinned_url(commit: str) -> str:
     return f"https://raw.githubusercontent.com/BerriAI/litellm/{commit}/{UPSTREAM_PATH}"
 
 
-# Providers whose traffic claude-tap can actually capture. Anything else only
+# Providers whose traffic agent-tap can actually capture. Anything else only
 # inflates the vendored file.
 KEPT_PROVIDERS = {
     "anthropic",

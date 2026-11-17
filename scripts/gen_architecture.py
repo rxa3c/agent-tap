@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate architecture diagram for claude-tap."""
+"""Generate architecture diagram for agent-tap."""
 
 from diagrams import Cluster, Diagram, Edge
 from diagrams.generic.storage import Storage
@@ -28,7 +28,7 @@ edge_attr = {
 }
 
 with Diagram(
-    "claude-tap Architecture",
+    "agent-tap Architecture",
     filename="docs/architecture",
     outformat="png",
     show=False,
@@ -41,7 +41,7 @@ with Diagram(
         user = User("Developer")
 
     with Cluster("CLI Layer"):
-        claude_tap = Python("claude-tap")
+        agent_tap = Python("agent-tap")
         claude_code = Client("Claude Code")
 
     with Cluster("Proxy Layer"):
@@ -55,8 +55,8 @@ with Diagram(
         browser = Client("Live Viewer")
 
     # Main flow
-    user >> Edge(label="run") >> claude_tap
-    claude_tap >> Edge(label="spawn") >> claude_code
+    user >> Edge(label="run") >> agent_tap
+    agent_tap >> Edge(label="spawn") >> claude_code
     claude_code >> Edge(label="requests") >> proxy
     proxy >> Edge(label="forward") >> api
     api >> Edge(label="SSE stream", style="dashed") >> proxy

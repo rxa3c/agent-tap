@@ -13,8 +13,8 @@ import aiohttp
 import pytest
 from aiohttp import web
 
-from claude_tap.forward_proxy import ForwardProxyServer
-from claude_tap.proxy import (
+from agent_tap.forward_proxy import ForwardProxyServer
+from agent_tap.proxy import (
     capture_only_content_type,
     capture_only_response,
     capture_only_stream_bytes,
@@ -22,8 +22,8 @@ from claude_tap.proxy import (
     is_capture_only_streaming_request,
     proxy_handler,
 )
-from claude_tap.trace import TraceWriter
-from claude_tap.trace_store import get_trace_store, reset_trace_store
+from agent_tap.trace import TraceWriter
+from agent_tap.trace_store import get_trace_store, reset_trace_store
 
 
 def _bedrock_frame(payload: dict[str, Any]) -> bytes:
@@ -367,7 +367,7 @@ def test_capture_only_response_shapes_model_probes_by_provider() -> None:
     assert is_capture_only_request("/v1internal:streamGenerateContent?alt=sse", {"request": {"contents": []}})
 
     openai_model = capture_only_response("/v1/models/gpt-5", None)
-    assert openai_model == {"id": "gpt-5", "object": "model", "created": 0, "owned_by": "claude-tap"}
+    assert openai_model == {"id": "gpt-5", "object": "model", "created": 0, "owned_by": "agent-tap"}
 
     gemini = capture_only_response("/v1beta/models/gemini-pro:generateContent", None)
     assert "candidates" in gemini

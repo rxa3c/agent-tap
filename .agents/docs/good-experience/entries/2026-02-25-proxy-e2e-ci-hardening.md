@@ -14,7 +14,7 @@
 ## 有效做法
 
 1. **上游转发尊重系统 proxy env**
-   - 在 claude-tap 上游转发使用的 aiohttp session 中设置 `trust_env=True`。
+   - 在 agent-tap 上游转发使用的 aiohttp session 中设置 `trust_env=True`。
    - 使流量能遵循本地 proxy/VPN 工具（如 Clash），而不是绕过它。
 
 2. **提升 forward/OAuth 断言鲁棒性**
@@ -39,5 +39,5 @@
 - 真实 E2E 仍通过 `--run-real-e2e` opt-in。
 - Browser integration 测试需要安装 Playwright 与浏览器二进制。
 - 调试 proxy 问题时，两个链路都要验证：
-  - Claude CLI -> claude-tap
-  - claude-tap -> upstream（必要时必须遵守 proxy env）
+  - Claude CLI -> agent-tap
+  - agent-tap -> upstream（必要时必须遵守 proxy env）

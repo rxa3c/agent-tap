@@ -1,7 +1,7 @@
 # PR #44 Verification Report
 
 Date: 2026-03-19
-PR: https://github.com/liaohch3/claude-tap/pull/44
+PR: upstream PR 44
 Branch: `fix/codex-responses-40-41`
 
 ## Scope
@@ -20,12 +20,12 @@ uv run pytest tests/ -x --timeout=60 -q  # 103 passed, 25 skipped
 uv run ruff check . && uv run ruff format --check .  # clean
 ```
 
-### 2. Real Codex E2E through claude-tap (OAuth path)
+### 2. Real Codex E2E through agent-tap (OAuth path)
 
 Command:
 
 ```bash
-claude-tap --tap-client codex \
+agent-tap --tap-client codex \
   --tap-target https://chatgpt.com/backend-api/codex \
   --tap-output-dir /tmp/pr44-real-e2e \
   --tap-no-open --tap-no-update-check \
@@ -61,7 +61,7 @@ Captured via Playwright at `1440x1000` viewport from the real HTML trace.
 
 ## What Was Verified
 
-- Real Codex OAuth trace captured by `claude-tap` as Responses format
+- Real Codex OAuth trace captured by `agent-tap` as Responses format
 - Viewer displays user messages from `request.body.input` (fix for #41)
 - Viewer displays assistant response text and token usage (fix for #40)
 - Multiple API calls visible in sidebar (real agent behavior, not single-shot)

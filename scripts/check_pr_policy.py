@@ -33,7 +33,7 @@ VALIDATION_HEADINGS = {
 }
 
 EVIDENCE_REQUIRED_PATHS = (
-    "claude_tap/",
+    "agent_tap/",
     "docs/support-matrix.md",
 )
 EVIDENCE_SCREENSHOT_ROOT = ".agents/evidence/pr/"
@@ -48,14 +48,14 @@ EVIDENCE_SCREENSHOT_KEYWORDS = (
 REAL_EVIDENCE_MARKERS = (
     ".traces/",
     "--run-real-e2e",
-    "claude-tap --tap-client",
+    "agent-tap --tap-client",
     "dashboard",
     "jsonl",
     "real e2e",
     "real trace",
     "run_real_e2e",
     "trace viewer",
-    "uv run claude-tap",
+    "uv run agent-tap",
     "viewer html",
 )
 

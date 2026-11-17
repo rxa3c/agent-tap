@@ -3,23 +3,23 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>claude-tap - Local AI Agent Trace Viewer</title>
+    <title>agent-tap - Local AI Agent Trace Viewer</title>
     <meta
       name="description"
-      content="claude-tap is a local AI agent trace viewer and HTML exporter for Claude Code, Codex CLI, Codex App, Gemini, Cursor, OpenCode, Kimi, Pi, Hermes, Qoder, Antigravity, and CodeBuddy."
+      content="agent-tap is a local AI agent trace viewer and HTML exporter for Claude Code, Codex CLI, Codex App, Gemini, Cursor, OpenCode, Kimi, Pi, Hermes, Qoder, Antigravity, and CodeBuddy."
     >
-    <link rel="canonical" href="https://liaohch3.com/claude-tap/">
-    <link rel="alternate" hreflang="en" href="https://liaohch3.com/claude-tap/">
-    <link rel="alternate" hreflang="zh-Hans" href="https://liaohch3.com/claude-tap/index.zh.html">
-    <link rel="alternate" hreflang="x-default" href="https://liaohch3.com/claude-tap/">
-    <meta property="og:title" content="claude-tap - Local AI Agent Trace Viewer">
+    <link rel="canonical" href="https://rxa3c.github.io/agent-tap/">
+    <link rel="alternate" hreflang="en" href="https://rxa3c.github.io/agent-tap/">
+    <link rel="alternate" hreflang="zh-Hans" href="https://rxa3c.github.io/agent-tap/index.zh.html">
+    <link rel="alternate" hreflang="x-default" href="https://rxa3c.github.io/agent-tap/">
+    <meta property="og:title" content="agent-tap - Local AI Agent Trace Viewer">
     <meta
       property="og:description"
       content="Inspect coding agent traces locally: tool calls, prompts, token usage, latency, streaming responses, and request diffs."
     >
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://liaohch3.com/claude-tap/">
-    <meta property="og:image" content="https://liaohch3.com/claude-tap/viewer-light.png">
+    <meta property="og:url" content="https://rxa3c.github.io/agent-tap/">
+    <meta property="og:image" content="https://rxa3c.github.io/agent-tap/viewer-light.png">
     <meta name="twitter:card" content="summary_large_image">
     <style>
       :root {
@@ -456,15 +456,15 @@
     <div class="page">
       <header class="topbar">
         <div class="shell topbar-inner">
-          <a class="brand" href="https://github.com/liaohch3/claude-tap">
-            <span class="brand-mark">ct</span>
-            <strong>claude-tap</strong>
+          <a class="brand" href="https://github.com/rxa3c/agent-tap">
+            <span class="brand-mark">at</span>
+            <strong>agent-tap</strong>
           </a>
           <nav class="nav" aria-label="Main navigation">
             <a href="guides/agent-trace-viewer.html">Guide</a>
             <a href="support-matrix.html">Clients</a>
             <a class="lang" href="index.zh.html">中文</a>
-            <a class="primary" href="https://github.com/liaohch3/claude-tap">GitHub</a>
+            <a class="primary" href="https://github.com/rxa3c/agent-tap">GitHub</a>
           </nav>
         </div>
       </header>
@@ -476,20 +476,20 @@
               <p class="eyebrow">Local AI agent trace viewer</p>
               <h1>See what your coding agent really sent.</h1>
               <p class="lead">
-                claude-tap captures real API traffic from AI coding agents and turns it into a local trace viewer.
+                agent-tap captures real API traffic from AI coding agents and turns it into a local trace viewer.
                 Inspect prompts, tool calls, token usage, latency, streaming responses, and request diffs without
                 uploading private traces to a hosted dashboard.
               </p>
               <div class="hero-actions">
-                <a class="button dark" href="https://github.com/liaohch3/claude-tap">View on GitHub</a>
+                <a class="button dark" href="https://github.com/rxa3c/agent-tap">View on GitHub</a>
                 <a class="button light" href="guides/agent-trace-viewer.html">Read the trace viewer guide</a>
               </div>
-              <pre class="terminal"><code>uv tool install claude-tap
-claude-tap --tap-client codex
-claude-tap export --format html trace.jsonl</code></pre>
+              <pre class="terminal"><code>uv tool install git+https://github.com/rxa3c/agent-tap
+agent-tap --tap-client codex
+agent-tap export --format html trace.jsonl</code></pre>
             </div>
             <figure class="viewer-shot">
-              <img src="viewer-light.png" alt="claude-tap local AI agent trace viewer showing requests, tool calls, and token usage">
+              <img src="viewer-light.png" alt="agent-tap local AI agent trace viewer showing requests, tool calls, and token usage">
               <figcaption class="caption">Open a real agent run, inspect each request, and compare context between turns.</figcaption>
             </figure>
           </div>
@@ -522,7 +522,7 @@ claude-tap export --format html trace.jsonl</code></pre>
               <h2>Built for coding agent traces, not generic logs.</h2>
               <p>
                 Agent runs are shaped by prompts, tool schemas, retries, streaming chunks, and model-specific
-                request formats. claude-tap keeps those pieces visible so debugging can start from the actual trace.
+                request formats. agent-tap keeps those pieces visible so debugging can start from the actual trace.
               </p>
             </div>
             <div class="cards">
@@ -592,7 +592,7 @@ claude-tap export --format html trace.jsonl</code></pre>
             <div class="workflow">
               <div class="step">
                 <strong>Run</strong>
-                <span>Launch your agent through claude-tap.</span>
+                <span>Launch your agent through agent-tap.</span>
               </div>
               <div class="step">
                 <strong>Capture</strong>
@@ -615,18 +615,18 @@ claude-tap export --format html trace.jsonl</code></pre>
             <div>
               <h2>Start with a local trace.</h2>
               <p>
-                Use claude-tap when you need to understand what an AI coding agent actually did before you tune prompts,
+                Use agent-tap when you need to understand what an AI coding agent actually did before you tune prompts,
                 compare tools, or share a run with another reviewer.
               </p>
             </div>
-            <a class="button light" href="https://github.com/liaohch3/claude-tap">Install from GitHub</a>
+            <a class="button light" href="https://github.com/rxa3c/agent-tap">Install from GitHub</a>
           </div>
         </section>
       </main>
 
       <footer class="footer">
         <div class="shell">
-          <span>claude-tap is open source under the MIT license.</span>
+          <span>agent-tap is open source under the MIT license.</span>
         </div>
       </footer>
     </div>

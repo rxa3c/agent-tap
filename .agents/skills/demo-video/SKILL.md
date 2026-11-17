@@ -14,8 +14,8 @@ Generate demo assets from a real tmux E2E run and viewer screenshots.
 
 ```bash
 tmux new-session -d -s demo -x 160 -y 46
-tmux send-keys -t demo "asciinema rec /tmp/claude-tap-recordings/demo.cast" Enter
-tmux send-keys -t demo "cd /path/to/claude-tap && scripts/run_real_e2e_tmux.sh" Enter
+tmux send-keys -t demo "asciinema rec /tmp/agent-tap-recordings/demo.cast" Enter
+tmux send-keys -t demo "cd /path/to/agent-tap && scripts/run_real_e2e_tmux.sh" Enter
 # ... wait until run finishes ...
 tmux send-keys -t demo "exit" Enter
 ```
@@ -28,13 +28,13 @@ Notes:
 ### 2) Convert `.cast` to GIF with `agg`
 
 ```bash
-agg /tmp/claude-tap-recordings/demo.cast /tmp/claude-tap-recordings/demo.gif
+agg /tmp/agent-tap-recordings/demo.cast /tmp/agent-tap-recordings/demo.gif
 ```
 
 ### 3) Convert GIF to MP4 with ffmpeg
 
 ```bash
-ffmpeg -y -i /tmp/claude-tap-recordings/demo.gif -movflags +faststart -pix_fmt yuv420p .agents/recordings/demo.mp4
+ffmpeg -y -i /tmp/agent-tap-recordings/demo.gif -movflags +faststart -pix_fmt yuv420p .agents/recordings/demo.mp4
 ```
 
 ## Browser Screenshots (HTML Viewer)

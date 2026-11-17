@@ -6,7 +6,7 @@ status: completed
 
 ## 问题
 
-`claude_tap/viewer.html` 中 detail pane 的操作按钮行在用户向下滚动时会消失。
+`agent_tap/viewer.html` 中 detail pane 的操作按钮行在用户向下滚动时会消失。
 这会降低重复操作（`Request JSON`、`cURL`、`Diff with Prev`）的效率。
 
 ## 范围
@@ -29,7 +29,7 @@ status: completed
 
 ## 变更摘要
 
-- `claude_tap/viewer.html`
+- `agent_tap/viewer.html`
   - 让 `.action-bar` 在 detail 滚动容器中保持 sticky。
 - `AGENTS.md`
   - 新增 `E2E Validation Requirements` 章节。

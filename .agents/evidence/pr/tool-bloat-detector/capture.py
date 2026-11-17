@@ -5,7 +5,7 @@ Usage:
     uv run python .agents/evidence/pr/tool-bloat-detector/capture.py \
         .traces/tool-bloat-evidence/trace_tool_bloat.jsonl
 
-The JSONL must come from a real `claude-tap` run (see README.md for the
+The JSONL must come from a real `agent-tap` run (see README.md for the
 recording command).  The script generates the viewer HTML next to the JSONL,
 opens it, clicks the sidebar entry carrying the size badge, and writes both
 screenshots into this directory.
@@ -21,7 +21,7 @@ from playwright.sync_api import sync_playwright
 REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT))
 
-from claude_tap.viewer import _generate_html_viewer  # noqa: E402
+from agent_tap.viewer import _generate_html_viewer  # noqa: E402
 
 OUT_DIR = Path(__file__).resolve().parent
 

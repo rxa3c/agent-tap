@@ -1,22 +1,19 @@
-# claude-tap
+# agent-tap
 
-[![PyPI version](https://img.shields.io/pypi/v/claude-tap.svg)](https://pypi.org/project/claude-tap/)
-[![PyPI downloads](https://img.shields.io/pypi/dm/claude-tap.svg)](https://pypi.org/project/claude-tap/)
-[![Python version](https://img.shields.io/pypi/pyversions/claude-tap.svg)](https://pypi.org/project/claude-tap/)
-[![License](https://img.shields.io/github/license/liaohch3/claude-tap.svg)](https://github.com/liaohch3/claude-tap/blob/main/LICENSE)
-[![GitHub stars](https://img.shields.io/github/stars/liaohch3/claude-tap?style=social)](https://github.com/liaohch3/claude-tap/stargazers)
+[![License](https://img.shields.io/github/license/rxa3c/agent-tap.svg)](https://github.com/rxa3c/agent-tap/blob/main/LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/rxa3c/agent-tap?style=social)](https://github.com/rxa3c/agent-tap/stargazers)
 [![All Contributors](https://img.shields.io/badge/all_contributors-9-orange.svg)](#contributors)
 
 [中文文档](README_zh.md)
 
-`claude-tap` is a local proxy and trace viewer for AI coding agents. Run your CLI through it, or listen to local app transcripts, then inspect the real API traffic and agent context: system prompts, conversation history, tool schemas, tool calls, streaming responses, token usage, and request diffs.
+`agent-tap` is a local proxy and trace viewer for AI coding agents. Run your CLI through it, or listen to local app transcripts, then inspect the real API traffic and agent context: system prompts, conversation history, tool schemas, tool calls, streaming responses, token usage, and request diffs.
 
-Website: [Local AI Agent Trace Viewer](https://liaohch3.com/claude-tap/) · Guide: [How to view agent traces locally](docs/guides/agent-trace-viewer.md)
+Website: [Local AI Agent Trace Viewer](https://rxa3c.github.io/agent-tap/) · Guide: [How to view agent traces locally](docs/guides/agent-trace-viewer.md)
 
 It works with [Claude Code](https://docs.anthropic.com/en/docs/claude-code), [Codex CLI](https://github.com/openai/codex), [Codex App](https://openai.com/codex/), [Gemini CLI](https://github.com/google-gemini/gemini-cli), [Grok Build CLI](https://docs.x.ai/build/overview), [Kimi CLI](https://github.com/MoonshotAI/kimi-cli), [MiMo Code](https://mimo.xiaomi.com/en/mimocode), [OpenCode](https://opencode.ai), [OpenClaw](https://github.com/openclaw/openclaw), [Pi](https://github.com/badlogic/pi-mono/tree/main/packages/coding-agent), [Hermes Agent](https://github.com/NousResearch/hermes-agent), [Cursor CLI](https://cursor.com/cli), [Qoder CLI](https://qoder.com/cli), [Antigravity CLI](https://antigravity.google/product/antigravity-cli), [CodeBuddy CLI](https://www.codebuddy.ai), and [WorkBuddy](https://www.workbuddy.cn).
 
 <p align="center">
-  <img src="docs/demo.gif" alt="claude-tap demo showing a real Codex trace" width="100%">
+  <img src="docs/demo.gif" alt="agent-tap demo showing a real Codex trace" width="100%">
   <br>
   <sub>Open a real agent run, inspect every request, and compare how context changes between turns.</sub>
 </p>
@@ -41,12 +38,12 @@ It works with [Claude Code](https://docs.anthropic.com/en/docs/claude-code), [Co
   </tr>
 </table>
 
-## Built with claude-tap
+## Built with agent-tap
 
 <table>
   <tr>
     <td width="55%">
-      <strong><a href="https://github.com/WEIFENG2333/phistory">Phistory</a></strong> archives versioned system prompt snapshots from agent CLIs such as Claude Code, Codex, Kimi, opencode, and Pi. It uses claude-tap's capture-only prompt export to preserve raw HTTP trace evidence and generate comparison-friendly prompt snapshots.
+      <strong><a href="https://github.com/WEIFENG2333/phistory">Phistory</a></strong> archives versioned system prompt snapshots from agent CLIs such as Claude Code, Codex, Kimi, opencode, and Pi. It uses agent-tap's capture-only prompt export to preserve raw HTTP trace evidence and generate comparison-friendly prompt snapshots.
       <br><br>
       <a href="https://phistory.cc/">Open the prompt diff viewer</a> · <a href="https://github.com/WEIFENG2333/phistory">View repository</a>
     </td>
@@ -82,7 +79,7 @@ It works with [Claude Code](https://docs.anthropic.com/en/docs/claude-code), [Co
 | [OpenClaw](https://github.com/openclaw/openclaw) | Multi-provider OpenClaw sessions |
 | [Pi](https://github.com/badlogic/pi-mono/tree/main/packages/coding-agent) | Pi sessions, including OpenAI Codex OAuth providers |
 | [Hermes Agent](https://github.com/NousResearch/hermes-agent) | Multi-provider Hermes TUI or gateway sessions |
-| [Cursor](https://cursor.com/cli) CLI / IDE Agent | Launch `cursor-agent` + live transcript watch (`claude-tap --tap-client cursor`) |
+| [Cursor](https://cursor.com/cli) CLI / IDE Agent | Launch `cursor-agent` + live transcript watch (`agent-tap --tap-client cursor`) |
 | [Qoder CLI](https://qoder.com/cli) | Qoder Agent sessions through forward proxy mode |
 | [Antigravity CLI](https://antigravity.google/product/antigravity-cli) | Antigravity Agent sessions through forward proxy mode |
 | [CodeBuddy CLI](https://www.codebuddy.ai) | Tencent CodeBuddy SaaS or internal Copilot endpoint |
@@ -94,69 +91,69 @@ Requires Python 3.11+ and the client you want to trace.
 
 ```bash
 # Recommended
-uv tool install claude-tap
+uv tool install git+https://github.com/rxa3c/agent-tap
 
 # Or with pip
-pip install claude-tap
+pip install git+https://github.com/rxa3c/agent-tap
 ```
 
-Upgrade: `claude-tap update`, `uv tool upgrade claude-tap`, or `pip install --upgrade claude-tap`
+Upgrade: `agent-tap update`, `uv tool upgrade agent-tap`, or `pip install --upgrade git+https://github.com/rxa3c/agent-tap`
 
 ## Quick Start
 
-Run the client you want to inspect through `claude-tap`. Flags after `--` are passed to the selected client.
+Run the client you want to inspect through `agent-tap`. Flags after `--` are passed to the selected client.
 
 ```bash
 # Claude Code with the live browser viewer enabled by default
-claude-tap
+agent-tap
 
 # Restore pre-v0.1.75 behavior: no live viewer server
-claude-tap --tap-no-live
+agent-tap --tap-no-live
 
 # Codex CLI
-claude-tap --tap-client codex
+agent-tap --tap-client codex
 
 # Codex App backend request capture
-claude-tap --tap-client codexapp
+agent-tap --tap-client codexapp
 
 # WorkBuddy desktop app (macOS; quit WorkBuddy first)
-claude-tap --tap-client workbuddy
+agent-tap --tap-client workbuddy
 
 # Gemini CLI
-claude-tap --tap-client gemini -- -p "hello"
+agent-tap --tap-client gemini -- -p "hello"
 
 # Grok Build CLI
-claude-tap --tap-client grok -- -p "hello"
+agent-tap --tap-client grok -- -p "hello"
 
 # DeepSeek Harness headless task
-claude-tap --tap-client dsh -- --profile headless "Reply OK"
+agent-tap --tap-client dsh -- --profile headless "Reply OK"
 
 # Kimi CLI
-claude-tap --tap-client kimi
+agent-tap --tap-client kimi
 
 # New Kimi Code CLI
-claude-tap --tap-client kimi-code
+agent-tap --tap-client kimi-code
 
 # MiMo Code (OpenCode fork)
-claude-tap --tap-client mimo
+agent-tap --tap-client mimo
 
 # Pi
-claude-tap --tap-client pi -- --model openai-codex/gpt-5.3-codex-spark -p "hello"
+agent-tap --tap-client pi -- --model openai-codex/gpt-5.3-codex-spark -p "hello"
 
 # Cursor: launch cursor-agent + live transcript watch + dashboard
-claude-tap --tap-client cursor
+agent-tap --tap-client cursor
 
 # Watch IDE Agent transcripts only (no CLI launch)
-claude-tap --tap-client cursor --tap-no-launch
+agent-tap --tap-client cursor --tap-no-launch
 
 # Qoder CLI
-claude-tap --tap-client qoder -- -p "hello" --permission-mode dont_ask
+agent-tap --tap-client qoder -- -p "hello" --permission-mode dont_ask
 
 # Antigravity CLI
-claude-tap --tap-client agy
+agent-tap --tap-client agy
 
 # CodeBuddy CLI
-claude-tap --tap-client codebuddy
+agent-tap --tap-client codebuddy
 ```
 
 <details>
@@ -164,24 +161,24 @@ claude-tap --tap-client codebuddy
 
 ```bash
 # Pass flags through to Claude Code
-claude-tap -- --model claude-opus-4-6
-claude-tap -c    # continue last conversation
+agent-tap -- --model claude-opus-4-6
+agent-tap -c    # continue last conversation
 
 # Skip all permission prompts (auto-accept tool calls)
-claude-tap -- --dangerously-skip-permissions
+agent-tap -- --dangerously-skip-permissions
 
 # Live viewer is on by default; pass Claude flags after --
-claude-tap -- --dangerously-skip-permissions --model claude-sonnet-4-6
+agent-tap -- --dangerously-skip-permissions --model claude-sonnet-4-6
 ```
 
-`claude-tap` auto-detects custom Claude Code upstreams from `ANTHROPIC_BASE_URL`,
+`agent-tap` auto-detects custom Claude Code upstreams from `ANTHROPIC_BASE_URL`,
 `ANTHROPIC_BEDROCK_BASE_URL`, or `ANTHROPIC_VERTEX_BASE_URL` in your environment
 or Claude settings. Use `--tap-target` only when you want to override that
 detected target.
 
-Local proxy upstreams are supported too: if a tool such as [CC Switch](https://github.com/farion1231/cc-switch) points Claude Code at a local `ANTHROPIC_BASE_URL`, `claude-tap` detects that value from Claude settings and records the traffic before forwarding it upstream. Use `claude-tap` in place of `claude`, such as `claude-tap -- <claude-args>`; no separate `--tap-client` value is needed.
+Local proxy upstreams are supported too: if a tool such as [CC Switch](https://github.com/farion1231/cc-switch) points Claude Code at a local `ANTHROPIC_BASE_URL`, `agent-tap` detects that value from Claude settings and records the traffic before forwarding it upstream. Use `agent-tap` in place of `claude`, such as `agent-tap -- <claude-args>`; no separate `--tap-client` value is needed.
 
-For the Claude Code VS Code extension, set `Claude Code: Claude Process Wrapper` to `claude-tap`; on Windows, use the full `claude-tap.exe` path if VS Code cannot find it.
+For the Claude Code VS Code extension, set `Claude Code: Claude Process Wrapper` to `agent-tap`; on Windows, use the full `agent-tap.exe` path if VS Code cannot find it.
 
 </details>
 
@@ -204,17 +201,17 @@ export ANTHROPIC_BASE_URL=https://api.deepseek.com/anthropic
 ```
 
 ```bash
-claude-tap -- --permission-mode bypassPermissions
+agent-tap -- --permission-mode bypassPermissions
 ```
 
-`claude-tap` reads the DeepSeek upstream from `ANTHROPIC_BASE_URL`, then launches Claude Code against the local proxy. Use `--tap-target https://api.deepseek.com/anthropic` only as a manual override.
+`agent-tap` reads the DeepSeek upstream from `ANTHROPIC_BASE_URL`, then launches Claude Code against the local proxy. Use `--tap-target https://api.deepseek.com/anthropic` only as a manual override.
 
 </details>
 
 <details>
 <summary>Claude Code with AWS Bedrock</summary>
 
-`claude-tap` supports three Bedrock scenarios and auto-detects which applies:
+`agent-tap` supports three Bedrock scenarios and auto-detects which applies:
 
 **Anthropic-compatible Bedrock gateway (New API or similar, no SigV4 in Claude Code)**
 
@@ -226,10 +223,10 @@ export ANTHROPIC_MODEL="bedrock/claude-opus-4-6"
 export ANTHROPIC_DEFAULT_OPUS_MODEL="bedrock/claude-opus-4-6"
 export ANTHROPIC_DEFAULT_SONNET_MODEL="bedrock/claude-opus-4-6"
 export ANTHROPIC_DEFAULT_HAIKU_MODEL="bedrock/claude-opus-4-6"
-claude-tap -- --model bedrock/claude-opus-4-6
+agent-tap -- --model bedrock/claude-opus-4-6
 ```
 
-`claude-tap` records the normal Claude Code `/v1/messages` HTTP/SSE traffic, then
+`agent-tap` records the normal Claude Code `/v1/messages` HTTP/SSE traffic, then
 forwards it to the gateway. For model names prefixed with `bedrock/`, it removes
 Claude Code beta-only request options that AWS Bedrock rejects while preserving
 the captured trace.
@@ -239,10 +236,10 @@ the captured trace.
 ```bash
 export CLAUDE_CODE_USE_BEDROCK=1
 export ANTHROPIC_BEDROCK_BASE_URL="https://your-gateway.company.com/bedrock"
-claude-tap
+agent-tap
 ```
 
-`claude-tap` detects the non-AWS host, redirects both `ANTHROPIC_BASE_URL` and `ANTHROPIC_BEDROCK_BASE_URL` to the local proxy, and decodes the AWS EventStream binary response format to extract token usage and model info.
+`agent-tap` detects the non-AWS host, redirects both `ANTHROPIC_BASE_URL` and `ANTHROPIC_BEDROCK_BASE_URL` to the local proxy, and decodes the AWS EventStream binary response format to extract token usage and model info.
 
 **AWS native Bedrock (SigV4-signed requests)**
 
@@ -250,10 +247,10 @@ claude-tap
 export CLAUDE_CODE_USE_BEDROCK=1
 export ANTHROPIC_BEDROCK_BASE_URL="https://bedrock-runtime.us-east-1.amazonaws.com"
 export AWS_REGION="us-east-1"
-claude-tap --tap-proxy-mode forward
+agent-tap --tap-proxy-mode forward
 ```
 
-When the endpoint is a real AWS domain (`*.amazonaws.com`), `claude-tap` does **not** rewrite `ANTHROPIC_BEDROCK_BASE_URL` to localhost — doing so would break AWS SigV4 signature validation. Use forward proxy mode (`--tap-proxy-mode forward`) to capture this traffic without modifying the signed request.
+When the endpoint is a real AWS domain (`*.amazonaws.com`), `agent-tap` does **not** rewrite `ANTHROPIC_BEDROCK_BASE_URL` to localhost — doing so would break AWS SigV4 signature validation. Use forward proxy mode (`--tap-proxy-mode forward`) to capture this traffic without modifying the signed request.
 
 Use `--tap-target` only as a manual override when auto-detection does not apply.
 
@@ -262,7 +259,7 @@ Use `--tap-target` only as a manual override when auto-detection does not apply.
 <details>
 <summary>Claude Code with Google Vertex AI</summary>
 
-`claude-tap` supports Claude Code Vertex pass-through gateways that expose the
+`agent-tap` supports Claude Code Vertex pass-through gateways that expose the
 Vertex `rawPredict`, `streamRawPredict`, and `count-tokens:rawPredict` paths.
 
 ```bash
@@ -271,11 +268,11 @@ export CLOUD_ML_REGION="us-east5"
 export ANTHROPIC_VERTEX_PROJECT_ID="your-project-id"
 export ANTHROPIC_VERTEX_BASE_URL="https://your-gateway.company.com/vertex"
 export CLAUDE_CODE_SKIP_VERTEX_AUTH=1  # when your gateway handles auth
-claude-tap
+agent-tap
 ```
 
 When `CLAUDE_CODE_USE_VERTEX=1` and `ANTHROPIC_VERTEX_BASE_URL` is set,
-`claude-tap` detects that upstream, redirects both `ANTHROPIC_BASE_URL` and
+`agent-tap` detects that upstream, redirects both `ANTHROPIC_BASE_URL` and
 `ANTHROPIC_VERTEX_BASE_URL` to the local proxy, and records Vertex rawPredict
 HTTP/SSE traffic. If Claude Code uses native Google Vertex without
 `ANTHROPIC_VERTEX_BASE_URL`, use forward proxy mode or set the base URL
@@ -293,7 +290,7 @@ Codex CLI supports two authentication modes with different upstream targets:
 | **OAuth** (ChatGPT subscription) | `codex login` | `https://chatgpt.com/backend-api/codex` | Default for ChatGPT Plus/Pro/Team users |
 | **API Key** | Set `OPENAI_API_KEY` | `https://api.openai.com` (default) | Pay-per-use via OpenAI Platform |
 
-`claude-tap` auto-detects the Codex target from your auth state when possible.
+`agent-tap` auto-detects the Codex target from your auth state when possible.
 In the default reverse-proxy mode, it launches Codex with a temporary sibling
 provider whose `supports_websockets` setting is disabled. This produces one
 HTTP/SSE trace record per request with the complete request context and does
@@ -301,22 +298,22 @@ not modify `~/.codex/config.toml`.
 
 ```bash
 # OAuth users (ChatGPT Plus/Pro/Team) — auto-detected after `codex login`
-claude-tap --tap-client codex
+agent-tap --tap-client codex
 
 # If auto-detection cannot read your Codex auth file, specify the target explicitly
-claude-tap --tap-client codex --tap-target https://chatgpt.com/backend-api/codex
+agent-tap --tap-client codex --tap-target https://chatgpt.com/backend-api/codex
 
 # API Key users — default OpenAI API target works out of the box
-claude-tap --tap-client codex
+agent-tap --tap-client codex
 
 # With specific model
-claude-tap --tap-client codex -- --model codex-mini-latest
+agent-tap --tap-client codex -- --model codex-mini-latest
 
 # Full auto-approval (skip all permission prompts)
-claude-tap --tap-client codex -- --full-auto
+agent-tap --tap-client codex -- --full-auto
 
 # OAuth + full auto; live viewer is enabled by default
-claude-tap --tap-client codex -- --full-auto
+agent-tap --tap-client codex -- --full-auto
 ```
 
 </details>
@@ -324,20 +321,20 @@ claude-tap --tap-client codex -- --full-auto
 <details>
 <summary>Codex App backend capture examples</summary>
 
-Codex App is launched through claude-tap's forward proxy so the final `/backend-api/codex/responses` HTTP and WebSocket request bodies can be captured in the same trace viewer as other clients. Current macOS installs ship as `ChatGPT.app` (bundle id `com.openai.codex`); older standalone `Codex.app` installs are still recognized. Non-model product traffic is relayed but not persisted as trace rows. On macOS, claude-tap trusts its local CA in the current user's login keychain when needed so the bundled app-server can connect through the proxy.
+Codex App is launched through agent-tap's forward proxy so the final `/backend-api/codex/responses` HTTP and WebSocket request bodies can be captured in the same trace viewer as other clients. Current macOS installs ship as `ChatGPT.app` (bundle id `com.openai.codex`); older standalone `Codex.app` installs are still recognized. Non-model product traffic is relayed but not persisted as trace rows. On macOS, agent-tap trusts its local CA in the current user's login keychain when needed so the bundled app-server can connect through the proxy.
 
 ```bash
 # Launch Codex App (ChatGPT.app or Codex.app) and inspect captured backend requests
-claude-tap --tap-client codexapp
+agent-tap --tap-client codexapp
 
 # Keep raw WebSocket/SSE event arrays in the trace
-claude-tap --tap-client codexapp --tap-store-stream-events
+agent-tap --tap-client codexapp --tap-store-stream-events
 
 # Override the executable when the app is installed outside the default locations
-CODEX_APP_EXECUTABLE=/path/to/ChatGPT.app/Contents/MacOS/ChatGPT claude-tap --tap-client codexapp
+CODEX_APP_EXECUTABLE=/path/to/ChatGPT.app/Contents/MacOS/ChatGPT agent-tap --tap-client codexapp
 ```
 
-If Codex/ChatGPT App is already running, claude-tap launches an isolated second instance with a dedicated `--user-data-dir` under `~/.claude-tap/codex-app-profiles/tap` so your current window keeps working. You may need to sign in again in the tapped window. Override the profile with `CODEX_APP_USER_DATA_DIR`. This mode records live backend traffic instead of importing local session JSONL transcripts.
+If Codex/ChatGPT App is already running, agent-tap launches an isolated second instance with a dedicated `--user-data-dir` under `~/.agent-tap/codex-app-profiles/tap` so your current window keeps working. You may need to sign in again in the tapped window. Override the profile with `CODEX_APP_USER_DATA_DIR`. This mode records live backend traffic instead of importing local session JSONL transcripts.
 
 </details>
 
@@ -347,13 +344,13 @@ If Codex/ChatGPT App is already running, claude-tap launches an isolated second 
 Use `--tap-client kimi` for legacy kimi-cli, or `--tap-client kimi-code` for the newer Kimi Code CLI. Both use reverse proxy mode by default.
 
 ```bash
-claude-tap --tap-client kimi
-claude-tap --tap-client kimi -- --thinking
-claude-tap --tap-client kimi --tap-target https://api.moonshot.ai/v1
+agent-tap --tap-client kimi
+agent-tap --tap-client kimi -- --thinking
+agent-tap --tap-client kimi --tap-target https://api.moonshot.ai/v1
 
-claude-tap --tap-client kimi-code
-claude-tap --tap-client kimi-code -- --thinking
-claude-tap --tap-client kimi-code --tap-target https://api.moonshot.ai/v1
+agent-tap --tap-client kimi-code
+agent-tap --tap-client kimi-code -- --thinking
+agent-tap --tap-client kimi-code --tap-target https://api.moonshot.ai/v1
 ```
 
 </details>
@@ -365,13 +362,13 @@ Gemini CLI uses forward proxy mode by default. Google OAuth / Code Assist traffi
 
 ```bash
 # Google OAuth / Code Assist
-claude-tap --tap-client gemini -- -p "hello"
+agent-tap --tap-client gemini -- -p "hello"
 
 # Live viewer is enabled by default
-claude-tap --tap-client gemini -- -p "hello"
+agent-tap --tap-client gemini -- -p "hello"
 
 # Reverse mode for compatible API-key / Vertex flows
-claude-tap --tap-client gemini --tap-proxy-mode reverse -- -p "hello"
+agent-tap --tap-client gemini --tap-proxy-mode reverse -- -p "hello"
 ```
 
 </details>
@@ -379,17 +376,17 @@ claude-tap --tap-client gemini --tap-proxy-mode reverse -- -p "hello"
 <details>
 <summary>OpenCode examples</summary>
 
-[OpenCode](https://opencode.ai) is a multi-provider terminal AI assistant. Because it can talk to many providers, claude-tap defaults to **forward proxy** mode for opencode: it injects `HTTPS_PROXY` plus the local CA into the child process so traffic to any provider is captured.
+[OpenCode](https://opencode.ai) is a multi-provider terminal AI assistant. Because it can talk to many providers, agent-tap defaults to **forward proxy** mode for opencode: it injects `HTTPS_PROXY` plus the local CA into the child process so traffic to any provider is captured.
 
 ```bash
 # Forward proxy mode — captures every provider opencode talks to (default)
-claude-tap --tap-client opencode
+agent-tap --tap-client opencode
 
 # Live viewer is enabled by default
-claude-tap --tap-client opencode
+agent-tap --tap-client opencode
 
 # Reverse mode — only works when using Anthropic provider (single ANTHROPIC_BASE_URL)
-claude-tap --tap-client opencode --tap-proxy-mode reverse
+agent-tap --tap-client opencode --tap-proxy-mode reverse
 ```
 
 </details>
@@ -397,17 +394,17 @@ claude-tap --tap-client opencode --tap-proxy-mode reverse
 <details>
 <summary>MiMo Code examples</summary>
 
-[MiMo Code](https://mimo.xiaomi.com/en/mimocode) is an [OpenCode](https://opencode.ai) fork with persistent memory, subagent orchestration, and Xiaomi MiMo platform integration. claude-tap defaults to **forward proxy** mode for mimocode: it injects `HTTPS_PROXY` plus the local CA into the child process so traffic to any provider is captured.
+[MiMo Code](https://mimo.xiaomi.com/en/mimocode) is an [OpenCode](https://opencode.ai) fork with persistent memory, subagent orchestration, and Xiaomi MiMo platform integration. agent-tap defaults to **forward proxy** mode for mimocode: it injects `HTTPS_PROXY` plus the local CA into the child process so traffic to any provider is captured.
 
 ```bash
 # Forward proxy mode — captures every provider MiMo Code talks to (default)
-claude-tap --tap-client mimo
+agent-tap --tap-client mimo
 
 # Live viewer is enabled by default
-claude-tap --tap-client mimo
+agent-tap --tap-client mimo
 
 # Reverse mode — single Anthropic provider with mimo-only disabled
-claude-tap --tap-client mimo --tap-proxy-mode reverse
+agent-tap --tap-client mimo --tap-proxy-mode reverse
 ```
 
 </details>
@@ -415,42 +412,42 @@ claude-tap --tap-client mimo --tap-proxy-mode reverse
 <details>
 <summary>Pi examples</summary>
 
-[Pi](https://github.com/badlogic/pi-mono/tree/main/packages/coding-agent) is a multi-provider coding agent. claude-tap defaults to **forward proxy** mode for Pi because Pi can use subscription OAuth providers such as `openai-codex` and custom API-key providers from its model registry.
+[Pi](https://github.com/badlogic/pi-mono/tree/main/packages/coding-agent) is a multi-provider coding agent. agent-tap defaults to **forward proxy** mode for Pi because Pi can use subscription OAuth providers such as `openai-codex` and custom API-key providers from its model registry.
 
 ```bash
 # OpenAI Codex OAuth via Pi's openai-codex provider
-claude-tap --tap-client pi -- --model openai-codex/gpt-5.3-codex-spark -p "hello"
+agent-tap --tap-client pi -- --model openai-codex/gpt-5.3-codex-spark -p "hello"
 
 # Live viewer is enabled by default
-claude-tap --tap-client pi -- --model openai-codex/gpt-5.3-codex-spark -p "hello"
+agent-tap --tap-client pi -- --model openai-codex/gpt-5.3-codex-spark -p "hello"
 
 # Read-only tool capture
-claude-tap --tap-client pi -- --model openai-codex/gpt-5.3-codex-spark --tools bash -p "Run pwd"
+agent-tap --tap-client pi -- --model openai-codex/gpt-5.3-codex-spark --tools bash -p "Run pwd"
 ```
 
-Pi stores OAuth credentials in `~/.pi/agent/auth.json` after `/login`. If you keep Pi credentials in another directory, set `PI_CODING_AGENT_DIR` before launching `claude-tap`.
+Pi stores OAuth credentials in `~/.pi/agent/auth.json` after `/login`. If you keep Pi credentials in another directory, set `PI_CODING_AGENT_DIR` before launching `agent-tap`.
 
 </details>
 
 <details>
 <summary>Hermes Agent examples</summary>
 
-Hermes Agent is a multi-provider Python AI agent (Nous Portal, OpenRouter, NVIDIA NIM, Xiaomi MiMo, GLM, Kimi, MiniMax, Hugging Face, OpenAI, Anthropic, custom). Because it can talk to any of these providers — and `httpx` / `requests` both honor `HTTPS_PROXY` natively — claude-tap defaults to **forward proxy** mode for hermes: it injects `HTTPS_PROXY` plus the local CA into the child process so any provider is captured.
+Hermes Agent is a multi-provider Python AI agent (Nous Portal, OpenRouter, NVIDIA NIM, Xiaomi MiMo, GLM, Kimi, MiniMax, Hugging Face, OpenAI, Anthropic, custom). Because it can talk to any of these providers — and `httpx` / `requests` both honor `HTTPS_PROXY` natively — agent-tap defaults to **forward proxy** mode for hermes: it injects `HTTPS_PROXY` plus the local CA into the child process so any provider is captured.
 
 ```bash
 # Interactive TUI — the recommended way for local trace capture.
-claude-tap --tap-client hermes
+agent-tap --tap-client hermes
 
 # Gateway mode — captures LLM calls triggered by incoming platform messages (Slack, Telegram, etc.).
 # Requires a messaging platform configured in ~/.hermes/.env.
-# claude-tap auto-rewrites `gateway start` → `gateway run` so the gateway runs in the
+# agent-tap auto-rewrites `gateway start` → `gateway run` so the gateway runs in the
 # foreground and inherits HTTPS_PROXY; without this, the daemon spawned by systemd/launchd
 # would not go through the proxy and no traces would be recorded.
-claude-tap --tap-client hermes -- gateway start
+agent-tap --tap-client hermes -- gateway start
 
 # Reverse mode is opt-in and only useful when ~/.hermes is configured with an
 # OpenAI-compatible provider that reads OPENAI_BASE_URL.
-claude-tap --tap-client hermes --tap-proxy-mode reverse
+agent-tap --tap-client hermes --tap-proxy-mode reverse
 ```
 
 > **Note:** Gateway mode only produces traces when a configured messaging platform (Slack, Telegram, etc.) delivers a message to the bot. Without an active platform integration, the gateway makes no LLM calls and no traces are recorded.
@@ -460,37 +457,37 @@ claude-tap --tap-client hermes --tap-proxy-mode reverse
 <details>
 <summary>Cursor CLI / IDE Agent examples</summary>
 
-Cursor is **transcript-only** (neither reverse nor forward proxy): claude-tap launches `cursor-agent`, watches `~/.cursor/projects/*/agent-transcripts/*.jsonl`, and writes **one dashboard session per Cursor conversation JSONL**. It does not MITM `api2.cursor.sh`.
+Cursor is **transcript-only** (neither reverse nor forward proxy): agent-tap launches `cursor-agent`, watches `~/.cursor/projects/*/agent-transcripts/*.jsonl`, and writes **one dashboard session per Cursor conversation JSONL**. It does not MITM `api2.cursor.sh`.
 
 ```bash
 # Launch agent + live watch + dashboard (default)
-claude-tap --tap-client cursor
+agent-tap --tap-client cursor
 
 # Pass args through to cursor-agent
-claude-tap --tap-client cursor -- -p --trust --model auto "hello"
+agent-tap --tap-client cursor -- -p --trust --model auto "hello"
 
 # IDE Agent only (no CLI launch)
-claude-tap --tap-client cursor --tap-no-launch
+agent-tap --tap-client cursor --tap-no-launch
 ```
 
 </details>
 
 ## Guides and Integrations
 
-- [OpenClaw setup guide](docs/guides/OPENCLAW_README.md) for integrating `claude-tap` with OpenClaw. Simplified Chinese version: [OpenClaw 设置指南](docs/guides/OPENCLAW_README.zh.md).
+- [OpenClaw setup guide](docs/guides/OPENCLAW_README.md) for integrating `agent-tap` with OpenClaw. Simplified Chinese version: [OpenClaw 设置指南](docs/guides/OPENCLAW_README.zh.md).
 - [Claude Code with DeepSeek API](docs/guides/deepseek-claude-code.md) for routing Claude Code through DeepSeek's Anthropic-compatible API. Simplified Chinese version: [Claude Code 搭配 DeepSeek API](docs/guides/deepseek-claude-code.zh.md).
 - [Client support matrix](docs/support-matrix.md) for exact environment variables, proxy modes, and URL rewrite rules.
 
 <details>
 <summary>Qoder CLI examples</summary>
 
-Qoder CLI talks to multiple Qoder endpoints, so claude-tap defaults to **forward proxy** mode for `--tap-client qoder`.
+Qoder CLI talks to multiple Qoder endpoints, so agent-tap defaults to **forward proxy** mode for `--tap-client qoder`.
 
 ```bash
 # Browser login, PAT, or job token must be configured before launch.
 qodercli login
 
-claude-tap --tap-client qoder -- -p "hello" --permission-mode dont_ask
+agent-tap --tap-client qoder -- -p "hello" --permission-mode dont_ask
 ```
 
 </details>
@@ -498,15 +495,15 @@ claude-tap --tap-client qoder -- -p "hello" --permission-mode dont_ask
 <details>
 <summary>Antigravity CLI examples</summary>
 
-Antigravity CLI talks to multiple Google/Antigravity endpoints, so claude-tap defaults to **forward proxy** mode for `--tap-client agy`. Its Code Assist model API also honors `CLOUD_CODE_URL`; claude-tap injects that automatically so model requests such as `/v1internal:streamGenerateContent` are captured by the same local proxy.
+Antigravity CLI talks to multiple Google/Antigravity endpoints, so agent-tap defaults to **forward proxy** mode for `--tap-client agy`. Its Code Assist model API also honors `CLOUD_CODE_URL`; agent-tap injects that automatically so model requests such as `/v1internal:streamGenerateContent` are captured by the same local proxy.
 
-On macOS, Antigravity may not honor per-process CA environment variables. claude-tap automatically trusts the local CA in your current user's login keychain on first `agy` launch. This does not use `sudo` or the System keychain, though macOS may prompt to unlock the login keychain.
+On macOS, Antigravity may not honor per-process CA environment variables. agent-tap automatically trusts the local CA in your current user's login keychain on first `agy` launch. This does not use `sudo` or the System keychain, though macOS may prompt to unlock the login keychain.
 
 ```bash
-claude-tap --tap-client agy --tap-live
+agent-tap --tap-client agy --tap-live
 
 # Optional: trust the CA separately before launching a forward-proxy client.
-claude-tap trust-ca
+agent-tap trust-ca
 ```
 
 </details>
@@ -514,21 +511,21 @@ claude-tap trust-ca
 <details>
 <summary>Grok Build CLI examples</summary>
 
-Grok Build uses reverse proxy mode by default. claude-tap temporarily points the official `GROK_CLI_CHAT_PROXY_BASE_URL` at the local proxy, captures the OpenAI Responses HTTP/SSE stream plus Grok storage and trace audit requests, and relays them to `https://cli-chat-proxy.grok.com/v1` with the existing Grok OAuth session.
+Grok Build uses reverse proxy mode by default. agent-tap temporarily points the official `GROK_CLI_CHAT_PROXY_BASE_URL` at the local proxy, captures the OpenAI Responses HTTP/SSE stream plus Grok storage and trace audit requests, and relays them to `https://cli-chat-proxy.grok.com/v1` with the existing Grok OAuth session.
 
 ```bash
 # Authenticate once with the official Grok Build CLI.
 grok login
 
 # Interactive TUI
-claude-tap --tap-client grok
+agent-tap --tap-client grok
 
 # Headless single turn
-claude-tap --tap-client grok -- -p "Reply OK"
+agent-tap --tap-client grok -- -p "Reply OK"
 
 # Custom Grok-compatible deployment
 GROK_CLI_CHAT_PROXY_BASE_URL=https://grok-gateway.example.com/v1 \
-  claude-tap --tap-client grok -- -p "Reply OK"
+  agent-tap --tap-client grok -- -p "Reply OK"
 ```
 
 </details>
@@ -540,13 +537,13 @@ DeepSeek Harness (`dsh`) uses forward proxy mode by default. This captures model
 
 ```bash
 # One-shot headless task
-claude-tap --tap-client dsh -- --profile headless "Summarize this repository"
+agent-tap --tap-client dsh -- --profile headless "Summarize this repository"
 
 # Custom dsh profile
-claude-tap --tap-client dsh -- --profile my-profile
+agent-tap --tap-client dsh -- --profile my-profile
 
 # Reverse mode for deployments configured only through DEEPSEEK_BASE_URL
-claude-tap --tap-client dsh --tap-proxy-mode reverse \
+agent-tap --tap-client dsh --tap-proxy-mode reverse \
   -- --profile headless "Reply OK"
 ```
 
@@ -555,19 +552,19 @@ claude-tap --tap-client dsh --tap-proxy-mode reverse \
 <details>
 <summary>WorkBuddy examples</summary>
 
-WorkBuddy (macOS desktop app) is launched through claude-tap's forward proxy so its `POST /v2/chat/completions` model requests and streamed replies, including tool calls and the tool results carried in later requests, show up in the trace viewer. Account, login, update, and telemetry traffic is relayed but not persisted. claude-tap trusts its local CA in the current user's login keychain when needed, because WorkBuddy's bundled agent ignores `NODE_EXTRA_CA_CERTS` and uses a CA bundle built from the keychain instead.
+WorkBuddy (macOS desktop app) is launched through agent-tap's forward proxy so its `POST /v2/chat/completions` model requests and streamed replies, including tool calls and the tool results carried in later requests, show up in the trace viewer. Account, login, update, and telemetry traffic is relayed but not persisted. agent-tap trusts its local CA in the current user's login keychain when needed, because WorkBuddy's bundled agent ignores `NODE_EXTRA_CA_CERTS` and uses a CA bundle built from the keychain instead.
 
 ```bash
 # Quit WorkBuddy completely first (also from the menu bar icon), then:
-claude-tap --tap-client workbuddy
+agent-tap --tap-client workbuddy
 
 # Override the executable when WorkBuddy is installed outside /Applications
-WORKBUDDY_EXECUTABLE=/path/to/WorkBuddy.app/Contents/MacOS/Electron claude-tap --tap-client workbuddy
+WORKBUDDY_EXECUTABLE=/path/to/WorkBuddy.app/Contents/MacOS/Electron agent-tap --tap-client workbuddy
 ```
 
-- If WorkBuddy is already running, claude-tap stops and asks you to quit it; it never quits the app or copies its login data.
-- Only the WorkBuddy that claude-tap starts is traced. If WorkBuddy quits and comes back another way (it relaunches itself to install a downloaded update at startup, or you reopen it from the Dock), claude-tap detects this and tells you; quit that WorkBuddy and run the command again.
-- WorkBuddy caches that CA bundle at `~/.workbuddy/system-ca-bundle.pem`. If the cache was created before the claude-tap CA was trusted, claude-tap warns you; quit WorkBuddy and remove the file so WorkBuddy rebuilds it.
+- If WorkBuddy is already running, agent-tap stops and asks you to quit it; it never quits the app or copies its login data.
+- Only the WorkBuddy that agent-tap starts is traced. If WorkBuddy quits and comes back another way (it relaunches itself to install a downloaded update at startup, or you reopen it from the Dock), agent-tap detects this and tells you; quit that WorkBuddy and run the command again.
+- WorkBuddy caches that CA bundle at `~/.workbuddy/system-ca-bundle.pem`. If the cache was created before the agent-tap CA was trusted, agent-tap warns you; quit WorkBuddy and remove the file so WorkBuddy rebuilds it.
 - The dashboard's Trace tab shows each request as soon as it is sent and updates the reply about twice a second while it streams, including the model's thinking text before the answer starts; the finished record then replaces it. A stopped or interrupted reply keeps what was captured and is labeled Cancelled or Interrupted. The Full viewer tab updates when a reply finishes.
 
 </details>
@@ -575,17 +572,17 @@ WORKBUDDY_EXECUTABLE=/path/to/WorkBuddy.app/Contents/MacOS/Electron claude-tap -
 <details>
 <summary>CodeBuddy CLI examples</summary>
 
-CodeBuddy uses reverse proxy mode by default. claude-tap auto-detects the upstream from CodeBuddy's own login cache (`~/.codebuddy/local_storage/`), so iOA / WeChat / Google-Github / Enterprise-Domain login modes all work without any extra flag. When the cache is missing (e.g. before first login), it falls back to `https://copilot.tencent.com/v2`.
+CodeBuddy uses reverse proxy mode by default. agent-tap auto-detects the upstream from CodeBuddy's own login cache (`~/.codebuddy/local_storage/`), so iOA / WeChat / Google-Github / Enterprise-Domain login modes all work without any extra flag. When the cache is missing (e.g. before first login), it falls back to `https://copilot.tencent.com/v2`.
 
 ```bash
 # Auto-detected endpoint (works for all four login modes once logged in)
-claude-tap --tap-client codebuddy
+agent-tap --tap-client codebuddy
 
 # Explicit override (e.g. external SaaS or staging)
-claude-tap --tap-client codebuddy --tap-target https://www.codebuddy.ai/v2
+agent-tap --tap-client codebuddy --tap-target https://www.codebuddy.ai/v2
 
 # Or via environment variable
-CODEBUDDY_BASE_URL=https://www.codebuddy.ai/v2 claude-tap --tap-client codebuddy -- -p "Reply OK"
+CODEBUDDY_BASE_URL=https://www.codebuddy.ai/v2 agent-tap --tap-client codebuddy -- -p "Reply OK"
 ```
 
 </details>
@@ -595,58 +592,58 @@ CODEBUDDY_BASE_URL=https://www.codebuddy.ai/v2 claude-tap --tap-client codebuddy
 
 ```bash
 # Live viewer runs by default while a client runs
-claude-tap
+agent-tap
 
 # Disable live viewer for scripts, CI, remote shells, or old behavior
-claude-tap --tap-no-live
+agent-tap --tap-no-live
 
 # Browse saved traces without launching a client
-claude-tap dashboard
+agent-tap dashboard
 
 # Stop the shared dashboard service
-claude-tap dashboard stop
+agent-tap dashboard stop
 
 # Build a local macOS menu bar app, then double-click it in Finder
-claude-tap build-macos-app
-open "dist/Claude Tap.app"
+agent-tap build-macos-app
+open "dist/Agent Tap.app"
 
 # Build an Apple Silicon app that bundles Python and dependencies
-claude-tap build-macos-app --self-contained
+agent-tap build-macos-app --self-contained
 
 # Restore Claude/Codex configs if the menu app is force-killed while monitoring
-claude-tap monitor-restore
+agent-tap monitor-restore
 
 # Regenerate a self-contained HTML viewer from JSONL or compact trace input
-claude-tap export .traces/2026-02-28/trace_141557.jsonl -o trace.html
+agent-tap export .traces/2026-02-28/trace_141557.jsonl -o trace.html
 
 # Export a portable compact trace bundle, then render it later.
 # Compact is the default export format.
-claude-tap export <session-id> -o trace.ctap.json
-claude-tap export trace.ctap.json -o trace.html
+agent-tap export <session-id> -o trace.ctap.json
+agent-tap export trace.ctap.json -o trace.html
 
 # Embed the exported viewer in an iframe with reduced chrome
 # trace.html?embed=1&hideHeader=1&hidePath=1&hideHistory=1&hideControls=1&density=compact&theme=light
 
 # Store traces in another directory, or keep fewer sessions
-claude-tap --tap-output-dir ./my-traces
-claude-tap --tap-max-traces 10
+agent-tap --tap-output-dir ./my-traces
+agent-tap --tap-max-traces 10
 
 # Start only the proxy for custom setups
-claude-tap --tap-no-launch --tap-port 8080
+agent-tap --tap-no-launch --tap-port 8080
 
 # Disable browser auto-open for live and generated viewers
-claude-tap --tap-no-open
+agent-tap --tap-no-open
 ```
 
 If `urlsplit()` raises `ValueError` while rendering a Dashboard session, the affected string and that response's text previews are shown as `REDACTED`. Existing recognition and nesting limits still apply. JSONL, compact, and HTML downloads preserve the stored capture, including any authentication-header sanitization applied during recording.
 
 In proxy-only mode, start your client in another terminal and point its base URL or proxy settings at the local proxy. Use the [client support matrix](docs/support-matrix.md) for exact wiring.
 
-When used as VSCode Claude Code's `claudeProcessWrapper`, claude-tap honors the Claude binary path passed by the extension.
+When used as VSCode Claude Code's `claudeProcessWrapper`, agent-tap honors the Claude binary path passed by the extension.
 
-On macOS, `claude-tap build-macos-app` creates a local `Claude Tap.app` bundle. The app runs as a menu bar item with a compact status board, Start Monitor / Stop Monitor controls, and a shortcut to the full dashboard. Start Monitor asks for confirmation, launches local reverse proxies for Claude Code and Codex CLI, then writes temporary base-URL settings into `~/.claude/settings.json` and `~/.codex/config.toml` so newly opened sessions are captured. Codex custom providers are routed through the selected provider's `base_url`; Claude Bedrock custom gateways are routed when they do not point at native AWS Bedrock endpoints. Native AWS Bedrock endpoints are left unchanged because reverse-mode URL rewriting would break SigV4 signing. Stop Monitor restores the config files byte-for-byte. If the app is force-killed, run `claude-tap monitor-restore` to restore configs and clean up monitor processes recorded by the app.
+On macOS, `agent-tap build-macos-app` creates a local `Agent Tap.app` bundle. The app runs as a menu bar item with a compact status board, Start Monitor / Stop Monitor controls, and a shortcut to the full dashboard. Start Monitor asks for confirmation, launches local reverse proxies for Claude Code and Codex CLI, then writes temporary base-URL settings into `~/.claude/settings.json` and `~/.codex/config.toml` so newly opened sessions are captured. Codex custom providers are routed through the selected provider's `base_url`; Claude Bedrock custom gateways are routed when they do not point at native AWS Bedrock endpoints. Native AWS Bedrock endpoints are left unchanged because reverse-mode URL rewriting would break SigV4 signing. Stop Monitor restores the config files byte-for-byte. If the app is force-killed, run `agent-tap monitor-restore` to restore configs and clean up monitor processes recorded by the app.
 
-By default the launcher points at the current checkout; pass `--installed` if `claude-tap` is installed in the Python environment used to build the app. Pass `--self-contained` to build an Apple Silicon PyInstaller bundle under `Contents/Resources` so the app does not depend on a colleague's Python installation. Ad-hoc signed builds may still require the recipient to remove quarantine or approve the app in macOS security settings.
+By default the launcher points at the current checkout; pass `--installed` if `agent-tap` is installed in the Python environment used to build the app. Pass `--self-contained` to build an Apple Silicon PyInstaller bundle under `Contents/Resources` so the app does not depend on a colleague's Python installation. Ad-hoc signed builds may still require the recipient to remove quarantine or approve the app in macOS security settings.
 
 ### CLI Options
 
@@ -698,7 +695,7 @@ The viewer is a single self-contained HTML file (zero external dependencies):
 
 **How it works:**
 
-1. `claude-tap` starts a reverse or forward proxy and spawns the selected client
+1. `agent-tap` starts a reverse or forward proxy and spawns the selected client
 2. Base URL clients are pointed at the reverse proxy; clients without base URL support use proxy/CA environment variables
 3. SSE and WebSocket streams are forwarded as chunks/messages arrive with low proxy overhead
 4. Each request-response pair or WebSocket session is recorded to local trace storage; raw SSE/WebSocket event arrays are omitted by default and must be captured with `--tap-store-stream-events` if you need them later in viewer/export output
@@ -713,15 +710,15 @@ The viewer is a single self-contained HTML file (zero external dependencies):
 
 ### Ecosystem
 
-- [Phistory](https://github.com/WEIFENG2333/phistory) archives versioned system prompt snapshots from agent CLIs such as Claude Code, Codex, Kimi, opencode, and Pi. It uses claude-tap's capture-only prompt export to preserve raw HTTP trace evidence and generate comparison-friendly prompt snapshots.
+- [Phistory](https://github.com/WEIFENG2333/phistory) archives versioned system prompt snapshots from agent CLIs such as Claude Code, Codex, Kimi, opencode, and Pi. It uses agent-tap's capture-only prompt export to preserve raw HTTP trace evidence and generate comparison-friendly prompt snapshots.
 
 ### Star History
 
-<a href="https://www.star-history.com/?repos=liaohch3%2Fclaude-tap&type=date&legend=bottom-right">
+<a href="https://www.star-history.com/?repos=rxa3c%2Fagent-tap&type=date&legend=bottom-right">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/liaohch3/claude-tap/star-history-assets/star-history-dark.png" />
-    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/liaohch3/claude-tap/star-history-assets/star-history-light.png" />
-    <img alt="Star History Chart" src="https://raw.githubusercontent.com/liaohch3/claude-tap/star-history-assets/star-history-light.png" />
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/rxa3c/agent-tap/star-history-assets/star-history-dark.png" />
+    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/rxa3c/agent-tap/star-history-assets/star-history-light.png" />
+    <img alt="Star History Chart" src="https://raw.githubusercontent.com/rxa3c/agent-tap/star-history-assets/star-history-light.png" />
   </picture>
 </a>
 
@@ -735,17 +732,17 @@ Thanks goes to these contributors:
 <table>
   <tbody>
     <tr>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/liaohch3"><img src="https://avatars.githubusercontent.com/u/34056481?s=100" width="100px;" alt="liaohch3"/><br /><sub><b>liaohch3</b></sub></a><br /><a href="https://github.com/liaohch3/claude-tap/commits?author=liaohch3" title="Code">💻</a> <a href="https://github.com/liaohch3/claude-tap/commits?author=liaohch3" title="Documentation">📖</a> <a href="#maintenance-liaohch3" title="Maintenance">🚧</a> <a href="https://github.com/liaohch3/claude-tap/commits?author=liaohch3" title="Tests">⚠️</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/WEIFENG2333"><img src="https://avatars.githubusercontent.com/u/61730227?s=100" width="100px;" alt="BKK"/><br /><sub><b>BKK</b></sub></a><br /><a href="https://github.com/liaohch3/claude-tap/commits?author=WEIFENG2333" title="Code">💻</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/YoungCan-Wang"><img src="https://avatars.githubusercontent.com/u/73347006?s=100" width="100px;" alt="YoungCan-Wang"/><br /><sub><b>YoungCan-Wang</b></sub></a><br /><a href="https://github.com/liaohch3/claude-tap/commits?author=YoungCan-Wang" title="Code">💻</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/oxkrypton"><img src="https://avatars.githubusercontent.com/u/154910746?s=100" width="100px;" alt="0xkrypton"/><br /><sub><b>0xkrypton</b></sub></a><br /><a href="https://github.com/liaohch3/claude-tap/commits?author=oxkrypton" title="Code">💻</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/googs1025"><img src="https://avatars.githubusercontent.com/u/86391540?s=100" width="100px;" alt="CYJiang"/><br /><sub><b>CYJiang</b></sub></a><br /><a href="https://github.com/liaohch3/claude-tap/commits?author=googs1025" title="Code">💻</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/TITOCHAN2023"><img src="https://avatars.githubusercontent.com/u/138754853?s=100" width="100px;" alt="陈展鹏"/><br /><sub><b>陈展鹏</b></sub></a><br /><a href="https://github.com/liaohch3/claude-tap/commits?author=TITOCHAN2023" title="Documentation">📖</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/devtalker"><img src="https://avatars.githubusercontent.com/u/23204195?s=100" width="100px;" alt="devtalker"/><br /><sub><b>devtalker</b></sub></a><br /><a href="https://github.com/liaohch3/claude-tap/commits?author=devtalker" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/liaohch3"><img src="https://avatars.githubusercontent.com/u/34056481?s=100" width="100px;" alt="liaohch3"/><br /><sub><b>liaohch3</b></sub></a><br /><a href="https://github.com/rxa3c/agent-tap/commits?author=liaohch3" title="Code">💻</a> <a href="https://github.com/rxa3c/agent-tap/commits?author=liaohch3" title="Documentation">📖</a> <a href="#maintenance-liaohch3" title="Maintenance">🚧</a> <a href="https://github.com/rxa3c/agent-tap/commits?author=liaohch3" title="Tests">⚠️</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/WEIFENG2333"><img src="https://avatars.githubusercontent.com/u/61730227?s=100" width="100px;" alt="BKK"/><br /><sub><b>BKK</b></sub></a><br /><a href="https://github.com/rxa3c/agent-tap/commits?author=WEIFENG2333" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/YoungCan-Wang"><img src="https://avatars.githubusercontent.com/u/73347006?s=100" width="100px;" alt="YoungCan-Wang"/><br /><sub><b>YoungCan-Wang</b></sub></a><br /><a href="https://github.com/rxa3c/agent-tap/commits?author=YoungCan-Wang" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/oxkrypton"><img src="https://avatars.githubusercontent.com/u/154910746?s=100" width="100px;" alt="0xkrypton"/><br /><sub><b>0xkrypton</b></sub></a><br /><a href="https://github.com/rxa3c/agent-tap/commits?author=oxkrypton" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/googs1025"><img src="https://avatars.githubusercontent.com/u/86391540?s=100" width="100px;" alt="CYJiang"/><br /><sub><b>CYJiang</b></sub></a><br /><a href="https://github.com/rxa3c/agent-tap/commits?author=googs1025" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/TITOCHAN2023"><img src="https://avatars.githubusercontent.com/u/138754853?s=100" width="100px;" alt="陈展鹏"/><br /><sub><b>陈展鹏</b></sub></a><br /><a href="https://github.com/rxa3c/agent-tap/commits?author=TITOCHAN2023" title="Documentation">📖</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/devtalker"><img src="https://avatars.githubusercontent.com/u/23204195?s=100" width="100px;" alt="devtalker"/><br /><sub><b>devtalker</b></sub></a><br /><a href="https://github.com/rxa3c/agent-tap/commits?author=devtalker" title="Code">💻</a></td>
     </tr>
     <tr>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/dingyaguang117"><img src="https://avatars.githubusercontent.com/u/1930778?s=100" width="100px;" alt="Yaguang Ding"/><br /><sub><b>Yaguang Ding</b></sub></a><br /><a href="https://github.com/liaohch3/claude-tap/commits?author=dingyaguang117" title="Code">💻</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/sephymartin"><img src="https://avatars.githubusercontent.com/u/299891?s=100" width="100px;" alt="Sephy"/><br /><sub><b>Sephy</b></sub></a><br /><a href="https://github.com/liaohch3/claude-tap/commits?author=sephymartin" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/dingyaguang117"><img src="https://avatars.githubusercontent.com/u/1930778?s=100" width="100px;" alt="Yaguang Ding"/><br /><sub><b>Yaguang Ding</b></sub></a><br /><a href="https://github.com/rxa3c/agent-tap/commits?author=dingyaguang117" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/sephymartin"><img src="https://avatars.githubusercontent.com/u/299891?s=100" width="100px;" alt="Sephy"/><br /><sub><b>Sephy</b></sub></a><br /><a href="https://github.com/rxa3c/agent-tap/commits?author=sephymartin" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>

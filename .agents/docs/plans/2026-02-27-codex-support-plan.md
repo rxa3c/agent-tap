@@ -8,7 +8,7 @@ Date: 2026-02-27
 
 ## Goal
 
-Add first-class Codex support to `claude-tap` while keeping Claude behavior fully backward compatible.
+Add first-class Codex support to `agent-tap` while keeping Claude behavior fully backward compatible.
 
 ## Scope
 
@@ -24,7 +24,7 @@ Add first-class Codex support to `claude-tap` while keeping Claude behavior full
 
 ## Non-Goals
 
-- Rename package/project branding (`claude-tap`) in this change.
+- Rename package/project branding (`agent-tap`) in this change.
 - Add broad provider abstractions beyond Claude/Codex.
 - Guarantee Codex ChatGPT login flow under forward proxy mode.
 

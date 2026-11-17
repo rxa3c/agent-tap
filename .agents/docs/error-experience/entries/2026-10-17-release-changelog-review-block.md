@@ -4,7 +4,7 @@ Date: 2026-10-17
 
 ## Failure and evidence
 
-[Auto Release run 39040400288](https://github.com/liaohch3/claude-tap/actions/runs/39040400288)
+Auto Release run 39040400288 (upstream)
 passed the release PR checks, then failed with `All comments must be resolved`.
 No release tag was created. Release PR #442 had six unresolved review threads
 covering duplicated release notes, internal evidence commits, and missing Chinese notes.

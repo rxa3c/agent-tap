@@ -15,12 +15,12 @@ import pytest
 from aiohttp import web
 from yarl import URL
 
-from claude_tap import forward_proxy
-from claude_tap.certs import CertificateAuthority, ensure_ca
-from claude_tap.forward_proxy import ForwardProxyServer
-from claude_tap.live import LiveViewerServer
-from claude_tap.trace import TraceWriter
-from claude_tap.trace_store import TraceStore, get_trace_store
+from agent_tap import forward_proxy
+from agent_tap.certs import CertificateAuthority, ensure_ca
+from agent_tap.forward_proxy import ForwardProxyServer
+from agent_tap.live import LiveViewerServer
+from agent_tap.trace import TraceWriter
+from agent_tap.trace_store import TraceStore, get_trace_store
 
 
 def _record(request_id: str, text: str, *, turn: int = 1) -> dict:
@@ -326,7 +326,7 @@ async def test_forward_proxy_concurrent_streams_do_not_mix(tmp_path: Path, monke
 async def test_dashboard_serves_redacted_inflight_records_and_emits_events(
     trace_db, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    from claude_tap import live
+    from agent_tap import live
 
     monkeypatch.setattr(live, "_DASHBOARD_WATCH_INTERVAL_SECONDS", 0.05)
     store = get_trace_store()
@@ -363,7 +363,7 @@ async def test_dashboard_serves_redacted_inflight_records_and_emits_events(
 
 # ── dashboard rendering ────────────────────────────────────────────────────
 
-_DASHBOARD_HTML = Path(__file__).resolve().parents[1] / "claude_tap" / "dashboard.html"
+_DASHBOARD_HTML = Path(__file__).resolve().parents[1] / "agent_tap" / "dashboard.html"
 _RENDER_FUNCTIONS = (
     "streamStateBadge",
     "toolCallsText",

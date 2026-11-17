@@ -7,9 +7,9 @@ from typing import Any
 
 import pytest
 
-from claude_tap import macos_app
-from claude_tap.cli import main_entry
-from claude_tap.macos_app import (
+from agent_tap import macos_app
+from agent_tap.cli import main_entry
+from agent_tap.macos_app import (
     DashboardMonitorController,
     MacOSMenuApp,
     build_dashboard_command,
@@ -22,7 +22,7 @@ from claude_tap.macos_app import (
 def _isolate_global_config(tmp_path_factory: pytest.TempPathFactory, monkeypatch: pytest.MonkeyPatch) -> None:
     """Redirect $HOME so controller tests exercising the real ``global_inject``
     callables never read or write the developer's real ~/.claude, ~/.codex, or
-    ~/.claude-tap monitor state."""
+    ~/.agent-tap monitor state."""
     fake_home = tmp_path_factory.mktemp("home")
     monkeypatch.setattr(Path, "home", lambda: fake_home)
     monkeypatch.delenv("CODEX_HOME", raising=False)
@@ -40,7 +40,7 @@ def test_build_dashboard_command_starts_dashboard_without_opening_browser(tmp_pa
     assert cmd == [
         "/usr/bin/python3",
         "-m",
-        "claude_tap",
+        "agent_tap",
         "dashboard",
         "--tap-live-port",
         "19527",
@@ -65,14 +65,14 @@ def test_build_dashboard_command_uses_frozen_executable(monkeypatch: pytest.Monk
     monkeypatch.setattr(sys, "frozen", True, raising=False)
 
     cmd = build_dashboard_command(
-        python_executable="/Applications/Claude Tap.app/Contents/Resources/claude-tap/claude-tap",
+        python_executable="/Applications/Agent Tap.app/Contents/Resources/agent-tap/agent-tap",
         host="127.0.0.1",
         port=19527,
         output_dir=tmp_path,
     )
 
     assert cmd[:4] == [
-        "/Applications/Claude Tap.app/Contents/Resources/claude-tap/claude-tap",
+        "/Applications/Agent Tap.app/Contents/Resources/agent-tap/agent-tap",
         "dashboard",
         "--tap-live-port",
         "19527",
@@ -91,7 +91,7 @@ def test_build_proxy_command_starts_reverse_proxy_without_dashboard(tmp_path: Pa
     assert cmd == [
         "/usr/bin/python3",
         "-m",
-        "claude_tap",
+        "agent_tap",
         "--tap-no-launch",
         "--tap-client",
         "claude",
@@ -108,7 +108,7 @@ def test_build_proxy_command_starts_reverse_proxy_without_dashboard(tmp_path: Pa
 def test_debug_log_helpers_resolve_enable_write_and_ignore_errors(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    source_file = tmp_path / "src" / "claude_tap" / "macos_app.py"
+    source_file = tmp_path / "src" / "agent_tap" / "macos_app.py"
     source_file.parent.mkdir(parents=True)
     source_file.write_text("")
     monkeypatch.setattr(macos_app, "__file__", str(source_file))
@@ -116,7 +116,7 @@ def test_debug_log_helpers_resolve_enable_write_and_ignore_errors(
 
     log_path = macos_app._resolve_debug_log_path()
 
-    assert log_path == tmp_path / "src" / "dist" / "claude-tap-macos-debug.log"
+    assert log_path == tmp_path / "src" / "dist" / "agent-tap-macos-debug.log"
 
     macos_app._enable_debug_logging()
     macos_app._debug_log("hello debug")
@@ -200,7 +200,7 @@ def test_monitor_controller_spawns_dashboard_process(tmp_path: Path) -> None:
     assert controller.start() == "http://127.0.0.1:19527"
     assert len(spawned) == 3
     cmd, kwargs = spawned[0]
-    assert cmd[:4] == [sys.executable, "-m", "claude_tap", "dashboard"]
+    assert cmd[:4] == [sys.executable, "-m", "agent_tap", "dashboard"]
     assert kwargs["stdin"] == subprocess.DEVNULL
     assert kwargs["stdout"] == subprocess.DEVNULL
     assert kwargs["stderr"] == subprocess.DEVNULL
@@ -238,7 +238,7 @@ def test_monitor_controller_start_spawns_proxies_and_enables_global_injection(tm
     assert controller.start() == "http://127.0.0.1:19527"
 
     assert len(spawned) == 3
-    assert spawned[0][:4] == [sys.executable, "-m", "claude_tap", "dashboard"]
+    assert spawned[0][:4] == [sys.executable, "-m", "agent_tap", "dashboard"]
     assert spawned[1][3:7] == ["--tap-no-launch", "--tap-client", "claude", "--tap-port"]
     assert spawned[1][7] == "19528"
     assert spawned[2][3:7] == ["--tap-no-launch", "--tap-client", "codex", "--tap-port"]
@@ -290,7 +290,7 @@ def test_monitor_controller_reuses_healthy_proxy_instead_of_spawning_duplicate(t
 
     # Dashboard + codex spawn; the healthy claude proxy is reused, not duplicated.
     assert len(spawned) == 2
-    assert spawned[0][:4] == [sys.executable, "-m", "claude_tap", "dashboard"]
+    assert spawned[0][:4] == [sys.executable, "-m", "agent_tap", "dashboard"]
     assert spawned[1][3:7] == ["--tap-no-launch", "--tap-client", "codex", "--tap-port"]
     assert spawned[1][7] == "19529"
     # Injection still covers both ports; only owned pids are recorded.
@@ -391,7 +391,7 @@ def test_monitor_controller_open_dashboard_repairs_stale_dashboard_without_resta
     controller.open_dashboard()
 
     assert len(spawned) == 1
-    assert spawned[0][:4] == [sys.executable, "-m", "claude_tap", "dashboard"]
+    assert spawned[0][:4] == [sys.executable, "-m", "agent_tap", "dashboard"]
     assert stopped == [("127.0.0.1", 19527, "http://127.0.0.1:19527")]
     assert opened == ["http://127.0.0.1:19527"]
 
@@ -438,7 +438,7 @@ def test_monitor_controller_kills_process_that_ignores_terminate(tmp_path: Path)
             self.waits += 1
             events.append(f"wait:{timeout}")
             if self.waits == 1:
-                raise subprocess.TimeoutExpired("claude-tap", timeout)
+                raise subprocess.TimeoutExpired("agent-tap", timeout)
             return 0
 
     controller = DashboardMonitorController(host="127.0.0.1", port=19527, output_dir=tmp_path)
@@ -493,7 +493,7 @@ def test_monitor_controller_start_fails_when_dashboard_exits_immediately(tmp_pat
 def test_monitor_controller_subprocess_kwargs_include_windows_flags(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(sys, "platform", "win32")
     monkeypatch.setattr(
-        "claude_tap.process_utils.windows_no_console_subprocess_kwargs",
+        "agent_tap.process_utils.windows_no_console_subprocess_kwargs",
         lambda: {"creationflags": 123},
     )
 
@@ -701,7 +701,7 @@ def test_menu_app_start_monitor_shows_error_on_failure() -> None:
     app.start_monitor()
 
     assert calls == ["refresh"]
-    assert errors == [("Unable to start Claude Tap monitor", "port 19528 is already in use")]
+    assert errors == [("Unable to start Agent Tap monitor", "port 19528 is already in use")]
 
 
 def test_menu_app_start_monitor_success_refreshes_menu() -> None:
@@ -849,7 +849,7 @@ class FakeRuntime:
         self.methods: list[bytes] = []
 
     def objc_getClass(self, name: bytes) -> int:
-        return 0 if name == b"ClaudeTapMenuTarget" else 900
+        return 0 if name == b"AgentTapMenuTarget" else 900
 
     def objc_allocateClassPair(self, _base: int, _name: bytes, _extra: int) -> int:
         return 901
@@ -978,7 +978,7 @@ def test_menu_app_alert_helpers_use_objective_c_alerts() -> None:
 
     assert app._confirm_start_monitor() is True
     strings = set(app._objc.strings.values())
-    assert {"Title", "Details", "Start Claude Tap Monitor?", "Start Monitor", "Cancel"} <= strings
+    assert {"Title", "Details", "Start Agent Tap Monitor?", "Start Monitor", "Cancel"} <= strings
 
 
 def test_objc_rejects_non_macos(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -1050,8 +1050,8 @@ def test_main_entry_routes_macos_app_subcommand(monkeypatch: pytest.MonkeyPatch)
         called["argv"] = argv
         return 4
 
-    monkeypatch.setattr(sys, "argv", ["claude-tap", "macos-app", "--tap-no-auto-start"])
-    monkeypatch.setattr("claude_tap.macos_app.main", fake_macos_main)
+    monkeypatch.setattr(sys, "argv", ["agent-tap", "macos-app", "--tap-no-auto-start"])
+    monkeypatch.setattr("agent_tap.macos_app.main", fake_macos_main)
 
     with pytest.raises(SystemExit) as excinfo:
         main_entry()

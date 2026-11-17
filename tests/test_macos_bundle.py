@@ -8,9 +8,9 @@ from pathlib import Path
 
 import pytest
 
-from claude_tap import macos_bundle
-from claude_tap.cli import main_entry
-from claude_tap.macos_bundle import build_macos_app_bundle
+from agent_tap import macos_bundle
+from agent_tap.cli import main_entry
+from agent_tap.macos_bundle import build_macos_app_bundle
 
 
 def test_build_macos_app_bundle_writes_double_clickable_app(tmp_path: Path) -> None:
@@ -18,15 +18,15 @@ def test_build_macos_app_bundle_writes_double_clickable_app(tmp_path: Path) -> N
         output_path.write_bytes(b"native-launcher")
 
     app_path = build_macos_app_bundle(
-        tmp_path / "Claude Tap.app",
+        tmp_path / "Agent Tap.app",
         python_executable=sys.executable,
-        source_root=Path("/repo/claude-tap"),
+        source_root=Path("/repo/agent-tap"),
         compile_launcher=fake_compile,
     )
 
-    assert app_path == tmp_path / "Claude Tap.app"
+    assert app_path == tmp_path / "Agent Tap.app"
     info_path = app_path / "Contents" / "Info.plist"
-    launcher_path = app_path / "Contents" / "MacOS" / "claude-tap-macos"
+    launcher_path = app_path / "Contents" / "MacOS" / "agent-tap-macos"
     resources_path = app_path / "Contents" / "Resources"
 
     assert info_path.exists()
@@ -35,8 +35,8 @@ def test_build_macos_app_bundle_writes_double_clickable_app(tmp_path: Path) -> N
     assert os.access(launcher_path, os.X_OK)
 
     info = plistlib.loads(info_path.read_bytes())
-    assert info["CFBundleName"] == "Claude Tap"
-    assert info["CFBundleExecutable"] == "claude-tap-macos"
+    assert info["CFBundleName"] == "Agent Tap"
+    assert info["CFBundleExecutable"] == "agent-tap-macos"
     assert info["LSUIElement"] is True
 
     assert launcher_path.read_bytes() == b"native-launcher"
@@ -51,21 +51,21 @@ def test_build_macos_app_bundle_uses_native_launcher(tmp_path: Path) -> None:
         output_path.write_bytes(b"native-launcher")
 
     app_path = build_macos_app_bundle(
-        tmp_path / "Claude Tap.app",
+        tmp_path / "Agent Tap.app",
         python_executable="/usr/bin/python3",
-        source_root=Path("/repo/claude-tap"),
+        source_root=Path("/repo/agent-tap"),
         compile_launcher=fake_compile,
     )
 
-    launcher_path = app_path / "Contents" / "MacOS" / "claude-tap-macos"
+    launcher_path = app_path / "Contents" / "MacOS" / "agent-tap-macos"
     source = compiled["source"]
 
     assert compiled["output_path"] == launcher_path
     assert isinstance(source, str)
     assert "/usr/bin/python3" in source
-    assert "claude_tap" in source
+    assert "agent_tap" in source
     assert "macos-app" in source
-    assert "/repo/claude-tap" in source
+    assert "/repo/agent-tap" in source
     assert launcher_path.read_bytes() == b"native-launcher"
 
 
@@ -77,25 +77,25 @@ def test_build_macos_app_bundle_can_embed_pyinstaller_executable(tmp_path: Path)
         output_path.write_bytes(b"native-launcher")
 
     def fake_build_frozen(resources_dir: Path) -> Path:
-        executable = resources_dir / "claude-tap" / "claude-tap"
+        executable = resources_dir / "agent-tap" / "agent-tap"
         executable.parent.mkdir(parents=True)
         executable.write_bytes(b"frozen")
         return executable
 
     app_path = build_macos_app_bundle(
-        tmp_path / "Claude Tap.app",
+        tmp_path / "Agent Tap.app",
         self_contained=True,
         compile_launcher=fake_compile,
         build_frozen_executable=fake_build_frozen,
     )
 
     source = compiled["source"]
-    assert (app_path / "Contents" / "Resources" / "claude-tap" / "claude-tap").read_bytes() == b"frozen"
+    assert (app_path / "Contents" / "Resources" / "agent-tap" / "agent-tap").read_bytes() == b"frozen"
     assert "_NSGetExecutablePath" in source
-    assert "../Resources/claude-tap/claude-tap" in source
+    assert "../Resources/agent-tap/agent-tap" in source
     assert 'child_argv[1] = "macos-app";' in source
     assert '"-m"' not in source
-    assert '"claude_tap"' not in source
+    assert '"agent_tap"' not in source
 
 
 def test_build_macos_app_main_uses_installed_mode(
@@ -126,20 +126,20 @@ def test_build_macos_app_bundle_self_contained_disables_source_root(tmp_path: Pa
         output_path.write_bytes(b"native-launcher")
 
     def fake_build_frozen(resources_dir: Path) -> Path:
-        executable = resources_dir / "claude-tap" / "claude-tap"
+        executable = resources_dir / "agent-tap" / "agent-tap"
         executable.parent.mkdir(parents=True)
         executable.write_bytes(b"frozen")
         return executable
 
     app_path = build_macos_app_bundle(
-        tmp_path / "Claude Tap",
+        tmp_path / "Agent Tap",
         source_root=Path("/repo/should-not-be-used"),
         self_contained=True,
         compile_launcher=fake_compile,
         build_frozen_executable=fake_build_frozen,
     )
 
-    assert app_path == tmp_path / "Claude Tap.app"
+    assert app_path == tmp_path / "Agent Tap.app"
     assert "/repo/should-not-be-used" not in compiled["source"]
 
 
@@ -200,9 +200,9 @@ def test_ad_hoc_sign_app_uses_codesign_when_available(monkeypatch: pytest.Monkey
         lambda cmd, **_kwargs: calls.append(cmd),
     )
 
-    macos_bundle._ad_hoc_sign_app(tmp_path / "Claude Tap.app")
+    macos_bundle._ad_hoc_sign_app(tmp_path / "Agent Tap.app")
 
-    assert calls == [["/usr/bin/codesign", "--force", "--sign", "-", str(tmp_path / "Claude Tap.app")]]
+    assert calls == [["/usr/bin/codesign", "--force", "--sign", "-", str(tmp_path / "Agent Tap.app")]]
 
 
 def test_c_string_literal_escapes_quotes_backslashes_and_utf8() -> None:
@@ -221,8 +221,8 @@ def test_main_entry_routes_build_macos_app_subcommand(monkeypatch: pytest.Monkey
         called["argv"] = argv
         return 5
 
-    monkeypatch.setattr(sys, "argv", ["claude-tap", "build-macos-app", "--output", "dist/Test.app"])
-    monkeypatch.setattr("claude_tap.macos_bundle.main", fake_build_main)
+    monkeypatch.setattr(sys, "argv", ["agent-tap", "build-macos-app", "--output", "dist/Test.app"])
+    monkeypatch.setattr("agent_tap.macos_bundle.main", fake_build_main)
 
     with pytest.raises(SystemExit) as excinfo:
         main_entry()

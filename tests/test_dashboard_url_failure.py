@@ -8,9 +8,9 @@ from urllib.parse import quote_plus
 import aiohttp
 import pytest
 
-from claude_tap import dashboard
-from claude_tap.live import LiveViewerServer
-from claude_tap.trace_store import get_trace_store
+from agent_tap import dashboard
+from agent_tap.live import LiveViewerServer
+from agent_tap.trace_store import get_trace_store
 
 
 def redact_records_for_display(records: list[dict]) -> list[dict]:

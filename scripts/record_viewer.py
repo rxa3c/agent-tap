@@ -1,4 +1,4 @@
-"""Record a walkthrough of the claude-tap trace viewer using Playwright.
+"""Record a walkthrough of the agent-tap trace viewer using Playwright.
 
 Produces:
   - Video at 1440x900 in .agents/recordings/video/

@@ -59,7 +59,7 @@
   <circle cx="450" cy="200" r="250" fill="#10b981" opacity="0.02"/>
   
   <!-- Title -->
-  <text x="450" y="38" text-anchor="middle" font-size="22" font-weight="700" fill="#1e293b">claude-tap</text>
+  <text x="450" y="38" text-anchor="middle" font-size="22" font-weight="700" fill="#1e293b">agent-tap</text>
   <text x="450" y="58" text-anchor="middle" font-size="12" fill="#64748b">Transparent API Proxy for Claude Code</text>
   
   <!-- ===== COMPONENTS ===== -->
@@ -73,13 +73,13 @@
     <text x="45" y="82" text-anchor="middle" font-size="12" font-weight="600" fill="#475569">Developer</text>
   </g>
   
-  <!-- claude-tap CLI -->
+  <!-- agent-tap CLI -->
   <g transform="translate(175, 125)">
     <rect width="110" height="100" rx="16" fill="url(#cardWhite)" filter="url(#softShadow)"/>
     <rect x="18" y="16" width="74" height="45" rx="8" fill="#1e293b"/>
     <text x="55" y="35" text-anchor="middle" font-size="10" fill="#4ade80" font-family="monospace">$ tap</text>
     <rect x="25" y="43" width="40" height="12" rx="2" fill="#4ade80" opacity="0.3"/>
-    <text x="55" y="82" text-anchor="middle" font-size="12" font-weight="600" fill="#475569">claude-tap</text>
+    <text x="55" y="82" text-anchor="middle" font-size="12" font-weight="600" fill="#475569">agent-tap</text>
   </g>
   
   <!-- Claude Code -->
@@ -137,11 +137,11 @@
   
   <!-- ===== ARROWS ===== -->
   
-  <!-- Developer -> claude-tap -->
+  <!-- Developer -> agent-tap -->
   <path d="M130,175 C150,175 155,175 170,175" fill="none" stroke="url(#blue)" stroke-width="3" stroke-linecap="round"/>
   <polygon points="170,175 163,170 163,180" fill="#3b82f6"/>
   
-  <!-- claude-tap -> Claude Code -->
+  <!-- agent-tap -> Claude Code -->
   <path d="M285,175 C305,175 310,175 325,175" fill="none" stroke="url(#blue)" stroke-width="3" stroke-linecap="round"/>
   <polygon points="325,175 318,170 318,180" fill="#3b82f6"/>
   
