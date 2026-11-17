@@ -46,6 +46,7 @@ English version: [Support Matrix](support-matrix.md).
 | Qoder CLI | Qoder 登录 / `QODER_PERSONAL_ACCESS_TOKEN` / `QODER_JOB_TOKEN` | Forward proxy（Qoder 端点） | n/a | HTTP/SSE | 真实 E2E 已验证 |
 | Antigravity CLI | Antigravity 登录 | Forward proxy + `CLOUD_CODE_URL` bridge 到 `https://daily-cloudcode-pa.googleapis.com` | `CLOUD_CODE_URL` | HTTP/SSE | 手动 E2E 已验证；启动环境、Code Assist bridge 和 macOS 用户 keychain CA 自动信任已由单测覆盖 |
 | CodeBuddy CLI | CodeBuddy 登录（iOA / WeChat / Google-Github / Enterprise Domain） | 自动从 `~/.codebuddy/local_storage/` 缓存识别；默认 `https://copilot.tencent.com/v2` | `CODEBUDDY_BASE_URL` | HTTP/SSE Chat Completions | iOA 真实 E2E 已验证 |
+| WorkBuddy（macOS 桌面端，5.9.x–5.11.x） | WorkBuddy 账号登录 | Forward proxy 到账号对应的 WorkBuddy 端点（默认 `https://www.workbuddy.cn/v2`） | n/a | HTTP/SSE Chat Completions（仅 `POST */chat/completions`；账号、登录、更新和遥测流量照常转发但不记录 trace） | 单测覆盖；已在 5.9.3 和 5.11.3 上手动完成真实 E2E |
 
 ## 各客户端默认代理模式
 
@@ -70,6 +71,7 @@ English version: [Support Matrix](support-matrix.md).
 | `qoder` | `forward` | Qoder CLI 会访问多个 Qoder 服务端点，且没有可靠的单一 base URL 覆盖能力 |
 | `agy` | `forward` | Antigravity 会访问多个 Google / Antigravity 端点；claude-tap 用 `HTTPS_PROXY` 捕获辅助流量，并用 `CLOUD_CODE_URL` 捕获 Code Assist 模型流量 |
 | `codebuddy` | `reverse` | 单 provider，原生支持 `CODEBUDDY_BASE_URL` 环境变量；支持 `--settings` 环境变量注入；上游 endpoint 自动从 CodeBuddy 登录缓存识别 |
+| `workbuddy` | `forward` | Electron 桌面端在启动内置 agent CLI 前会移除 `CODEBUDDY_*`、`HTTPS_PROXY` 和 `NODE_EXTRA_CA_CERTS`，只重新注入它自己的代理设置和从钥匙串生成的 CA bundle；因此不支持 reverse 模式 |
 
 用户可以通过 `--tap-proxy-mode {reverse,forward}` 覆盖有代理的客户端。
 
@@ -145,6 +147,7 @@ strip = CLIENT_CONFIGS[client].reverse_strip_path_prefix(target)
 - `test_auto_ca_trust_*`：验证 Antigravity 会自动请求 macOS 用户 keychain CA 信任，且不需要 sudo
 - `test_macos_*_ca_command_*`：验证 CA 信任命令使用用户 login keychain 且不会调用 sudo
 - `test_codebuddy_*`：验证 CodeBuddy 注册、parse_args 默认 reverse 模式、settings 注入、forward/reverse 环境变量、`CODEBUDDY_BASE_URL` 探测，以及登录缓存读取
+- `test_workbuddy_*`（`tests/test_workbuddy_launch.py`）：验证 WorkBuddy 可执行文件解析（bundle id 校验、`WORKBUDDY_EXECUTABLE` 覆盖）、WorkBuddy 运行中时拒绝启动、forward proxy 启动环境变量、`~/.workbuddy/system-ca-bundle.pem` 过期提示，以及用假上游验证 gzip 编码的 `/v2/chat/completions` 流被正确捕获、账号流量不落库
 
 ### 手动验证（代理变更合入前）
 
@@ -203,6 +206,11 @@ uv run python -m claude_tap --tap-client pi -- \
 # CodeBuddy（登录后自动识别端点）
 uv run python -m claude_tap --tap-client codebuddy -- -p "Reply OK"
 # 验证 trace 包含 /v2/chat/completions 记录,且响应有非零 token 计数
+
+# WorkBuddy（macOS；先完全退出 WorkBuddy）
+uv run python -m claude_tap --tap-client workbuddy
+# 发送一条会触发工具调用的消息；确认 dashboard 出现 /v2/chat/completions 记录，
+# 包含请求 messages、流式回复和工具调用；账号/登录流量不应出现。
 ```
 
 ### 真实 E2E（有认证时可选）

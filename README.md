@@ -13,7 +13,7 @@
 
 Website: [Local AI Agent Trace Viewer](https://liaohch3.com/claude-tap/) · Guide: [How to view agent traces locally](docs/guides/agent-trace-viewer.md)
 
-It works with [Claude Code](https://docs.anthropic.com/en/docs/claude-code), [Codex CLI](https://github.com/openai/codex), [Codex App](https://openai.com/codex/), [Gemini CLI](https://github.com/google-gemini/gemini-cli), [Grok Build CLI](https://docs.x.ai/build/overview), [Kimi CLI](https://github.com/MoonshotAI/kimi-cli), [MiMo Code](https://mimo.xiaomi.com/en/mimocode), [OpenCode](https://opencode.ai), [OpenClaw](https://github.com/openclaw/openclaw), [Pi](https://github.com/badlogic/pi-mono/tree/main/packages/coding-agent), [Hermes Agent](https://github.com/NousResearch/hermes-agent), [Cursor CLI](https://cursor.com/cli), [Qoder CLI](https://qoder.com/cli), [Antigravity CLI](https://antigravity.google/product/antigravity-cli), and [CodeBuddy CLI](https://www.codebuddy.ai).
+It works with [Claude Code](https://docs.anthropic.com/en/docs/claude-code), [Codex CLI](https://github.com/openai/codex), [Codex App](https://openai.com/codex/), [Gemini CLI](https://github.com/google-gemini/gemini-cli), [Grok Build CLI](https://docs.x.ai/build/overview), [Kimi CLI](https://github.com/MoonshotAI/kimi-cli), [MiMo Code](https://mimo.xiaomi.com/en/mimocode), [OpenCode](https://opencode.ai), [OpenClaw](https://github.com/openclaw/openclaw), [Pi](https://github.com/badlogic/pi-mono/tree/main/packages/coding-agent), [Hermes Agent](https://github.com/NousResearch/hermes-agent), [Cursor CLI](https://cursor.com/cli), [Qoder CLI](https://qoder.com/cli), [Antigravity CLI](https://antigravity.google/product/antigravity-cli), [CodeBuddy CLI](https://www.codebuddy.ai), and [WorkBuddy](https://www.workbuddy.cn).
 
 <p align="center">
   <img src="docs/demo.gif" alt="claude-tap demo showing a real Codex trace" width="100%">
@@ -64,7 +64,7 @@ It works with [Claude Code](https://docs.anthropic.com/en/docs/claude-code), [Co
 - 🔎 **Debug behavior with evidence**: compare adjacent requests and pinpoint which prompt, message, tool, or parameter changed.
 - 📦 **Share one portable artifact**: each run writes a local trace session that can be exported to a self-contained HTML viewer for review or archiving.
 - 🔒 **Keep traces on your machine**: no hosted dashboard is required, and common auth headers are redacted before recording.
-- 🧩 **Use one workflow across clients**: trace Claude Code, Codex CLI, Codex App, Gemini CLI, Grok Build CLI, DeepSeek Harness, Kimi CLI, MiMo Code, OpenCode, OpenClaw, Pi, Hermes Agent, Cursor CLI, Qoder CLI, and CodeBuddy.
+- 🧩 **Use one workflow across clients**: trace Claude Code, Codex CLI, Codex App, Gemini CLI, Grok Build CLI, DeepSeek Harness, Kimi CLI, MiMo Code, OpenCode, OpenClaw, Pi, Hermes Agent, Cursor CLI, Qoder CLI, CodeBuddy, and WorkBuddy.
 
 ## Supported Clients
 
@@ -86,6 +86,7 @@ It works with [Claude Code](https://docs.anthropic.com/en/docs/claude-code), [Co
 | [Qoder CLI](https://qoder.com/cli) | Qoder Agent sessions through forward proxy mode |
 | [Antigravity CLI](https://antigravity.google/product/antigravity-cli) | Antigravity Agent sessions through forward proxy mode |
 | [CodeBuddy CLI](https://www.codebuddy.ai) | Tencent CodeBuddy SaaS or internal Copilot endpoint |
+| [WorkBuddy](https://www.workbuddy.cn) | macOS desktop app launched through forward proxy mode so its model requests are captured |
 
 ## Install
 
@@ -117,6 +118,9 @@ claude-tap --tap-client codex
 
 # Codex App backend request capture
 claude-tap --tap-client codexapp
+
+# WorkBuddy desktop app (macOS; quit WorkBuddy first)
+claude-tap --tap-client workbuddy
 
 # Gemini CLI
 claude-tap --tap-client gemini -- -p "hello"
@@ -549,6 +553,26 @@ claude-tap --tap-client dsh --tap-proxy-mode reverse \
 </details>
 
 <details>
+<summary>WorkBuddy examples</summary>
+
+WorkBuddy (macOS desktop app) is launched through claude-tap's forward proxy so its `POST /v2/chat/completions` model requests and streamed replies, including tool calls and the tool results carried in later requests, show up in the trace viewer. Account, login, update, and telemetry traffic is relayed but not persisted. claude-tap trusts its local CA in the current user's login keychain when needed, because WorkBuddy's bundled agent ignores `NODE_EXTRA_CA_CERTS` and uses a CA bundle built from the keychain instead.
+
+```bash
+# Quit WorkBuddy completely first (also from the menu bar icon), then:
+claude-tap --tap-client workbuddy
+
+# Override the executable when WorkBuddy is installed outside /Applications
+WORKBUDDY_EXECUTABLE=/path/to/WorkBuddy.app/Contents/MacOS/Electron claude-tap --tap-client workbuddy
+```
+
+- If WorkBuddy is already running, claude-tap stops and asks you to quit it; it never quits the app or copies its login data.
+- Only the WorkBuddy that claude-tap starts is traced. If WorkBuddy quits and comes back another way (it relaunches itself to install a downloaded update at startup, or you reopen it from the Dock), claude-tap detects this and tells you; quit that WorkBuddy and run the command again.
+- WorkBuddy caches that CA bundle at `~/.workbuddy/system-ca-bundle.pem`. If the cache was created before the claude-tap CA was trusted, claude-tap warns you; quit WorkBuddy and remove the file so WorkBuddy rebuilds it.
+- The dashboard's Trace tab shows each request as soon as it is sent and updates the reply about twice a second while it streams, including the model's thinking text before the answer starts; the finished record then replaces it. A stopped or interrupted reply keeps what was captured and is labeled Cancelled or Interrupted. The Full viewer tab updates when a reply finishes.
+
+</details>
+
+<details>
 <summary>CodeBuddy CLI examples</summary>
 
 CodeBuddy uses reverse proxy mode by default. claude-tap auto-detects the upstream from CodeBuddy's own login cache (`~/.codebuddy/local_storage/`), so iOA / WeChat / Google-Github / Enterprise-Domain login modes all work without any extra flag. When the cache is missing (e.g. before first login), it falls back to `https://copilot.tencent.com/v2`.
@@ -629,7 +653,7 @@ By default the launcher points at the current checkout; pass `--installed` if `c
 All flags are forwarded to the selected client, except these `--tap-*` ones:
 
 ```
---tap-client CLIENT      Client to launch/listen to: claude (default), agy, codex, codexapp, dsh, gemini, grok, kimi, kimi-code, mimo, opencode, openclaw, pi, hermes, cursor, qoder, or codebuddy
+--tap-client CLIENT      Client to launch/listen to: claude (default), agy, codex, codexapp, dsh, gemini, grok, kimi, kimi-code, mimo, opencode, openclaw, pi, hermes, cursor, qoder, codebuddy, or workbuddy
 --tap-target URL         Upstream API URL (default: auto per client)
 --tap-live               Start real-time viewer while the client runs (default: on)
 --tap-no-live            Disable the real-time viewer server (pre-v0.1.75 behavior)
@@ -641,7 +665,7 @@ All flags are forwarded to the selected client, except these `--tap-*` ones:
 --tap-no-launch          Only start the proxy, don't launch client
 --tap-max-traces N       Max trace sessions to keep (default: 50, 0 = unlimited)
 --tap-store-stream-events Persist raw SSE/WebSocket event arrays during capture so viewer/export output can show them (default: off)
---tap-proxy-mode MODE    Proxy mode: reverse or forward (default: reverse for claude/codex/grok/kimi/kimi-code/openclaw/codebuddy, forward for agy/codexapp/dsh/gemini/mimo/opencode/pi/hermes/qoder; cursor is transcript-only and ignores proxy MITM)
+--tap-proxy-mode MODE    Proxy mode: reverse or forward (default: reverse for claude/codex/grok/kimi/kimi-code/openclaw/codebuddy, forward for agy/codexapp/dsh/gemini/mimo/opencode/pi/hermes/qoder/workbuddy; cursor is transcript-only and ignores proxy MITM)
 --tap-trust-ca           On macOS, explicitly trust the local CA in the user login keychain before launch (agy does this automatically)
 ```
 

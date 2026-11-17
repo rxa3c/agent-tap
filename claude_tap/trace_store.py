@@ -158,7 +158,82 @@ class TraceStore:
             ).fetchone()
             record_count = int(count_row["record_count"]) if count_row is not None else next_index
             self._refresh_summary_after_append(conn, session_id, record, record_count)
+            request_id = _str_or_none(record.get("request_id"))
+            if request_id:
+                # The final record replaces its in-flight snapshot in the same
+                # transaction, so readers never see both or neither.
+                conn.execute(
+                    "DELETE FROM inflight_records WHERE session_id = ? AND request_id = ?",
+                    (session_id, request_id),
+                )
             conn.commit()
+
+    def upsert_inflight_record(self, session_id: str, record: dict[str, Any]) -> None:
+        """Store the latest snapshot of a request that has not finished yet."""
+        request_id = _str_or_none(record.get("request_id"))
+        if not request_id:
+            raise ValueError("in-flight records need a request_id")
+        payload_json = json.dumps(record, ensure_ascii=False, separators=(",", ":"))
+        updated_at = datetime.now(timezone.utc).isoformat()
+        with self._write_access() as conn:
+            conn.execute(
+                """
+                INSERT INTO inflight_records (session_id, request_id, revision, updated_at, payload_json)
+                VALUES (?, ?, 1, ?, ?)
+                ON CONFLICT (session_id, request_id) DO UPDATE SET
+                    revision = inflight_records.revision + 1,
+                    updated_at = excluded.updated_at,
+                    payload_json = excluded.payload_json
+                """,
+                (session_id, request_id, updated_at, payload_json),
+            )
+            conn.commit()
+
+    def delete_inflight_record(self, session_id: str, request_id: str) -> None:
+        with self._write_access() as conn:
+            conn.execute(
+                "DELETE FROM inflight_records WHERE session_id = ? AND request_id = ?",
+                (session_id, request_id),
+            )
+            conn.commit()
+
+    def load_inflight_records(self, session_id: str) -> list[dict[str, Any]]:
+        """Return in-flight snapshots for an active session, oldest request first."""
+        with self._read_connect() as conn:
+            rows = conn.execute(
+                """
+                SELECT i.revision, i.payload_json
+                FROM inflight_records i
+                JOIN sessions s ON s.id = i.session_id
+                WHERE i.session_id = ? AND s.status = 'active'
+                ORDER BY i.rowid
+                """,
+                (session_id,),
+            ).fetchall()
+        records: list[dict[str, Any]] = []
+        for row in rows:
+            try:
+                record = json.loads(row["payload_json"])
+            except json.JSONDecodeError:
+                continue
+            if isinstance(record, dict):
+                record["inflight_revision"] = int(row["revision"])
+                records.append(record)
+        return records
+
+    def inflight_snapshot(self) -> dict[str, tuple[int, int]]:
+        """Return session_id -> (in-flight row count, revision sum) for active sessions."""
+        with self._read_connect() as conn:
+            rows = conn.execute(
+                """
+                SELECT i.session_id, COUNT(*) AS rows_count, SUM(i.revision) AS revisions
+                FROM inflight_records i
+                JOIN sessions s ON s.id = i.session_id
+                WHERE s.status = 'active'
+                GROUP BY i.session_id
+                """
+            ).fetchall()
+        return {row["session_id"]: (int(row["rows_count"]), int(row["revisions"] or 0)) for row in rows}
 
     def replace_record_payloads(self, session_id: str, records: list[dict[str, Any]]) -> int:
         """Rewrite stored record payloads without changing ``record_count``.
@@ -274,6 +349,7 @@ class TraceStore:
                     session_id,
                 ),
             )
+            conn.execute("DELETE FROM inflight_records WHERE session_id = ?", (session_id,))
             conn.commit()
 
     def load_session_row(self, session_id: str) -> sqlite3.Row | None:
@@ -495,6 +571,7 @@ class TraceStore:
                     """,
                     (status, summary_json, session_id),
                 )
+                conn.execute("DELETE FROM inflight_records WHERE session_id = ?", (session_id,))
                 updated += 1
             if updated:
                 conn.commit()
@@ -1231,6 +1308,20 @@ class TraceStore:
         )
 
     def _create_v4_tables(self, conn: sqlite3.Connection) -> None:
+        # Additive and ignored by older readers, so no schema version bump.
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS inflight_records (
+                session_id TEXT NOT NULL,
+                request_id TEXT NOT NULL,
+                revision INTEGER NOT NULL,
+                updated_at TEXT NOT NULL,
+                payload_json TEXT NOT NULL,
+                PRIMARY KEY (session_id, request_id),
+                FOREIGN KEY (session_id) REFERENCES sessions(id) ON DELETE CASCADE
+            )
+            """
+        )
         conn.execute(
             """
             CREATE TABLE IF NOT EXISTS record_blobs (

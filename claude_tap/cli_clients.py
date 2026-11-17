@@ -50,6 +50,28 @@ _CODEX_APP_ISOLATED_PROFILE_ROOT = Path.home() / ".claude-tap" / "codex-app-prof
 _CODEX_APP_ISOLATED_PROFILE_DIR = _CODEX_APP_ISOLATED_PROFILE_ROOT / "tap"
 _CODEX_APP_PROCESS_CHATGPT_BUNDLE_RE = re.compile(r"(/[^\s]*ChatGPT\.app)(?:/|\s|$)")
 
+_WORKBUDDY_EXECUTABLE_ENV = "WORKBUDDY_EXECUTABLE"
+_WORKBUDDY_BUNDLE_ID = "com.tencent.workbuddy.mac"
+_WORKBUDDY_DEFAULT_EXECUTABLES = (Path("/Applications/WorkBuddy.app/Contents/MacOS/Electron"),)
+# Matches the Electron host, its helpers, and the bundled agent CLI/sidecar
+# processes (all run from inside the bundle). Keep this ERE-compatible for pgrep.
+_WORKBUDDY_PROCESS_RE = r"WorkBuddy\.app/Contents/"
+# WorkBuddy builds this PEM from the macOS keychains the first time it spawns
+# its agent CLI behind a proxy, then reuses it forever.
+_WORKBUDDY_SYSTEM_CA_BUNDLE = "system-ca-bundle.pem"
+# The main window is usually ready ~1.2s after spawn.
+_WORKBUDDY_ACTIVATE_INITIAL_DELAY_SECONDS = 1.5
+# Keep this short: every attempt takes focus from whatever the user switched to.
+_WORKBUDDY_ACTIVATE_ATTEMPTS = 3
+_WORKBUDDY_ACTIVATE_RETRY_SECONDS = 1.0
+# A WorkBuddy started any other way than by claude-tap has no proxy environment.
+# This happens when WorkBuddy installs a downloaded update at startup (the
+# process we spawned quits and the updater relaunches the app detached) and
+# when it is quit and reopened from the Dock.
+_WORKBUDDY_RELAUNCH_FAST_EXIT_SECONDS = 20.0
+_WORKBUDDY_RELAUNCH_WAIT_SECONDS = 10.0
+_WORKBUDDY_RELAUNCH_POLL_SECONDS = 0.5
+
 
 @dataclass(frozen=True)
 class CodexAppLaunchPlan:
@@ -154,7 +176,182 @@ def _resolve_client_executable(client: str, cfg: ClientConfig, client_cmd: str |
             if _is_codex_desktop_executable(candidate):
                 return str(candidate)
         return None
+    if client == "workbuddy":
+        for candidate in _workbuddy_executable_candidates():
+            if _is_workbuddy_executable(candidate):
+                return str(candidate)
+        return None
     return shutil.which(cfg.cmd)
+
+
+def _workbuddy_executable_candidates() -> tuple[Path, ...]:
+    """Return candidate WorkBuddy executables (``WORKBUDDY_EXECUTABLE`` first)."""
+    configured = os.environ.get(_WORKBUDDY_EXECUTABLE_ENV)
+    candidates: list[Path] = []
+    if configured:
+        candidates.append(Path(configured).expanduser())
+    if sys.platform == "darwin":
+        for executable in _WORKBUDDY_DEFAULT_EXECUTABLES:
+            candidates.append(executable)
+            candidates.append(Path.home() / executable.relative_to("/"))
+    return tuple(candidates)
+
+
+def _is_workbuddy_executable(executable: Path) -> bool:
+    """Return True for a WorkBuddy host binary.
+
+    The bundle executable is a generic ``Electron`` binary, so app bundles must
+    advertise WorkBuddy's bundle id. Bare test binaries without an
+    ``Info.plist`` remain allowed for ``WORKBUDDY_EXECUTABLE`` overrides.
+    """
+    if not executable.is_file():
+        return False
+    bundle_id = _macos_bundle_identifier_for_executable(executable)
+    if bundle_id is None:
+        return ".app/" not in executable.as_posix()
+    return bundle_id == _WORKBUDDY_BUNDLE_ID
+
+
+def _workbuddy_existing_processes() -> list[str]:
+    """Return ``pgrep -fl`` lines for running WorkBuddy host/helper/CLI processes."""
+    if sys.platform != "darwin":
+        return []
+    process_patterns = [_WORKBUDDY_PROCESS_RE]
+    configured_executable = os.environ.get(_WORKBUDDY_EXECUTABLE_ENV, "").strip()
+    if configured_executable:
+        process_patterns.append(re.escape(str(Path(configured_executable).expanduser())))
+    try:
+        result = subprocess.run(
+            ["pgrep", "-fl", f"({'|'.join(process_patterns)})"],
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=2,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return []
+    if result.returncode not in {0, 1}:
+        return []
+    current_pid = str(os.getpid())
+    lines = [line.strip() for line in result.stdout.splitlines() if line.strip()]
+    return [line for line in lines if not line.startswith(f"{current_pid} ")]
+
+
+def _workbuddy_host_pids() -> set[int]:
+    """Return PIDs of WorkBuddy host processes (the bare Electron binary, no helper args)."""
+    pids: set[int] = set()
+    for line in _workbuddy_existing_processes():
+        pid, _, command = line.partition(" ")
+        if pid.isdigit() and command.strip().endswith("/Contents/MacOS/Electron"):
+            pids.add(int(pid))
+    return pids
+
+
+async def _workbuddy_relaunched_outside_tap(spawned_pid: int, elapsed: float) -> bool:
+    """Detect a WorkBuddy host that replaced the one claude-tap spawned."""
+    wait = _WORKBUDDY_RELAUNCH_WAIT_SECONDS if elapsed < _WORKBUDDY_RELAUNCH_FAST_EXIT_SECONDS else 0.0
+    deadline = asyncio.get_running_loop().time() + wait
+    while True:
+        if _workbuddy_host_pids() - {spawned_pid}:
+            return True
+        if asyncio.get_running_loop().time() >= deadline:
+            return False
+        await asyncio.sleep(_WORKBUDDY_RELAUNCH_POLL_SECONDS)
+
+
+def _workbuddy_launch_blocked_by_running_instance() -> bool:
+    """Print guidance and return True when WorkBuddy is already running.
+
+    WorkBuddy is single-instance and keeps its agent CLI/sidecar alive, so a
+    second launch hands off to the existing processes and never inherits the
+    proxy environment. claude-tap does not quit the app or copy its login data;
+    the user must quit it normally first.
+    """
+    processes = _workbuddy_existing_processes()
+    if not processes:
+        return False
+    _print("\n⚠️  WorkBuddy is already running.")
+    _print("   A new launch would be handed to the running instance and would not use claude-tap's proxy.")
+    _print("   Quit WorkBuddy completely (WorkBuddy menu → Quit, also from the menu bar icon), then run this again.")
+    for line in processes[:3]:
+        _print(f"   {line}")
+    if len(processes) > 3:
+        _print(f"   ... {len(processes) - 3} more process(es)")
+    return True
+
+
+def _ensure_app_frontmost(pid: int) -> bool:
+    """Return True once the app with ``pid`` is frontmost; otherwise ask it to activate.
+
+    Launching the Electron binary directly (not via LaunchServices) leaves the
+    window behind the terminal. Target the exact PID so this can never launch a
+    second, unproxied instance the way ``tell application ... to activate`` would.
+    An activation requested before the window exists may not stick, so success
+    is only reported after a later call observes the app in front.
+    """
+    script = (
+        "ObjC.import('AppKit');"
+        f"var pid = {int(pid)};"
+        "var app = $.NSRunningApplication.runningApplicationWithProcessIdentifier(pid);"
+        "var front = $.NSWorkspace.sharedWorkspace.frontmostApplication;"
+        "app.isNil() ? 'missing' : (!front.isNil() && front.processIdentifier == pid) ? 'front' : "
+        "(app.activateWithOptions($.NSApplicationActivateIgnoringOtherApps), 'activated');"
+    )
+    try:
+        result = subprocess.run(
+            ["osascript", "-l", "JavaScript", "-e", script],
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=3,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return False
+    return result.returncode == 0 and result.stdout.strip() == "front"
+
+
+async def _bring_workbuddy_to_front(proc: asyncio.subprocess.Process) -> None:
+    await asyncio.sleep(_WORKBUDDY_ACTIVATE_INITIAL_DELAY_SECONDS)
+    for _ in range(_WORKBUDDY_ACTIVATE_ATTEMPTS):
+        if proc.returncode is not None:
+            return
+        if await asyncio.to_thread(_ensure_app_frontmost, proc.pid):
+            return
+        await asyncio.sleep(_WORKBUDDY_ACTIVATE_RETRY_SECONDS)
+
+
+def _workbuddy_config_dir() -> Path:
+    # Mirrors WorkBuddy's own resolveWorkbuddyConfigDir().
+    for env_key in ("WORKBUDDY_CONFIG_DIR", "CODEBUDDY_CONFIG_DIR"):
+        value = os.environ.get(env_key, "").strip()
+        if value:
+            return Path(value).expanduser()
+    return Path.home() / ".workbuddy"
+
+
+def _normalize_pem(text: str) -> str:
+    return "".join(text.split())
+
+
+def _warn_if_workbuddy_ca_bundle_is_stale(ca_cert_path: Path) -> None:
+    """Warn when WorkBuddy's cached CA bundle predates the claude-tap CA.
+
+    WorkBuddy strips ``NODE_EXTRA_CA_CERTS`` from the environment of its agent
+    CLI and substitutes this cached bundle instead, so a bundle created before
+    the claude-tap CA was trusted makes model requests fail TLS verification.
+    The cache belongs to WorkBuddy, so only report it.
+    """
+    bundle_path = _workbuddy_config_dir() / _WORKBUDDY_SYSTEM_CA_BUNDLE
+    try:
+        bundle_text = bundle_path.read_text(encoding="utf-8", errors="replace")
+        ca_text = ca_cert_path.read_text(encoding="utf-8")
+    except OSError:
+        return
+    if _normalize_pem(ca_text) in _normalize_pem(bundle_text):
+        return
+    _print(f"\n⚠️  WorkBuddy's cached CA bundle does not include the claude-tap CA: {bundle_path}")
+    _print("   WorkBuddy's agent uses this file instead of NODE_EXTRA_CA_CERTS, so model requests may fail TLS.")
+    _print("   With WorkBuddy quit, remove that file; WorkBuddy rebuilds it from the keychain on next launch.")
 
 
 def _is_codex_desktop_process_line(line: str) -> bool:
@@ -602,6 +799,27 @@ CLIENT_CONFIGS: dict[str, ClientConfig] = {
         default_target="https://copilot.tencent.com/v2",
         inject_settings_env=True,
     ),
+    "workbuddy": ClientConfig(
+        cmd="/Applications/WorkBuddy.app/Contents/MacOS/Electron",
+        label="WorkBuddy",
+        install_url="https://www.workbuddy.cn",
+        # WorkBuddy's bundled CodeBuddy agent honors CODEBUDDY_BASE_URL, but the
+        # desktop host strips CODEBUDDY_* and NODE_EXTRA_CA_CERTS before spawning
+        # it, so reverse mode cannot work. Kept only for ClientConfig shape.
+        base_url_env="CODEBUDDY_BASE_URL",
+        base_url_suffix="",
+        default_target="https://www.workbuddy.cn/v2",
+        # The host keeps HTTPS_PROXY from its launch env (it skips system proxy
+        # detection when one is set) and forwards it to the agent CLI.
+        default_proxy_mode="forward",
+        # The agent CLI trusts a CA bundle WorkBuddy builds from the keychain
+        # rather than NODE_EXTRA_CA_CERTS.
+        auto_trust_ca_macos=True,
+        forward_trace_methods=("POST",),
+        # Model calls go to ``{endpoint}/v2/chat/completions``. Account, login,
+        # update, and telemetry traffic is relayed without being persisted.
+        forward_trace_path_suffixes=("/chat/completions",),
+    ),
 }
 
 
@@ -666,6 +884,12 @@ async def run_client(
                 "/Applications, or set "
                 f"{_CODEX_APP_EXECUTABLE_ENV}=/path/to/App.app/Contents/MacOS/<Executable>.\n"
             )
+        elif client == "workbuddy":
+            _print(
+                "\nError: WorkBuddy app executable not found.\n"
+                f"Install WorkBuddy.app (bundle id {_WORKBUDDY_BUNDLE_ID}) in /Applications ({cfg.install_url}), "
+                f"or set {_WORKBUDDY_EXECUTABLE_ENV}=/path/to/WorkBuddy.app/Contents/MacOS/Electron.\n"
+            )
         else:
             _print(cfg.missing_help)
         return 1
@@ -676,6 +900,8 @@ async def run_client(
             return 1
         if codex_app_user_data_dir is None:
             codex_app_user_data_dir = launch_plan.user_data_dir
+    if client == "workbuddy" and _workbuddy_launch_blocked_by_running_instance():
+        return 1
 
     env = os.environ.copy()
     cleanup_paths: list[Path] = []
@@ -728,6 +954,8 @@ async def run_client(
         forward_base_url = cfg.reverse_base_url(port)
         for env_key in cfg.forward_base_url_envs:
             env[env_key] = forward_base_url
+        if client == "workbuddy" and ca_cert_path:
+            _warn_if_workbuddy_ca_bundle_is_stale(ca_cert_path)
         if ca_cert_path:
             env["NODE_EXTRA_CA_CERTS"] = str(ca_cert_path)
             # Codex is a Rust binary; NODE_EXTRA_CA_CERTS does not affect its TLS stack.
@@ -818,9 +1046,9 @@ async def run_client(
 
     # Give TUI children their own process group and make them the foreground
     # group so they have full terminal control (e.g. Cmd+Delete, Ctrl+U).
-    # Codex App is a GUI process with very noisy app-server logs; keep its
-    # stdio detached so claude-tap's terminal only shows capture status.
-    hide_child_output = client == "codexapp"
+    # Codex App and WorkBuddy are GUI processes with very noisy app-server logs;
+    # keep their stdio detached so claude-tap's terminal only shows capture status.
+    hide_child_output = client in {"codexapp", "workbuddy"}
     use_fg = not hide_child_output and hasattr(os, "tcsetpgrp") and sys.stdin.isatty()
 
     try:
@@ -847,6 +1075,8 @@ async def run_client(
             os.tcsetpgrp(sys.stdin.fileno(), proc.pid)
         except OSError:
             pass
+
+    activate_task = asyncio.create_task(_bring_workbuddy_to_front(proc)) if client == "workbuddy" else None
 
     # --- Signal handling: graceful Ctrl+C / Ctrl+Z ---
     loop = asyncio.get_running_loop()
@@ -884,6 +1114,8 @@ async def run_client(
     try:
         code = await proc.wait()
     finally:
+        if activate_task is not None:
+            activate_task.cancel()
         for path in cleanup_paths:
             try:
                 path.unlink(missing_ok=True)
@@ -934,6 +1166,11 @@ async def run_client(
             "claude-tap's HTTPS_PROXY/CA environment. Quit the app completely, "
             "then run this command again."
         )
+    if client == "workbuddy" and await _workbuddy_relaunched_outside_tap(proc.pid, elapsed):
+        _print("\n⚠️  WorkBuddy quit and was started again outside claude-tap.")
+        _print("   This happens when WorkBuddy installs an update at startup, or when it is reopened from the Dock.")
+        _print("   The WorkBuddy that is open now does NOT use claude-tap's proxy, so nothing is being traced.")
+        _print("   Quit WorkBuddy completely (WorkBuddy menu → Quit), then run this command again.")
     return code
 
 

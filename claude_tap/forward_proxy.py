@@ -69,6 +69,10 @@ from claude_tap.ws_proxy import (
 
 log = logging.getLogger("claude-tap")
 
+# How often a streaming response publishes its partial reconstruction. Each
+# publish rewrites one SQLite row, so keep it coarse rather than per chunk.
+INFLIGHT_UPDATE_INTERVAL_SECONDS = 0.5
+
 DEFAULT_TRACE_IGNORED_HOSTS = frozenset(
     {
         "registry.npmjs.org",
@@ -608,6 +612,15 @@ class ForwardProxyServer:
             log.info(f"{log_prefix} <- 200 capture-only ({duration_ms}ms, upstream skipped)")
             return
 
+        if should_trace and is_streaming:
+            assert turn is not None
+            pending = _build_record(
+                req_id, turn, 0, method, path, headers, req_body, 0, {}, None, upstream_base_url=upstream_base_url
+            )
+            pending["response"]["status"] = None
+            pending["stream_state"] = "waiting"
+            await self._publish_inflight(pending)
+
         # Prepare forwarding headers
         fwd_headers = filter_headers(headers)
         fwd_headers.pop("Host", None)
@@ -718,26 +731,70 @@ class ForwardProxyServer:
         is_bedrock_stream = is_bedrock_eventstream_path(path)
         reassembler = SSEReassembler(store_events=self._store_stream_events)
         raw_chunks: list[bytes] = []
+        # None means the upstream stream ended normally.
+        stream_state: str | None = None
+        # Publish the first chunk immediately, then at most once per interval.
+        last_publish = 0.0
 
         try:
             async for chunk in upstream_resp.content.iter_any():
+                # The TLS tunnel is a loopback relay, so a client that hangs up
+                # (e.g. the user stops generation) shows as a closing transport
+                # well before any write fails.
+                if client_writer.is_closing():
+                    stream_state = "client_cancelled"
+                    break
                 # Send as HTTP chunked encoding
                 chunk_header = f"{len(chunk):x}\r\n".encode()
-                client_writer.write(chunk_header + chunk + b"\r\n")
-                await client_writer.drain()
+                try:
+                    client_writer.write(chunk_header + chunk + b"\r\n")
+                    await client_writer.drain()
+                except ConnectionError:
+                    stream_state = "client_cancelled"
+                    break
                 if is_bedrock_stream:
                     raw_chunks.append(chunk)
-                else:
-                    reassembler.feed_bytes(chunk)
-        except (ConnectionError, asyncio.CancelledError):
-            pass
-
-        # Send final chunk
-        try:
-            client_writer.write(b"0\r\n\r\n")
-            await client_writer.drain()
-        except (ConnectionError, Exception):
-            pass
+                    continue
+                reassembler.feed_bytes(chunk)
+                now = time.monotonic()
+                if now - last_publish >= INFLIGHT_UPDATE_INTERVAL_SECONDS:
+                    last_publish = now
+                    await self._publish_stream_snapshot(
+                        req_id,
+                        turn,
+                        t0,
+                        method,
+                        path,
+                        req_headers,
+                        req_body,
+                        upstream_resp,
+                        reassembler,
+                        upstream_base_url,
+                    )
+        except aiohttp.ClientError as exc:
+            stream_state = "upstream_interrupted"
+            log.warning(f"{log_prefix} upstream stream interrupted: {exc!r}")
+        except ConnectionError:
+            stream_state = "upstream_interrupted"
+        except asyncio.CancelledError:
+            stream_state = "interrupted"
+        if stream_state == "client_cancelled":
+            # Drop the upstream connection so the provider stops generating too.
+            upstream_resp.close()
+        if stream_state == "upstream_interrupted":
+            # Closing without the terminating chunk tells the client the body is
+            # incomplete instead of presenting a truncated reply as finished.
+            try:
+                client_writer.close()
+            except Exception:
+                pass
+        else:
+            # Send final chunk
+            try:
+                client_writer.write(b"0\r\n\r\n")
+                await client_writer.drain()
+            except (ConnectionError, Exception):
+                pass
 
         duration_ms = int((time.monotonic() - t0) * 1000)
 
@@ -777,7 +834,57 @@ class ForwardProxyServer:
             sse_events=reassembler.events,
             upstream_base_url=upstream_base_url,
         )
+        if stream_state is not None:
+            record["stream_state"] = stream_state
+            log.info(f"{log_prefix} stream ended early: {stream_state}")
         await self._writer.write(record)
+
+    async def _publish_inflight(self, record: dict) -> None:
+        write_inflight = getattr(self._writer, "write_inflight", None)
+        if write_inflight is None:
+            return
+        try:
+            await write_inflight(record)
+        except Exception:
+            log.debug("Failed to publish in-flight trace snapshot", exc_info=True)
+
+    async def _discard_inflight(self, req_id: str) -> None:
+        discard_inflight = getattr(self._writer, "discard_inflight", None)
+        if discard_inflight is None:
+            return
+        try:
+            await discard_inflight(req_id)
+        except Exception:
+            log.debug("Failed to discard in-flight trace snapshot", exc_info=True)
+
+    async def _publish_stream_snapshot(
+        self,
+        req_id: str,
+        turn: int,
+        t0: float,
+        method: str,
+        path: str,
+        req_headers: dict[str, str],
+        req_body: dict | None,
+        upstream_resp: aiohttp.ClientResponse,
+        reassembler: SSEReassembler,
+        upstream_base_url: str,
+    ) -> None:
+        snapshot = _build_record(
+            req_id,
+            turn,
+            int((time.monotonic() - t0) * 1000),
+            method,
+            path,
+            req_headers,
+            req_body,
+            upstream_resp.status,
+            dict(upstream_resp.headers),
+            reassembler.reconstruct(),
+            upstream_base_url=upstream_base_url,
+        )
+        snapshot["stream_state"] = "streaming"
+        await self._publish_inflight(snapshot)
 
     async def _handle_non_streaming(
         self,
@@ -796,6 +903,7 @@ class ForwardProxyServer:
     ) -> None:
         """Handle a non-streaming response."""
         if _should_skip_trace_record(upstream_url, path, upstream_resp.headers, req_headers, method):
+            await self._discard_inflight(req_id)
             total_bytes = await self._relay_unrecorded_response(upstream_resp, client_writer)
             duration_ms = int((time.monotonic() - t0) * 1000)
             log.info(f"{log_prefix} <- {upstream_resp.status} ({duration_ms}ms, {total_bytes} bytes, trace skipped)")

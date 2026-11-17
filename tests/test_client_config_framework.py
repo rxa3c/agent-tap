@@ -27,6 +27,7 @@ SUPPORTED_CLIENTS = {
     "cursor",
     "qoder",
     "codebuddy",
+    "workbuddy",
 }
 
 SINGLE_REVERSE_ENV_CLIENTS = SUPPORTED_CLIENTS - {"claude", "codexapp", "gemini", "kimi-code", "openclaw"}
@@ -49,6 +50,7 @@ SUPPORTED_DEFAULT_PROXY_MODES = {
     "cursor": "forward",
     "qoder": "forward",
     "codebuddy": "reverse",
+    "workbuddy": "forward",
 }
 
 
@@ -75,7 +77,7 @@ def test_client_matrix_contains_only_supported_clients() -> None:
 def test_forward_proxy_desktop_clients_auto_trust_ca_on_macos() -> None:
     auto_trust_clients = {client for client, cfg in CLIENT_CONFIGS.items() if cfg.auto_trust_ca_macos}
 
-    assert auto_trust_clients == {"agy", "codexapp"}
+    assert auto_trust_clients == {"agy", "codexapp", "workbuddy"}
 
 
 @pytest.mark.parametrize("client", sorted(SUPPORTED_CLIENTS))

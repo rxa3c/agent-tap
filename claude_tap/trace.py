@@ -63,10 +63,37 @@ class TraceWriter:
         if self._live_server:
             await self._live_server.broadcast(record)
 
-    def _write_locked(self, record: dict) -> None:
+    async def write_inflight(self, record: dict) -> None:
+        """Publish a snapshot of an unfinished request without touching statistics.
+
+        The final ``write`` with the same ``request_id`` replaces it.
+        """
+        if self._startup_storage_error is not None:
+            return
+        async with self._lock:
+            self._apply_metadata(record)
+            try:
+                self._store.upsert_inflight_record(self.session_id, record)
+            except sqlite3.Error as exc:
+                self._record_storage_error(exc)
+
+    async def discard_inflight(self, request_id: str) -> None:
+        """Drop an in-flight snapshot whose request will not produce a trace record."""
+        if self._startup_storage_error is not None:
+            return
+        async with self._lock:
+            try:
+                self._store.delete_inflight_record(self.session_id, request_id)
+            except sqlite3.Error as exc:
+                self._record_storage_error(exc)
+
+    def _apply_metadata(self, record: dict) -> None:
         if self._metadata:
             capture = record.get("capture") if isinstance(record.get("capture"), dict) else {}
             record["capture"] = {**self._metadata, **capture}
+
+    def _write_locked(self, record: dict) -> None:
+        self._apply_metadata(record)
         try:
             self._store.append_record(self.session_id, record)
         except sqlite3.Error as exc:

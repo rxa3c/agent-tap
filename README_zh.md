@@ -13,7 +13,7 @@
 
 网站：[本地 AI Agent Trace Viewer](https://liaohch3.com/claude-tap/) · 指南：[如何本地查看 Agent traces](docs/guides/agent-trace-viewer.zh.md)
 
-它支持 [Claude Code](https://docs.anthropic.com/en/docs/claude-code)、[Codex CLI](https://github.com/openai/codex)、[Codex App](https://openai.com/codex/)、[Gemini CLI](https://github.com/google-gemini/gemini-cli)、[Grok Build CLI](https://docs.x.ai/build/overview)、[Kimi CLI](https://github.com/MoonshotAI/kimi-cli)、[MiMo Code](https://mimo.xiaomi.com/en/mimocode)、[OpenCode](https://opencode.ai)、[OpenClaw](https://github.com/openclaw/openclaw)、[Pi](https://github.com/badlogic/pi-mono/tree/main/packages/coding-agent)、[Hermes Agent](https://github.com/NousResearch/hermes-agent)、[Cursor CLI](https://cursor.com/cli)、[Qoder CLI](https://qoder.com/cli)、[Antigravity CLI](https://antigravity.google/product/antigravity-cli) 和 [CodeBuddy CLI](https://www.codebuddy.ai)。
+它支持 [Claude Code](https://docs.anthropic.com/en/docs/claude-code)、[Codex CLI](https://github.com/openai/codex)、[Codex App](https://openai.com/codex/)、[Gemini CLI](https://github.com/google-gemini/gemini-cli)、[Grok Build CLI](https://docs.x.ai/build/overview)、[Kimi CLI](https://github.com/MoonshotAI/kimi-cli)、[MiMo Code](https://mimo.xiaomi.com/en/mimocode)、[OpenCode](https://opencode.ai)、[OpenClaw](https://github.com/openclaw/openclaw)、[Pi](https://github.com/badlogic/pi-mono/tree/main/packages/coding-agent)、[Hermes Agent](https://github.com/NousResearch/hermes-agent)、[Cursor CLI](https://cursor.com/cli)、[Qoder CLI](https://qoder.com/cli)、[Antigravity CLI](https://antigravity.google/product/antigravity-cli)、[CodeBuddy CLI](https://www.codebuddy.ai) 和 [WorkBuddy](https://www.workbuddy.cn)。
 
 <p align="center">
   <img src="docs/demo_zh.gif" alt="claude-tap 演示：真实 Codex trace" width="100%">
@@ -64,7 +64,7 @@
 - 🔎 **用证据定位问题**：对比相邻请求，明确是哪段 prompt、消息、工具或参数发生了变化。
 - 📦 **留下可分享证据**：每次运行都会写入 JSONL trace，并生成自包含 HTML 查看器，方便 review 或归档。
 - 🔒 **数据留在本机**：不依赖云端 dashboard；常见认证 header 会在记录前自动脱敏。
-- 🧩 **覆盖主流编码客户端**：同一套流程可用于 Claude Code、Codex CLI、Codex App、Gemini CLI、Grok Build CLI、DeepSeek Harness、Kimi CLI、MiMo Code、OpenCode、OpenClaw、Pi、Hermes Agent、Cursor CLI、Qoder CLI、Antigravity CLI 和 CodeBuddy CLI。
+- 🧩 **覆盖主流编码客户端**：同一套流程可用于 Claude Code、Codex CLI、Codex App、Gemini CLI、Grok Build CLI、DeepSeek Harness、Kimi CLI、MiMo Code、OpenCode、OpenClaw、Pi、Hermes Agent、Cursor CLI、Qoder CLI、Antigravity CLI、CodeBuddy CLI 和 WorkBuddy。
 
 ## 支持的客户端
 
@@ -86,6 +86,7 @@
 | [Qoder CLI](https://qoder.com/cli) | 通过 forward proxy 捕获 Qoder Agent 会话 |
 | [Antigravity CLI](https://antigravity.google/product/antigravity-cli) | 通过 forward proxy 捕获 Antigravity Agent 会话 |
 | [CodeBuddy CLI](https://www.codebuddy.ai) | 腾讯 CodeBuddy SaaS 或内部 Copilot 端点 |
+| [WorkBuddy](https://www.workbuddy.cn) | 通过 forward proxy 启动 macOS 桌面 App，捕获模型请求 |
 
 ## 安装
 
@@ -117,6 +118,9 @@ claude-tap --tap-client codex
 
 # Codex App 后端请求捕获
 claude-tap --tap-client codexapp
+
+# WorkBuddy 桌面端（macOS；先退出 WorkBuddy）
+claude-tap --tap-client workbuddy
 
 # Gemini CLI
 claude-tap --tap-client gemini -- -p "hello"
@@ -541,6 +545,26 @@ claude-tap --tap-client dsh --tap-proxy-mode reverse \
 </details>
 
 <details>
+<summary>WorkBuddy 示例</summary>
+
+WorkBuddy（macOS 桌面端）会通过 claude-tap 的 forward proxy 启动，因此它发往 `POST /v2/chat/completions` 的模型请求和流式回复（包括工具调用，以及后续请求中携带的工具结果）都会进入 trace viewer。账号、登录、更新和遥测流量会照常转发，但不会落库。必要时 claude-tap 会把本地 CA 信任到当前用户的登录钥匙串，因为 WorkBuddy 内置 agent 会忽略 `NODE_EXTRA_CA_CERTS`，改用从钥匙串生成的 CA bundle。
+
+```bash
+# 先完全退出 WorkBuddy（包括菜单栏图标），然后：
+claude-tap --tap-client workbuddy
+
+# WorkBuddy 不在 /Applications 时覆盖可执行文件路径
+WORKBUDDY_EXECUTABLE=/path/to/WorkBuddy.app/Contents/MacOS/Electron claude-tap --tap-client workbuddy
+```
+
+- 如果 WorkBuddy 已在运行，claude-tap 会停止并提示你先退出；它不会替你退出 App，也不会复制登录数据。
+- 只有由 claude-tap 启动的 WorkBuddy 会被追踪。如果 WorkBuddy 退出后以其他方式重新打开（启动时安装已下载的更新而自行重启，或你从 Dock 重新打开），claude-tap 会检测到并给出提示；退出那个 WorkBuddy 后再运行一次命令即可。
+- WorkBuddy 会把上述 CA bundle 缓存在 `~/.workbuddy/system-ca-bundle.pem`。如果缓存早于 claude-tap CA 的信任时间，claude-tap 会给出提示；退出 WorkBuddy 后删除该文件，WorkBuddy 会重新生成。
+- dashboard 的 Trace 标签页会在请求发出时立即显示，生成过程中约每秒更新两次回复内容（包括正文开始前的模型思考过程），结束后由最终记录替换。被停止或中断的回复会保留已捕获内容，并标注“已取消”或“已中断”。Full viewer 标签页在回复结束后更新。
+
+</details>
+
+<details>
 <summary>CodeBuddy CLI 示例</summary>
 
 CodeBuddy 默认使用 reverse proxy。claude-tap 会自动从 CodeBuddy 自己的登录缓存（`~/.codebuddy/local_storage/`）识别上游地址，所以 iOA / WeChat / Google-Github / Enterprise-Domain 四种登录方式登录后都可以零参数启动。当缓存还不存在（例如首次登录前）时，会回退到 `https://copilot.tencent.com/v2`。
@@ -620,7 +644,7 @@ macOS 上，`claude-tap build-macos-app` 会生成本地 `Claude Tap.app`。该 
 除以下 `--tap-*` 参数外，所有参数均透传给所选客户端：
 
 ```
---tap-client CLIENT      启动或监听的客户端: claude（默认）/ agy / codex / codexapp / dsh / gemini / grok / kimi / kimi-code / mimo / opencode / openclaw / pi / hermes / cursor / qoder / codebuddy
+--tap-client CLIENT      启动或监听的客户端: claude（默认）/ agy / codex / codexapp / dsh / gemini / grok / kimi / kimi-code / mimo / opencode / openclaw / pi / hermes / cursor / qoder / codebuddy / workbuddy
 --tap-target URL         上游 API 地址（默认: 根据客户端自动选择）
 --tap-live               客户端运行时启动实时查看器（默认开启）
 --tap-no-live            关闭实时查看器（恢复 v0.1.75 之前的行为）
@@ -632,7 +656,7 @@ macOS 上，`claude-tap build-macos-app` 会生成本地 `Claude Tap.app`。该 
 --tap-no-launch          仅启动代理，不启动客户端
 --tap-max-traces N       最大保留 trace 数量（默认: 50，0 = 不限）
 --tap-store-stream-events 捕获时把原始 SSE/WebSocket event 数组写入 trace 存储，以便查看器/导出结果展示（默认关闭）
---tap-proxy-mode MODE    代理模式: reverse 或 forward（默认：claude/codex/grok/kimi/kimi-code/openclaw/codebuddy 用 reverse，agy/codexapp/dsh/gemini/mimo/opencode/pi/hermes/qoder 用 forward；cursor 为 transcript-only，不走 MITM 代理）
+--tap-proxy-mode MODE    代理模式: reverse 或 forward（默认：claude/codex/grok/kimi/kimi-code/openclaw/codebuddy 用 reverse，agy/codexapp/dsh/gemini/mimo/opencode/pi/hermes/qoder/workbuddy 用 forward；cursor 为 transcript-only，不走 MITM 代理）
 --tap-trust-ca           macOS 上显式把本地 CA 信任到当前用户 login keychain（agy 会自动执行）
 ```
 

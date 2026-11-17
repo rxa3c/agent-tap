@@ -46,6 +46,7 @@ Simplified Chinese version: [支持矩阵](support-matrix.zh.md).
 | Qoder CLI | Qoder login / `QODER_PERSONAL_ACCESS_TOKEN` / `QODER_JOB_TOKEN` | Forward proxy (Qoder endpoints) | n/a | HTTP/SSE | Real E2E verified |
 | Antigravity CLI | Antigravity login | Forward proxy + `CLOUD_CODE_URL` bridge to `https://daily-cloudcode-pa.googleapis.com` | `CLOUD_CODE_URL` | HTTP/SSE | Manual E2E verified; launch env, Code Assist bridge, and automatic macOS user-keychain CA trust are unit-tested |
 | CodeBuddy CLI | CodeBuddy login (iOA / WeChat / Google-Github / Enterprise Domain) | Auto-detected from `~/.codebuddy/local_storage/` cache; default `https://copilot.tencent.com/v2` | `CODEBUDDY_BASE_URL` | HTTP/SSE Chat Completions | Real E2E verified on iOA |
+| WorkBuddy (macOS desktop app, 5.9.x–5.11.x) | WorkBuddy account login | Forward proxy to the account's WorkBuddy endpoint (default `https://www.workbuddy.cn/v2`) | n/a | HTTP/SSE Chat Completions (`POST */chat/completions` only; account, login, update, and telemetry traffic relayed but not traced) | Unit-tested; real E2E verified manually on 5.9.3 and 5.11.3 |
 
 ## Default Proxy Mode by Client
 
@@ -71,6 +72,7 @@ Each client in `CLIENT_CONFIGS` declares a `default_proxy_mode` used when
 | `qoder` | `forward` | Qoder CLI uses multiple Qoder service endpoints and has no reliable single base URL override |
 | `agy` | `forward` | Antigravity uses multiple Google / Antigravity endpoints; claude-tap sets `HTTPS_PROXY` for auxiliary traffic and `CLOUD_CODE_URL` for Code Assist model traffic |
 | `codebuddy` | `reverse` | Single provider, native `CODEBUDDY_BASE_URL` env var; supports `--settings` env injection. Endpoint auto-detected from CodeBuddy's login cache |
+| `workbuddy` | `forward` | Electron desktop app whose host strips `CODEBUDDY_*`, `HTTPS_PROXY`, and `NODE_EXTRA_CA_CERTS` before spawning its bundled agent CLI, then re-adds only its own proxy and keychain-derived CA bundle; reverse mode is rejected |
 
 Users can override proxy-backed clients with `--tap-proxy-mode {reverse,forward}`.
 
@@ -151,6 +153,7 @@ strip = CLIENT_CONFIGS[client].reverse_strip_path_prefix(target)
 - `test_auto_ca_trust_*` — verifies Antigravity automatically requests macOS user-keychain CA trust without sudo
 - `test_macos_*_ca_command_*` — verifies CA trust commands use the user login keychain and do not invoke sudo
 - `test_codebuddy_*` — verifies CodeBuddy registration, parse_args default reverse mode, settings injection, forward/reverse env, target detection from `CODEBUDDY_BASE_URL` env, and the login-time endpoint cache reader
+- `test_workbuddy_*` (`tests/test_workbuddy_launch.py`) — verifies WorkBuddy executable resolution (bundle id check, `WORKBUDDY_EXECUTABLE` override), refusal to launch while WorkBuddy is running, forward-proxy launch env, the stale `~/.workbuddy/system-ca-bundle.pem` warning, and fake-upstream capture of a gzip-encoded `/v2/chat/completions` stream while account traffic is not persisted
 
 ### Manual (pre-merge for proxy changes)
 
@@ -209,6 +212,11 @@ uv run python -m claude_tap --tap-client pi -- \
 # CodeBuddy (auto-detected endpoint after login)
 uv run python -m claude_tap --tap-client codebuddy -- -p "Reply OK"
 # Verify the trace contains /v2/chat/completions records and the response body has non-zero token counts
+
+# WorkBuddy (macOS; quit WorkBuddy completely first)
+uv run python -m claude_tap --tap-client workbuddy
+# Send a message that triggers a tool call; verify the dashboard shows /v2/chat/completions records
+# with the request messages, streamed reply, and tool calls; account/login traffic must not appear.
 ```
 
 ### Real E2E (optional, when auth is available)

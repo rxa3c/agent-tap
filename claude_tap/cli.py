@@ -49,6 +49,7 @@ from claude_tap.cli_clients import (
     _selected_codex_provider_base_url,
     _settings_arg,
     _toml_dotted_key_segment,
+    _workbuddy_launch_blocked_by_running_instance,
     run_client,
 )
 from claude_tap.cli_output import print_status as _print
@@ -135,6 +136,13 @@ class _LazyTraceWriter:
 
     async def write_next_turn(self, record: dict) -> None:
         await self._ensure_writer().write_next_turn(record)
+
+    async def write_inflight(self, record: dict) -> None:
+        await self._ensure_writer().write_inflight(record)
+
+    async def discard_inflight(self, request_id: str) -> None:
+        if self._writer is not None:
+            await self._writer.discard_inflight(request_id)
 
     def close(self) -> None:
         if self._writer is not None:
@@ -339,6 +347,8 @@ async def _async_main(args: argparse.Namespace) -> int:
             return 1
         codex_app_preflighted = True
         codex_app_user_data_dir = launch_plan.user_data_dir
+    if args.client == "workbuddy" and not args.no_launch and _workbuddy_launch_blocked_by_running_instance():
+        return 1
 
     ca_cert_path: Path | None = None
     ca_key_path: Path | None = None
@@ -721,6 +731,10 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
             "  # Launch Codex App through the forward proxy to capture backend HTTP/WebSocket requests\n"
             "  claude-tap --tap-client codexapp\n"
             "\n"
+            "workbuddy (macOS desktop app):\n"
+            "  # Quit WorkBuddy first; captures /v2/chat/completions through the forward proxy\n"
+            "  claude-tap --tap-client workbuddy\n"
+            "\n"
             "kimi cli (legacy kimi-cli; uses shell KIMI_BASE_URL):\n"
             "  claude-tap --tap-client kimi\n"
             "  claude-tap --tap-client kimi -- --thinking\n"
@@ -855,7 +869,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help=(
             "'reverse' sets provider base URL, 'forward' sets HTTPS_PROXY with CONNECT/TLS termination. "
             "Default depends on the client: 'reverse' for claude/codex/grok/kimi/kimi-code/openclaw/codebuddy, "
-            "'forward' for agy/codexapp/dsh/gemini/mimo/opencode/pi/hermes/qoder. "
+            "'forward' for agy/codexapp/dsh/gemini/mimo/opencode/pi/hermes/qoder/workbuddy. "
             "Ignored for transcript-only clients such as cursor."
         ),
     )
@@ -995,8 +1009,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
             args.target = detector() if detector else client_cfg.default_target
     if args.proxy_mode is None:
         args.proxy_mode = client_cfg.default_proxy_mode
-    if args.client == "codexapp" and args.proxy_mode != "forward":
-        tap_parser.error("--tap-client codexapp only supports forward proxy mode")
+    if args.client in {"codexapp", "workbuddy"} and args.proxy_mode != "forward":
+        tap_parser.error(f"--tap-client {args.client} only supports forward proxy mode")
     if args.trust_ca and (client_cfg.transcript_only or args.proxy_mode != "forward"):
         tap_parser.error("--tap-trust-ca only applies to forward proxy mode")
     if client_cfg.transcript_only and args.export_prompt:

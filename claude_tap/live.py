@@ -25,6 +25,7 @@ from claude_tap.dashboard import (
     list_trace_sessions,
     load_trace_session,
     read_dashboard_template,
+    redact_dashboard_records,
     redact_dashboard_summary,
 )
 from claude_tap.history import delete_trace_history, migrate_legacy_traces
@@ -47,6 +48,9 @@ DEFAULT_SESSION_PAGE_LIMIT = 100
 MAX_SESSION_PAGE_LIMIT = 500
 
 _DASHBOARD_QUIT_TOKEN_HEADER = "X-Claude-Tap-Dashboard-Token"
+# In-flight snapshots are published every ~0.5s by the proxy, so poll a little
+# faster than that. Session-level refreshes reuse the same tick.
+_DASHBOARD_WATCH_INTERVAL_SECONDS = 0.25
 
 
 def _split_host_port(value: str) -> tuple[str, int | None]:
@@ -211,6 +215,7 @@ class LiveViewerServer:
         self._stop_lock = asyncio.Lock()
         self._dashboard_watch_task: asyncio.Task | None = None
         self._dashboard_snapshot: dict[str, tuple[int, str]] = {}
+        self._inflight_snapshot: dict[str, tuple[int, int]] = {}
         self._dashboard_quit_token = secrets.token_urlsafe(32)
 
     async def start(self) -> int:
@@ -239,6 +244,7 @@ class LiveViewerServer:
         app.router.add_delete("/api/sessions", self._handle_delete_sessions)
         app.router.add_delete("/api/sessions/{session_id}", self._handle_delete_session)
         app.router.add_get("/api/sessions/{session_id}/records", self._handle_session_records)
+        app.router.add_get("/api/sessions/{session_id}/inflight", self._handle_session_inflight)
         app.router.add_get("/api/sessions/{session_id}/html", self._handle_session_html_compat)
         app.router.add_get("/api/sessions/{session_id}/export/jsonl", self._handle_export_jsonl)
         app.router.add_get("/api/sessions/{session_id}/export/compact", self._handle_export_compact)
@@ -257,6 +263,7 @@ class LiveViewerServer:
 
         if self.dashboard_mode:
             self._dashboard_snapshot = dashboard_trace_snapshot()
+            self._inflight_snapshot = ensure_trace_store().inflight_snapshot()
             self._dashboard_watch_task = asyncio.create_task(self._watch_dashboard_store())
 
         return self._actual_port
@@ -567,6 +574,16 @@ class LiveViewerServer:
         session["records"] = [attach_cost_to_record(record) for record in session.get("records") or []]
         return web.json_response(session)
 
+    async def _handle_session_inflight(self, request: web.Request) -> web.Response:
+        """Return snapshots of requests that are still streaming in an active session."""
+        session_id = request.match_info["session_id"]
+        store = ensure_trace_store()
+        if store.load_session_row(session_id) is None:
+            return web.json_response({"error": "Session not found"}, status=404)
+        with dashboard_redaction_scope():
+            records = redact_dashboard_records(store.load_inflight_records(session_id))
+        return web.json_response({"session_id": session_id, "records": records})
+
     async def _handle_session_html_compat(self, request: web.Request) -> web.Response:
         return await self._session_html_response(request.match_info["session_id"])
 
@@ -751,10 +768,10 @@ class LiveViewerServer:
         )
 
     async def _watch_dashboard_store(self) -> None:
-        """Poll SQLite and notify dashboard clients when history changes."""
+        """Poll SQLite and notify dashboard clients when history or in-flight requests change."""
         while not self._shutdown_event.is_set():
             try:
-                await asyncio.wait_for(self._shutdown_event.wait(), timeout=1)
+                await asyncio.wait_for(self._shutdown_event.wait(), timeout=_DASHBOARD_WATCH_INTERVAL_SECONDS)
             except asyncio.TimeoutError:
                 pass
             if self._shutdown_event.is_set():
@@ -763,6 +780,16 @@ class LiveViewerServer:
             if snapshot != self._dashboard_snapshot:
                 self._dashboard_snapshot = snapshot
                 await self._broadcast_dashboard_event({"type": "refresh"})
+            inflight = ensure_trace_store().inflight_snapshot()
+            if inflight != self._inflight_snapshot:
+                changed = {
+                    session_id
+                    for session_id in inflight.keys() | self._inflight_snapshot.keys()
+                    if inflight.get(session_id) != self._inflight_snapshot.get(session_id)
+                }
+                self._inflight_snapshot = inflight
+                for session_id in sorted(changed):
+                    await self._broadcast_dashboard_event({"type": "inflight", "session_id": session_id})
 
     async def _broadcast_dashboard_event(self, payload: dict) -> None:
         if not self._dashboard_clients:

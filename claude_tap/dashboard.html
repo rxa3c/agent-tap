@@ -581,6 +581,7 @@ body.detail-route .main {
   animation: spin .8s linear infinite;
   flex: 0 0 auto;
 }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
@@ -799,6 +800,12 @@ body.detail-route .detail-inspector-bar {
 .badge.active { background: var(--green-bg); color: var(--green); }
 .badge.error { background: var(--red-bg); color: var(--red); }
 .badge.empty { background: var(--amber-bg); color: var(--amber); }
+.badge.streaming { background: var(--green-bg); color: var(--green); animation: pulse 1.6s ease-in-out infinite; }
+.thinking-block { margin-top: 8px; font-size: 12px; color: var(--text-secondary); }
+.thinking-block summary { cursor: pointer; font-family: var(--mono); }
+.thinking-block .thinking-text { margin-top: 6px; white-space: pre-wrap; word-break: break-word; max-height: 260px; overflow-y: auto; }
+[data-inflight] .msg.user .content-block { max-height: 140px; overflow-y: auto; }
+.tool-call-line { margin-top: 6px; font-family: var(--mono); font-size: 12px; color: var(--text-secondary); white-space: pre-wrap; word-break: break-word; }
 .records { display: grid; gap: 8px; }
 .section {
   margin-bottom: 0; border: 1px solid var(--border);
@@ -1154,6 +1161,11 @@ const state = {
 	  detailRecordsLoaded: 0,
 	  detailRecordTotal: 0,
 	  detailFingerprint: "",
+	  detailRequestIds: [],
+	  inflightSessionId: null,
+	  inflightRecords: [],
+	  inflightFetching: false,
+	  inflightFetchQueued: false,
 	  detailSession: null,
 	};
 
@@ -1287,6 +1299,13 @@ const DASHBOARD_I18N = {
 	    full_viewer: "Full viewer",
     request_empty: "Request body has no user-facing message.",
     response_empty: "Response body has no assistant text.",
+    stream_waiting: "Waiting for response",
+    stream_streaming: "Generating",
+    thinking: "Thinking",
+    chars: "{count} chars",
+    stream_client_cancelled: "Cancelled",
+    stream_upstream_interrupted: "Interrupted",
+    stream_interrupted: "Interrupted",
     request: "Request",
     response: "Response",
     json: "JSON",
@@ -1394,6 +1413,13 @@ const DASHBOARD_I18N = {
 	    full_viewer: "完整 Viewer",
     request_empty: "请求体里没有面向用户的消息。",
     response_empty: "响应体里没有 assistant 文本。",
+    stream_waiting: "等待响应",
+    stream_streaming: "生成中",
+    thinking: "思考过程",
+    chars: "{count} 字",
+    stream_client_cancelled: "已取消",
+    stream_upstream_interrupted: "已中断",
+    stream_interrupted: "已中断",
     request: "请求",
     response: "响应",
     json: "JSON",
@@ -2155,6 +2181,7 @@ async function loadSession(sessionId, {preserveLoaded = false} = {}) {
     const payload = await fetchJSON(`/api/sessions/${encodeURIComponent(sessionId)}/records?offset=0&limit=${limit}`);
     if (state.selectedSessionId !== sessionId) return;
     renderDetail(payload.session, payload.records || []);
+    refreshInflight(sessionId).catch(console.error);
   } catch (error) {
     if (state.selectedSessionId !== sessionId) return;
     showDetailView();
@@ -2196,6 +2223,11 @@ async function loadMoreSessionRecords(session, records, button) {
   state.detailRecordTotal = totalRecords;
   state.detailFingerprint = sessionDetailFingerprint(session);
   state.detailSession = session;
+  state.detailRequestIds = records.map(record => record.request_id).filter(Boolean);
+  if (state.inflightSessionId !== session.id) {
+    state.inflightSessionId = session.id;
+    state.inflightRecords = [];
+  }
   $("#detail-title").textContent = t("session_details", {agent: session.agent || t("session_detail")});
   $("#detail-subtitle").textContent = session.legacy_rel_path || session.id || "";
   updateTracePathBar(session);
@@ -2219,7 +2251,8 @@ async function loadMoreSessionRecords(session, records, button) {
 	    </div>
     <div id="raw-tab" class="${state.activeTab === "raw" ? "" : "hidden"}">
       ${hasHiddenRecords ? `<div class="detail-fallback-note">${esc(t("limited_records", {shown: records.length, total: totalRecords}))}</div>` : ""}
-      <div class="records">${records.map((record, index) => renderRecord(record, index)).join("") || emptyRecord()}</div>
+      <div class="records">${records.map((record, index) => renderRecord(record, index)).join("") || (state.inflightRecords.length ? "" : emptyRecord())}</div>
+      <div class="records" data-inflight-records></div>
       ${hasHiddenRecords ? `<div class="detail-load-more"><button class="load-more-btn" type="button" data-load-more>${esc(t("load_more_records"))}</button></div>` : ""}
     </div>
   `;
@@ -2246,6 +2279,40 @@ async function loadMoreSessionRecords(session, records, button) {
   document.querySelectorAll("[data-copy-path]").forEach(button => {
     button.addEventListener("click", () => navigator.clipboard?.writeText(button.dataset.copyPath || ""));
   });
+  renderInflight();
+}
+
+// Requests still streaming live in a separate list so updating them never
+// re-renders persisted records. A final record replaces its snapshot by request_id.
+function renderInflight() {
+  const container = document.querySelector("[data-inflight-records]");
+  if (!container || state.inflightSessionId !== state.detailSessionId) return;
+  const persisted = new Set(state.detailRequestIds);
+  const pending = state.inflightRecords.filter(record => !persisted.has(record.request_id));
+  container.innerHTML = pending.map((record, index) => renderRecord(record, `inflight-${index}`, {inflight: true})).join("");
+  // Re-rendering resets scroll, so keep the newest thinking text in view.
+  container.querySelectorAll(".thinking-text").forEach(element => { element.scrollTop = element.scrollHeight; });
+}
+
+async function refreshInflight(sessionId) {
+  if (state.inflightFetching) {
+    state.inflightFetchQueued = true;
+    return;
+  }
+  state.inflightFetching = true;
+  try {
+    const payload = await fetchJSON(`/api/sessions/${encodeURIComponent(sessionId)}/inflight`);
+    if (state.selectedSessionId !== sessionId || state.detailSessionId !== sessionId) return;
+    state.inflightSessionId = sessionId;
+    state.inflightRecords = Array.isArray(payload.records) ? payload.records : [];
+    renderInflight();
+  } finally {
+    state.inflightFetching = false;
+    if (state.inflightFetchQueued) {
+      state.inflightFetchQueued = false;
+      if (state.selectedSessionId === sessionId) refreshInflight(sessionId).catch(console.error);
+    }
+  }
 }
 
 function detailAlternateTab() {
@@ -2301,23 +2368,75 @@ function updateDetailI18n(session) {
   });
 }
 
-function renderRecord(record, index) {
+function streamStateBadge(record) {
+  const stateName = record.stream_state;
+  if (!stateName) return "";
+  const live = stateName === "waiting" || stateName === "streaming";
+  const label = t(`stream_${stateName}`);
+  return `<span class="badge ${live ? "streaming" : "empty"}" data-stream-state="${esc(stateName)}">${esc(label)}</span>`;
+}
+
+function toolCallsText(body) {
+  if (!body || typeof body !== "object") return "";
+  const lines = [];
+  const seen = new Set();
+  for (const choice of Array.isArray(body.choices) ? body.choices : []) {
+    for (const call of Array.isArray(choice?.message?.tool_calls) ? choice.message.tool_calls : []) {
+      const fn = call?.function || {};
+      if (call?.id) seen.add(call.id);
+      lines.push(`→ ${fn.name || "tool"} ${fn.arguments || ""}`.trim());
+    }
+  }
+  for (const block of Array.isArray(body.content) ? body.content : []) {
+    if (block?.type !== "tool_use" || seen.has(block.id)) continue;
+    lines.push(`→ ${block.name || "tool"} ${block.input ? JSON.stringify(block.input) : ""}`.trim());
+  }
+  return lines.join("\n");
+}
+
+function thinkingText(body) {
+  if (!body || typeof body !== "object") return "";
+  const parts = [];
+  for (const choice of Array.isArray(body.choices) ? body.choices : []) {
+    const reasoning = choice?.message?.reasoning_content || choice?.delta?.reasoning_content;
+    if (typeof reasoning === "string" && reasoning) parts.push(reasoning);
+  }
+  // Chat-completions bodies mirror reasoning into Anthropic-shape thinking blocks.
+  if (!parts.length) {
+    for (const block of Array.isArray(body.content) ? body.content : []) {
+      if (block?.type === "thinking" && typeof block.thinking === "string" && block.thinking) parts.push(block.thinking);
+    }
+  }
+  return parts.join("\n");
+}
+
+function renderThinking(text, open) {
+  if (!text) return "";
+  const count = t("chars", {count: text.length.toLocaleString()});
+  return `<details class="thinking-block"${open ? " open" : ""}><summary>${esc(t("thinking"))} · ${esc(count)}</summary><div class="thinking-text">${esc(text)}</div></details>`;
+}
+
+function renderRecord(record, index, {inflight = false} = {}) {
   const request = record.request || {};
   const response = record.response || {};
   const userText = requestText(request.body) || t("request_empty");
-  const responseText = responseTextFromRecord(record) || response.error || t("response_empty");
+  const toolText = toolCallsText(response.body);
+  const reasoningText = thinkingText(response.body);
+  const responseText = responseTextFromRecord(record) || response.error || (toolText || reasoningText || inflight ? "" : t("response_empty"));
   const status = response.status ?? "";
   const path = request.path || "";
   const jsonId = `json-${index}`;
   const statusClass = Number(status) >= 400 ? "error" : "";
+  const statusBadge = inflight && !status ? "" : `<span class="badge ${statusClass}">${esc(status || t("ok"))}</span>`;
   return `
-    <article class="section">
+    <article class="section" data-request-id="${esc(record.request_id || "")}"${inflight ? " data-inflight" : ""}>
       <div class="section-header">
         <span class="chevron">&#9654;</span>
         <span class="title">Turn ${esc(record.turn ?? index + 1)}</span>
-        <span class="badge ${statusClass}">${esc(status || t("ok"))}</span>
+        ${statusBadge}
+        ${streamStateBadge(record)}
         <span class="path">${esc(path)}</span>
-        <button class="json-btn" data-json-toggle="${jsonId}">${esc(t("json"))}</button>
+        ${inflight ? "" : `<button class="json-btn" data-json-toggle="${jsonId}">${esc(t("json"))}</button>`}
       </div>
       <div class="section-body">
         <div class="conversation">
@@ -2327,10 +2446,12 @@ function renderRecord(record, index) {
           </div>
           <div class="msg assistant">
             <span class="msg-role">${esc(t("response"))}</span>
+            ${renderThinking(reasoningText, inflight && !responseText)}
             <div class="content-block">${esc(responseText)}</div>
+            ${toolText ? `<div class="tool-call-line">${esc(toolText)}</div>` : ""}
           </div>
         </div>
-        <div id="${jsonId}" class="json-view"><pre data-json-index="${index}"></pre></div>
+        ${inflight ? "" : `<div id="${jsonId}" class="json-view"><pre data-json-index="${index}"></pre></div>`}
       </div>
     </article>
   `;
@@ -2340,12 +2461,23 @@ function emptyRecord() {
   return `<div class="empty">${esc(t("empty_session"))}</div>`;
 }
 
+function systemPromptText(body) {
+  const parts = [contentText(body.system)];
+  for (const message of body.messages) {
+    if (message && (message.role === "system" || message.role === "developer")) parts.push(contentText(message.content));
+  }
+  return parts.filter(Boolean).join("\n\n");
+}
+
 function requestText(body) {
   if (typeof body === "string") return body;
   if (!body || typeof body !== "object") return "";
   if (Array.isArray(body.messages)) {
+    // Responses-style bodies already carry their system prompt inside `input`;
+    // show it for message-style bodies too so both read the same.
     const message = body.messages.find(item => item && item.role === "user");
-    if (message) return contentText(message.content);
+    const parts = [systemPromptText(body), message ? contentText(message.content) : ""].filter(Boolean);
+    if (parts.length) return parts.join("\n\n");
   }
   const input = contentText(body.input);
   if (input) return input;
@@ -2425,6 +2557,18 @@ function partsText(parts) {
 	  events.addEventListener("refresh", () => {
 	    if (state.quittingDashboard) return;
 	    refreshSessions({preserveSelection: true, silent: true}).catch(console.error);
+	  });
+	  events.addEventListener("inflight", event => {
+	    if (state.quittingDashboard) return;
+	    let sessionId = null;
+	    try {
+	      sessionId = JSON.parse(event.data || "{}").session_id;
+	    } catch (error) {
+	      return;
+	    }
+	    if (sessionId && state.view === "detail" && sessionId === state.selectedSessionId && state.detailSessionId === sessionId) {
+	      refreshInflight(sessionId).catch(console.error);
+	    }
 	  });
 	  events.addEventListener("record", () => {
 	    if (state.quittingDashboard) return;

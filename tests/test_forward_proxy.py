@@ -36,6 +36,9 @@ class _MemoryWriter:
     async def drain(self) -> None:
         return None
 
+    def is_closing(self) -> bool:
+        return False
+
 
 @pytest.mark.parametrize(
     ("method", "path", "expected"),
