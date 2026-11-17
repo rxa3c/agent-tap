@@ -135,8 +135,7 @@ def main() -> int:
         [
             sys.executable,
             "-c",
-            "import sys; sys.argv=['agent-tap','monitor-restore']; "
-            "from agent_tap.cli import main_entry; main_entry()",
+            "import sys; sys.argv=['agent-tap','monitor-restore']; from agent_tap.cli import main_entry; main_entry()",
         ],
         env={**os.environ, "HOME": str(tmp), "CODEX_HOME": str(tmp / ".codex")},
         capture_output=True,
