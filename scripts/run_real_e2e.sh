@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Run a real Claude E2E flow through claude-tap forward proxy mode without tmux.
+# Run a real Claude E2E flow through agent-tap forward proxy mode without tmux.
 # Usage:
 #   scripts/run_real_e2e.sh
 # Env:
@@ -23,12 +23,12 @@ fi
 
 TS="$(date +%s)"
 TRACE_DIR="/tmp/ctap-real-e2e-$TS"
-RUN_LOG="/tmp/claude-tap-recordings/real-e2e-$TS.log"
+RUN_LOG="/tmp/agent-tap-recordings/real-e2e-$TS.log"
 PROMPT_ONE="${PROMPT_ONE:-Reply with exactly: REAL_E2E_TURN_ONE_OK}"
 PROMPT_TWO="${PROMPT_TWO:-What was the exact text I asked you to reply with in the previous turn?}"
 CLAUDE_ARGS="${CLAUDE_ARGS:-}"
 
-mkdir -p "$TRACE_DIR" /tmp/claude-tap-recordings
+mkdir -p "$TRACE_DIR" /tmp/agent-tap-recordings
 
 run_turn() {
   local prompt="$1"
@@ -41,7 +41,7 @@ run_turn() {
     claude_args=($CLAUDE_ARGS)
   fi
   local cmd=(
-    uv run python -m claude_tap
+    uv run python -m agent_tap
     --tap-output-dir "$TRACE_DIR"
     --tap-proxy-mode forward
     --
@@ -66,7 +66,7 @@ import json
 import sys
 from pathlib import Path
 
-from claude_tap import _generate_html_viewer
+from agent_tap import _generate_html_viewer
 
 trace_dir = Path(sys.argv[1])
 p1 = sys.argv[2]

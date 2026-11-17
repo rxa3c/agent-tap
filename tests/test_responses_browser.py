@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-from claude_tap.viewer import _generate_html_viewer
+from agent_tap.viewer import _generate_html_viewer
 from tests.conftest import playwright_skip_reason
 
 _pw_skip = playwright_skip_reason()
@@ -2013,7 +2013,7 @@ def test_viewer_warns_for_tool_result_only_responses_continuation(responses_page
               {
                 type: 'function_call_output',
                 call_id: 'call_123',
-                output: 'name = "claude-tap"'
+                output: 'name = "agent-tap"'
               }
             ],
             prompt_cache_key: 'cache_tool_result'
@@ -2022,7 +2022,7 @@ def test_viewer_warns_for_tool_result_only_responses_continuation(responses_page
             id: 'resp_tool_current',
             previous_response_id: 'resp_tool_previous',
             output: [
-              { type: 'message', role: 'assistant', content: [{ type: 'output_text', text: 'claude-tap' }] }
+              { type: 'message', role: 'assistant', content: [{ type: 'output_text', text: 'agent-tap' }] }
             ],
             usage: { input_tokens: 2, output_tokens: 3 }
           };
@@ -2036,4 +2036,4 @@ def test_viewer_warns_for_tool_result_only_responses_continuation(responses_page
     assert "previous_response_id but no captured user message history" in detail_text
     assert "resp_tool_previous" in detail_text
     assert "cache_tool_result" in detail_text
-    assert "claude-tap" in detail_text
+    assert "agent-tap" in detail_text

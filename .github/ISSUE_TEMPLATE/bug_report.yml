@@ -1,5 +1,5 @@
 name: Bug report
-description: Report a reproducible problem with claude-tap.
+description: Report a reproducible problem with agent-tap.
 title: "bug: "
 labels: ["bug"]
 body:
@@ -19,8 +19,8 @@ body:
   - type: input
     id: version
     attributes:
-      label: claude-tap version
-      description: Output of `claude-tap --version` or package version.
+      label: agent-tap version
+      description: Output of `agent-tap --version` or package version.
       placeholder: "0.1.39"
     validations:
       required: true

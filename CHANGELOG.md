@@ -26,7 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fix Dashboard records and HTML viewer HTTP 500 errors caused by `urlsplit()` `ValueError`, hiding the affected display strings and response text previews while retaining stored captures.
 - Ignore object key order in viewer parameter diffs and sort displayed JSON to highlight actual value changes.
-- Preserve wrapped-client stdout for every mode by routing claude-tap operational output to stderr.
+- Preserve wrapped-client stdout for every mode by routing agent-tap operational output to stderr.
 - Capture Anthropic-protocol requests (`/v1/messages`) when dsh uses an Anthropic provider.
 - Avoid double-counting cached input tokens in dashboard session totals.
 
@@ -402,7 +402,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add `--tap-no-live` to disable the live viewer server and restore the pre-v0.1.75 default behavior for scripts, CI, remote shells, or other non-interactive runs.
 
 ### Changed
-- **Breaking change:** the live viewer now starts by default when `claude-tap` runs a client, so users can watch trace records while the agent is still running (#192).
+- **Breaking change:** the live viewer now starts by default when `agent-tap` runs a client, so users can watch trace records while the agent is still running (#192).
 - `--tap-no-open` now prevents both the live viewer and the generated HTML viewer from auto-opening in a browser (#192).
 - Add Gemini LLM paths to the primary viewer path filter (#196).
 - Write completed WebSocket traces immediately (#195).
@@ -604,7 +604,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.37] - 2026-04-29
 
 ### Fixed
-- Unbreak `claude-tap` on Windows.
+- Unbreak `agent-tap` on Windows.
 
 ## [0.1.36] - 2026-04-28
 
@@ -821,7 +821,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.5] - 2026-02-18
 
 ### Added
-- `claude-tap export` command to export trace JSONL to Markdown or JSON format.
+- `agent-tap export` command to export trace JSONL to Markdown or JSON format.
 - `--tap-live` flag for SSE-based real-time trace viewer.
 - `--tap-live-port` flag to choose the live-viewer port.
 - `--tap-open` flag to auto-open HTML viewer after exit.
@@ -833,7 +833,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Refactored monolithic `__init__.py` into focused modules (`sse.py`, `trace.py`, `live.py`, `proxy.py`, `viewer.py`, `cli.py`).
 - Migrated tests to pytest with a structured `tests/` layout.
-- Entry point changed to `claude_tap.cli:main_entry` (public API unchanged).
+- Entry point changed to `agent_tap.cli:main_entry` (public API unchanged).
 
 ### Removed
 - `anthropic` dependency (SSE reassembly uses built-in implementation).

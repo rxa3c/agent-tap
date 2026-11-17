@@ -21,7 +21,7 @@
 
 - 修复 `urlsplit()` 抛出 `ValueError` 导致 Dashboard 记录接口和 HTML 查看器返回 HTTP 500 的问题；隐藏受影响的展示文本和预览，保留存储的原始记录。
 - 参数差异比较忽略对象键顺序，并对展示的 JSON 排序以突出实际值变化。
-- 将 claude-tap 的运行提示输出到 stderr，确保各模式均保留被包装客户端的 stdout。
+- 将 agent-tap 的运行提示输出到 stderr，确保各模式均保留被包装客户端的 stdout。
 - dsh 使用 Anthropic 供应商时抓取 Anthropic 协议请求（`/v1/messages`）。
 - 避免 Dashboard 会话 token 总数重复计算缓存输入。
 

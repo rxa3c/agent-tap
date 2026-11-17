@@ -9,8 +9,8 @@ ChatGPT subscription and the reverse proxy target
 - Codex exit code: 0
 - Exported viewer: `/tmp/windows-shim-codex-e2e.html` (local only)
 - Screenshot: `codex-real-trace.png`
-- Windows reproduction: <https://github.com/liaohch3/claude-tap/actions/runs/29195283902>
-- Windows success matrix: <https://github.com/liaohch3/claude-tap/actions/runs/29195896481>
+- Windows reproduction: upstream run 29195283902
+- Windows success matrix: upstream run 29195896481
 
 The prompt required Codex to inspect the worktree, `pyproject.toml`, and the
 latest two commits with shell tools, then report the project metadata and the

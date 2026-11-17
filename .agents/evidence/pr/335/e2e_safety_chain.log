@@ -1,4 +1,4 @@
-HOME=/var/folders/zk/rd35z49x7jj7_j48_zq3jh3c0000gn/T/claude-tap-e2e-8pjad16s
+HOME=/var/folders/zk/rd35z49x7jj7_j48_zq3jh3c0000gn/T/agent-tap-e2e-8pjad16s
 claude sha=178e77b3c57ab72b… mode=0o600
 codex  sha=551461707325d546… mode=0o600
 
@@ -21,7 +21,7 @@ codex  sha=551461707325d546… mode=0o600
   [PASS] config.toml restored with original perms
   [PASS] config.toml backup removed
 
-== Step 6: force-quit while active -> claude-tap monitor-restore ==
+== Step 6: force-quit while active -> agent-tap monitor-restore ==
   [PASS] state present after simulated force-quit (injection left behind)
   [PASS] config still injected pre-restore
   [PASS] monitor-restore exited 0 (got 0)

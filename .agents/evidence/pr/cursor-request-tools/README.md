@@ -19,7 +19,7 @@ uv run python scripts/check_screenshots.py .agents/evidence/pr/cursor-request-to
 The seed script:
 
 1. Copies the real nested transcript
-   `~/.cursor/projects/Users-youngcan-claude-tap/agent-transcripts/0b95c4b6-03e2-4780-8c3a-124f43625297/0b95c4b6-03e2-4780-8c3a-124f43625297.jsonl`
+   `~/.cursor/projects/Users-youngcan-agent-tap/agent-transcripts/0b95c4b6-03e2-4780-8c3a-124f43625297/0b95c4b6-03e2-4780-8c3a-124f43625297.jsonl`
 2. Copies `meta` plus the longest `role=system` JSON blob from the matching
    Cursor `store.db` (not the full protobuf blob store)
 3. Imports through `import_cursor_transcripts()` into

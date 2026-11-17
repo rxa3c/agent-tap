@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""End-to-end test for claude-tap.
+"""End-to-end test for agent-tap.
 
 Creates a fake 'claude' script + a fake upstream API server,
-then runs `python claude_tap.py` as a real subprocess and
+then runs `python agent_tap.py` as a real subprocess and
 verifies the full pipeline: proxy startup → claude launch → request
 forwarding → JSONL recording.
 """
@@ -25,12 +25,12 @@ from pathlib import Path
 import pytest
 from yarl import URL
 
-from claude_tap.trace import TraceWriter
+from agent_tap.trace import TraceWriter
 from tests.conftest import e2e_env, read_proxy_log, read_trace_records
 
 
 def _writer_for_dir(tmpdir: Path):
-    from claude_tap.trace_store import TraceStore
+    from agent_tap.trace_store import TraceStore
 
     store = TraceStore(tmpdir / "forward.sqlite3")
     session_id = store.create_session()
@@ -252,7 +252,7 @@ def test_e2e_store_stream_events_flag():
 
 def _run_test(upstream_port, store_stream_events=False):
     project_dir = PROJECT_ROOT
-    trace_dir = tempfile.mkdtemp(prefix="claude_tap_test_")
+    trace_dir = tempfile.mkdtemp(prefix="agent_tap_test_")
 
     # Create fake claude
     fake_bin_dir = tempfile.mkdtemp(prefix="fake_bin_")
@@ -264,13 +264,13 @@ def _run_test(upstream_port, store_stream_events=False):
 
     env = e2e_env(env, trace_dir)
     print(f"[test] Trace dir: {trace_dir}")
-    print("[test] Running: python -m claude_tap ...")
+    print("[test] Running: python -m agent_tap ...")
 
     try:
         cmd = [
             sys.executable,
             "-m",
-            "claude_tap",
+            "agent_tap",
             "--tap-output-dir",
             trace_dir,
             "--tap-no-open",
@@ -288,7 +288,7 @@ def _run_test(upstream_port, store_stream_events=False):
             timeout=30,
         )
     except subprocess.TimeoutExpired:
-        print("[test] TIMEOUT — claude_tap.py did not exit in 30s")
+        print("[test] TIMEOUT — agent_tap.py did not exit in 30s")
         _cleanup(trace_dir, fake_bin_dir, "e2e")
         sys.exit(1)
 
@@ -432,7 +432,7 @@ def _start_fake_upstream(port, handler_fn):
     return stop
 
 
-def _run_claude_tap(
+def _run_agent_tap(
     project_dir,
     trace_dir,
     fake_bin_dir,
@@ -445,7 +445,7 @@ def _run_claude_tap(
     client_args=None,
     client_env=None,
 ):
-    """Run claude_tap as a subprocess pointing at `upstream_port`.
+    """Run agent_tap as a subprocess pointing at `upstream_port`.
     Returns the CompletedProcess."""
     env = os.environ.copy()
     env["PATH"] = fake_bin_dir + ":" + env.get("PATH", "")
@@ -457,7 +457,7 @@ def _run_claude_tap(
     cmd = [
         sys.executable,
         "-m",
-        "claude_tap",
+        "agent_tap",
         "--tap-output-dir",
         trace_dir,
         "--tap-target",
@@ -671,7 +671,7 @@ for suffix, stream in [(":rawPredict", False), (":streamRawPredict", True)]:
         sys.exit(1)
 """
 
-    trace_dir = tempfile.mkdtemp(prefix="claude_tap_test_vertex_")
+    trace_dir = tempfile.mkdtemp(prefix="agent_tap_test_vertex_")
     fake_bin_dir = _create_fake_claude(fake_claude_script)
     with socket.socket() as sock:
         sock.bind(("127.0.0.1", 0))
@@ -692,7 +692,7 @@ for suffix, stream in [(":rawPredict", False), (":streamRawPredict", True)]:
             [
                 sys.executable,
                 "-m",
-                "claude_tap",
+                "agent_tap",
                 "--tap-output-dir",
                 trace_dir,
                 "--tap-no-live",
@@ -777,7 +777,7 @@ except Exception as exc:
     sys.exit(1)
 """
 
-    trace_dir = tempfile.mkdtemp(prefix="claude_tap_endpoint_target_")
+    trace_dir = tempfile.mkdtemp(prefix="agent_tap_endpoint_target_")
     fake_bin_dir = _create_fake_claude(fake_claude_script)
 
     with socket.socket() as sock:
@@ -794,7 +794,7 @@ except Exception as exc:
             [
                 sys.executable,
                 "-m",
-                "claude_tap",
+                "agent_tap",
                 "--tap-output-dir",
                 trace_dir,
                 "--tap-no-open",
@@ -887,11 +887,11 @@ def test_upstream_error():
     print(f"\n[test_upstream_error] Fake upstream on :{FAKE_UPSTREAM_ERROR_PORT}")
 
     project_dir = PROJECT_ROOT
-    trace_dir = tempfile.mkdtemp(prefix="claude_tap_test_error_")
+    trace_dir = tempfile.mkdtemp(prefix="agent_tap_test_error_")
     fake_bin_dir = _create_fake_claude(FAKE_CLAUDE_ERROR_SCRIPT)
 
     try:
-        proc = _run_claude_tap(project_dir, trace_dir, fake_bin_dir, FAKE_UPSTREAM_ERROR_PORT)
+        proc = _run_agent_tap(project_dir, trace_dir, fake_bin_dir, FAKE_UPSTREAM_ERROR_PORT)
 
         print(f"[test_upstream_error] Exit code: {proc.returncode}")
         if proc.stdout.strip():
@@ -1028,11 +1028,11 @@ def test_malformed_sse():
     print(f"\n[test_malformed_sse] Fake upstream on :{FAKE_UPSTREAM_MALFORMED_PORT}")
 
     project_dir = PROJECT_ROOT
-    trace_dir = tempfile.mkdtemp(prefix="claude_tap_test_malformed_")
+    trace_dir = tempfile.mkdtemp(prefix="agent_tap_test_malformed_")
     fake_bin_dir = _create_fake_claude(FAKE_CLAUDE_MALFORMED_SCRIPT)
 
     try:
-        proc = _run_claude_tap(project_dir, trace_dir, fake_bin_dir, FAKE_UPSTREAM_MALFORMED_PORT)
+        proc = _run_agent_tap(project_dir, trace_dir, fake_bin_dir, FAKE_UPSTREAM_MALFORMED_PORT)
 
         print(f"[test_malformed_sse] Exit code: {proc.returncode}")
         if proc.stdout.strip():
@@ -1156,11 +1156,11 @@ def test_large_payload():
     print(f"\n[test_large_payload] Fake upstream on :{FAKE_UPSTREAM_LARGE_PORT}")
 
     project_dir = PROJECT_ROOT
-    trace_dir = tempfile.mkdtemp(prefix="claude_tap_test_large_")
+    trace_dir = tempfile.mkdtemp(prefix="agent_tap_test_large_")
     fake_bin_dir = _create_fake_claude(FAKE_CLAUDE_LARGE_SCRIPT)
 
     try:
-        proc = _run_claude_tap(project_dir, trace_dir, fake_bin_dir, FAKE_UPSTREAM_LARGE_PORT)
+        proc = _run_agent_tap(project_dir, trace_dir, fake_bin_dir, FAKE_UPSTREAM_LARGE_PORT)
 
         print(f"[test_large_payload] Exit code: {proc.returncode}")
         if proc.stdout.strip():
@@ -1314,11 +1314,11 @@ def test_concurrent_requests():
     print(f"\n[test_concurrent_requests] Fake upstream on :{FAKE_UPSTREAM_CONCURRENT_PORT}")
 
     project_dir = PROJECT_ROOT
-    trace_dir = tempfile.mkdtemp(prefix="claude_tap_test_concurrent_")
+    trace_dir = tempfile.mkdtemp(prefix="agent_tap_test_concurrent_")
     fake_bin_dir = _create_fake_claude(FAKE_CLAUDE_CONCURRENT_SCRIPT)
 
     try:
-        proc = _run_claude_tap(project_dir, trace_dir, fake_bin_dir, FAKE_UPSTREAM_CONCURRENT_PORT)
+        proc = _run_agent_tap(project_dir, trace_dir, fake_bin_dir, FAKE_UPSTREAM_CONCURRENT_PORT)
 
         print(f"[test_concurrent_requests] Exit code: {proc.returncode}")
         if proc.stdout.strip():
@@ -1386,7 +1386,7 @@ def _cmd_preview():
     """
     import subprocess as sp
 
-    from claude_tap import _generate_html_viewer
+    from agent_tap import _generate_html_viewer
 
     traces_dir = Path(__file__).parent / ".traces"
     if not traces_dir.exists():
@@ -1419,7 +1419,7 @@ def _cmd_preview():
 
 
 def _cmd_dev():
-    """Start claude-tap proxy, run multi-turn prompts non-interactively, open HTML.
+    """Start agent-tap proxy, run multi-turn prompts non-interactively, open HTML.
 
     Usage:
         uv run python test_e2e.py --dev                          # default prompts
@@ -1442,11 +1442,11 @@ def _cmd_dev():
 
     # Start proxy in background via --no-launch
     # -u: unbuffered stdout so we can read the port line immediately
-    print("Starting claude-tap proxy...")
+    print("Starting agent-tap proxy...")
     proxy_env = os.environ.copy()
     proxy_env["PYTHONUNBUFFERED"] = "1"
     proxy_proc = sp.Popen(
-        [sys.executable, "-u", "-m", "claude_tap", "--tap-output-dir", str(traces_dir), "--tap-no-launch"],
+        [sys.executable, "-u", "-m", "agent_tap", "--tap-output-dir", str(traces_dir), "--tap-no-launch"],
         cwd=str(project_dir),
         env=proxy_env,
         stdout=sp.PIPE,
@@ -1518,9 +1518,9 @@ def _cmd_dev():
 
 
 def test_parse_args(monkeypatch, tmp_path):
-    """Test that --tap-* flags are consumed by claude-tap and everything else
+    """Test that --tap-* flags are consumed by agent-tap and everything else
     is forwarded to claude via claude_args."""
-    from claude_tap import parse_args
+    from agent_tap import parse_args
 
     monkeypatch.setenv("CODEX_HOME", str(tmp_path / "codex-home"))
     monkeypatch.delenv("ANTHROPIC_BASE_URL", raising=False)
@@ -1651,8 +1651,8 @@ def test_parse_args(monkeypatch, tmp_path):
 @pytest.mark.asyncio
 async def test_async_main_live_viewer_default_opens_when_allowed(monkeypatch, tmp_path, capsys):
     """Default live viewer starts, and --tap-no-open controls browser opening."""
-    from claude_tap import async_main, parse_args
-    from claude_tap.live import LiveViewerServer
+    from agent_tap import async_main, parse_args
+    from agent_tap.live import LiveViewerServer
 
     opened_urls = []
     spawned_servers: list[LiveViewerServer] = []
@@ -1670,10 +1670,10 @@ async def test_async_main_live_viewer_default_opens_when_allowed(monkeypatch, tm
 
     migration_calls = []
     monkeypatch.setenv("CLOUDTAP_DB", str(tmp_path / "async-main.sqlite3"))
-    monkeypatch.setattr("claude_tap.cli.run_client", fake_run_client)
-    monkeypatch.setattr("claude_tap.cli._open_browser", opened_urls.append)
-    monkeypatch.setattr("claude_tap.cli.ensure_shared_dashboard", fake_ensure_shared_dashboard)
-    monkeypatch.setattr("claude_tap.cli.migrate_legacy_traces", migration_calls.append)
+    monkeypatch.setattr("agent_tap.cli.run_client", fake_run_client)
+    monkeypatch.setattr("agent_tap.cli._open_browser", opened_urls.append)
+    monkeypatch.setattr("agent_tap.cli.ensure_shared_dashboard", fake_ensure_shared_dashboard)
+    monkeypatch.setattr("agent_tap.cli.migrate_legacy_traces", migration_calls.append)
 
     args = parse_args(["--tap-output-dir", str(tmp_path)])
     try:
@@ -1687,13 +1687,13 @@ async def test_async_main_live_viewer_default_opens_when_allowed(monkeypatch, tm
     assert all(url.startswith("http://127.0.0.1:") for url in opened_urls)
     assert migration_calls == []
     output = capsys.readouterr().err
-    assert "Stop dashboard: claude-tap dashboard stop" in output
+    assert "Stop dashboard: agent-tap dashboard stop" in output
 
 
 @pytest.mark.asyncio
 async def test_async_main_stop_hint_includes_custom_dashboard_address(monkeypatch, tmp_path, capsys):
     """The dashboard stop hint should target the actual shared dashboard address."""
-    from claude_tap import async_main, parse_args
+    from agent_tap import async_main, parse_args
 
     async def fake_run_client(*args, **kwargs):
         return 0
@@ -1702,8 +1702,8 @@ async def test_async_main_stop_hint_includes_custom_dashboard_address(monkeypatc
         return f"http://127.0.0.1:{port}", False
 
     monkeypatch.setenv("CLOUDTAP_DB", str(tmp_path / "async-main.sqlite3"))
-    monkeypatch.setattr("claude_tap.cli.run_client", fake_run_client)
-    monkeypatch.setattr("claude_tap.cli.ensure_shared_dashboard", fake_ensure_shared_dashboard)
+    monkeypatch.setattr("agent_tap.cli.run_client", fake_run_client)
+    monkeypatch.setattr("agent_tap.cli.ensure_shared_dashboard", fake_ensure_shared_dashboard)
 
     args = parse_args(
         [
@@ -1720,14 +1720,14 @@ async def test_async_main_stop_hint_includes_custom_dashboard_address(monkeypatc
 
     assert code == 0
     output = capsys.readouterr().err
-    assert "Stop dashboard: claude-tap dashboard stop --tap-live-port 3000 --tap-host 0.0.0.0" in output
+    assert "Stop dashboard: agent-tap dashboard stop --tap-live-port 3000 --tap-host 0.0.0.0" in output
 
 
 @pytest.mark.asyncio
 async def test_async_main_reuses_existing_dashboard_without_reopening_browser(monkeypatch, tmp_path):
-    """A second claude-tap run should attach to an existing dashboard without opening another tab."""
-    from claude_tap import async_main, parse_args
-    from claude_tap.live import LiveViewerServer
+    """A second agent-tap run should attach to an existing dashboard without opening another tab."""
+    from agent_tap import async_main, parse_args
+    from agent_tap.live import LiveViewerServer
 
     opened_urls = []
     spawned_servers: list[LiveViewerServer] = []
@@ -1748,9 +1748,9 @@ async def test_async_main_reuses_existing_dashboard_without_reopening_browser(mo
         return f"http://{host}:{port}", False
 
     monkeypatch.setenv("CLOUDTAP_DB", str(tmp_path / "async-main-shared.sqlite3"))
-    monkeypatch.setattr("claude_tap.cli.run_client", fake_run_client)
-    monkeypatch.setattr("claude_tap.cli._open_browser", opened_urls.append)
-    monkeypatch.setattr("claude_tap.cli.ensure_shared_dashboard", fake_ensure_shared_dashboard)
+    monkeypatch.setattr("agent_tap.cli.run_client", fake_run_client)
+    monkeypatch.setattr("agent_tap.cli._open_browser", opened_urls.append)
+    monkeypatch.setattr("agent_tap.cli.ensure_shared_dashboard", fake_ensure_shared_dashboard)
 
     args = parse_args(["--tap-output-dir", str(tmp_path)])
     try:
@@ -1766,7 +1766,7 @@ async def test_async_main_reuses_existing_dashboard_without_reopening_browser(mo
 @pytest.mark.asyncio
 async def test_async_main_live_viewer_respects_tap_host(monkeypatch, tmp_path):
     """Shared dashboard startup should honor the configured tap host."""
-    from claude_tap import async_main, parse_args
+    from agent_tap import async_main, parse_args
 
     dashboard_calls: list[dict[str, object]] = []
 
@@ -1778,8 +1778,8 @@ async def test_async_main_live_viewer_respects_tap_host(monkeypatch, tmp_path):
         return f"http://{host}:{port}", False
 
     monkeypatch.setenv("CLOUDTAP_DB", str(tmp_path / "async-main-host.sqlite3"))
-    monkeypatch.setattr("claude_tap.cli.run_client", fake_run_client)
-    monkeypatch.setattr("claude_tap.cli.ensure_shared_dashboard", fake_ensure_shared_dashboard)
+    monkeypatch.setattr("agent_tap.cli.run_client", fake_run_client)
+    monkeypatch.setattr("agent_tap.cli.ensure_shared_dashboard", fake_ensure_shared_dashboard)
 
     args = parse_args(
         [
@@ -1798,7 +1798,7 @@ async def test_async_main_live_viewer_respects_tap_host(monkeypatch, tmp_path):
 @pytest.mark.asyncio
 async def test_async_main_continues_when_dashboard_migration_is_locked(monkeypatch, tmp_path, capsys):
     """Dashboard storage failures must not prevent the configured client from running."""
-    from claude_tap import async_main, parse_args
+    from agent_tap import async_main, parse_args
 
     client_calls = []
 
@@ -1810,8 +1810,8 @@ async def test_async_main_continues_when_dashboard_migration_is_locked(monkeypat
         raise sqlite3.OperationalError("database is locked")
 
     monkeypatch.setenv("CLOUDTAP_DB", str(tmp_path / "async-main-dashboard-lock.sqlite3"))
-    monkeypatch.setattr("claude_tap.cli.run_client", fake_run_client)
-    monkeypatch.setattr("claude_tap.cli.ensure_shared_dashboard", fail_dashboard)
+    monkeypatch.setattr("agent_tap.cli.run_client", fake_run_client)
+    monkeypatch.setattr("agent_tap.cli.ensure_shared_dashboard", fail_dashboard)
 
     args = parse_args(["--tap-output-dir", str(tmp_path), "--tap-no-open"])
     code = await async_main(args)
@@ -1824,13 +1824,13 @@ async def test_async_main_continues_when_dashboard_migration_is_locked(monkeypat
 @pytest.mark.asyncio
 async def test_async_main_finalizes_session_when_proxy_startup_fails(monkeypatch, tmp_path):
     """Startup bind failures should not leave active SQLite sessions behind."""
-    from claude_tap import async_main, get_trace_store, parse_args
+    from agent_tap import async_main, get_trace_store, parse_args
 
     async def fail_start(self):
         raise OSError("bind failed")
 
     monkeypatch.setenv("CLOUDTAP_DB", str(tmp_path / "startup-failure.sqlite3"))
-    monkeypatch.setattr("claude_tap.cli.web.TCPSite.start", fail_start)
+    monkeypatch.setattr("agent_tap.cli.web.TCPSite.start", fail_start)
 
     args = parse_args(
         [
@@ -1852,7 +1852,7 @@ async def test_async_main_finalizes_session_when_proxy_startup_fails(monkeypatch
 @pytest.mark.asyncio
 async def test_async_main_no_live_and_no_open_restore_non_browser_mode(monkeypatch, tmp_path):
     """--tap-no-live disables the live server and --tap-no-open prevents browser opens."""
-    from claude_tap import async_main, parse_args
+    from agent_tap import async_main, parse_args
 
     opened_urls = []
     migration_calls = []
@@ -1863,11 +1863,11 @@ async def test_async_main_no_live_and_no_open_restore_non_browser_mode(monkeypat
     from unittest.mock import AsyncMock
 
     monkeypatch.setenv("CLOUDTAP_DB", str(tmp_path / "async-main-no-live.sqlite3"))
-    monkeypatch.setattr("claude_tap.cli.run_client", fake_run_client)
-    monkeypatch.setattr("claude_tap.cli._open_browser", opened_urls.append)
-    monkeypatch.setattr("claude_tap.cli.migrate_legacy_traces", migration_calls.append)
+    monkeypatch.setattr("agent_tap.cli.run_client", fake_run_client)
+    monkeypatch.setattr("agent_tap.cli._open_browser", opened_urls.append)
+    monkeypatch.setattr("agent_tap.cli.migrate_legacy_traces", migration_calls.append)
     monkeypatch.setattr(
-        "claude_tap.cli.ensure_shared_dashboard",
+        "agent_tap.cli.ensure_shared_dashboard",
         AsyncMock(side_effect=AssertionError("dashboard should stay disabled")),
     )
 
@@ -1882,7 +1882,7 @@ async def test_async_main_no_live_and_no_open_restore_non_browser_mode(monkeypat
 @pytest.mark.asyncio
 async def test_async_main_no_live_continues_when_legacy_migration_is_locked(monkeypatch, tmp_path, capsys):
     """A locked migration must not prevent the configured client from running."""
-    from claude_tap import async_main, parse_args
+    from agent_tap import async_main, parse_args
 
     client_calls = []
 
@@ -1894,8 +1894,8 @@ async def test_async_main_no_live_continues_when_legacy_migration_is_locked(monk
         raise sqlite3.OperationalError("database is locked")
 
     monkeypatch.setenv("CLOUDTAP_DB", str(tmp_path / "async-main-locked-migration.sqlite3"))
-    monkeypatch.setattr("claude_tap.cli.run_client", fake_run_client)
-    monkeypatch.setattr("claude_tap.cli.migrate_legacy_traces", fail_migration)
+    monkeypatch.setattr("agent_tap.cli.run_client", fake_run_client)
+    monkeypatch.setattr("agent_tap.cli.migrate_legacy_traces", fail_migration)
 
     args = parse_args(["--tap-output-dir", str(tmp_path), "--tap-no-live", "--tap-no-open"])
     code = await async_main(args)
@@ -1908,14 +1908,14 @@ async def test_async_main_no_live_continues_when_legacy_migration_is_locked(monk
 @pytest.mark.asyncio
 async def test_async_main_export_prompt_preserves_client_failure(monkeypatch, tmp_path):
     """Successful prompt export should not turn a failing client run into success."""
-    from claude_tap import async_main, parse_args
+    from agent_tap import async_main, parse_args
 
     async def fake_run_client(*args, **kwargs):
         return 7
 
     monkeypatch.setenv("CLOUDTAP_DB", str(tmp_path / "async-main-export-failure.sqlite3"))
-    monkeypatch.setattr("claude_tap.cli.run_client", fake_run_client)
-    monkeypatch.setattr("claude_tap.cli._export_prompt_from_session", lambda *_args: 0)
+    monkeypatch.setattr("agent_tap.cli.run_client", fake_run_client)
+    monkeypatch.setattr("agent_tap.cli._export_prompt_from_session", lambda *_args: 0)
 
     args = parse_args(
         [
@@ -1935,7 +1935,7 @@ def test_parse_args_allow_path_validation():
     """Test --tap-allow-path validation rejects invalid prefixes."""
     import pytest
 
-    from claude_tap import parse_args
+    from agent_tap import parse_args
 
     # Valid prefixes
     a = parse_args(["--tap-allow-path", "/custom/api"])
@@ -2004,14 +2004,14 @@ def test_codex_client_reverse_proxy():
             }
         )
 
-    trace_dir = tempfile.mkdtemp(prefix="claude_tap_test_codex_")
+    trace_dir = tempfile.mkdtemp(prefix="agent_tap_test_codex_")
     fake_bin_dir = tempfile.mkdtemp(prefix="fake_bin_codex_")
     fake_codex = Path(fake_bin_dir) / "codex"
     _write_fake_client(fake_codex, FAKE_CODEX_SCRIPT)
     stop = _start_fake_upstream(19242, handler)
 
     try:
-        proc = _run_claude_tap(
+        proc = _run_agent_tap(
             Path(__file__).parent,
             trace_dir,
             fake_bin_dir,
@@ -2136,14 +2136,14 @@ def test_grok_client_reverse_proxy():
         await resp.write_eof()
         return resp
 
-    trace_dir = tempfile.mkdtemp(prefix="claude_tap_test_grok_")
+    trace_dir = tempfile.mkdtemp(prefix="agent_tap_test_grok_")
     fake_bin_dir = tempfile.mkdtemp(prefix="fake_bin_grok_")
     fake_grok = Path(fake_bin_dir) / "grok"
     _write_fake_client(fake_grok, FAKE_GROK_SCRIPT)
     stop = _start_fake_upstream(19247, handler)
 
     try:
-        proc = _run_claude_tap(
+        proc = _run_agent_tap(
             Path(__file__).parent,
             trace_dir,
             fake_bin_dir,
@@ -2266,14 +2266,14 @@ def test_dsh_client_forward_proxy_captures_local_gateway():
         await resp.write_eof()
         return resp
 
-    trace_dir = tempfile.mkdtemp(prefix="claude_tap_test_dsh_")
+    trace_dir = tempfile.mkdtemp(prefix="agent_tap_test_dsh_")
     fake_bin_dir = tempfile.mkdtemp(prefix="fake_bin_dsh_")
     fake_dsh = Path(fake_bin_dir) / "dsh"
     _write_fake_client(fake_dsh, FAKE_DSH_SCRIPT)
     stop = _start_fake_upstream(19248, handler)
 
     try:
-        proc = _run_claude_tap(
+        proc = _run_agent_tap(
             Path(__file__).parent,
             trace_dir,
             fake_bin_dir,
@@ -2374,14 +2374,14 @@ def test_kimi_client_reverse_proxy():
         await resp.write_eof()
         return resp
 
-    trace_dir = tempfile.mkdtemp(prefix="claude_tap_test_kimi_")
+    trace_dir = tempfile.mkdtemp(prefix="agent_tap_test_kimi_")
     fake_bin_dir = tempfile.mkdtemp(prefix="fake_bin_kimi_")
     fake_kimi = Path(fake_bin_dir) / "kimi"
     _write_fake_client(fake_kimi, FAKE_KIMI_SCRIPT)
     stop = _start_fake_upstream(19244, handler)
 
     try:
-        proc = _run_claude_tap(
+        proc = _run_agent_tap(
             Path(__file__).parent,
             trace_dir,
             fake_bin_dir,
@@ -2597,14 +2597,14 @@ def test_kimi_multiturn_tool_calls_reverse_proxy():
         await resp.write_eof()
         return resp
 
-    trace_dir = tempfile.mkdtemp(prefix="claude_tap_test_kimi_multiturn_")
+    trace_dir = tempfile.mkdtemp(prefix="agent_tap_test_kimi_multiturn_")
     fake_bin_dir = tempfile.mkdtemp(prefix="fake_bin_kimi_multiturn_")
     fake_kimi = Path(fake_bin_dir) / "kimi"
     _write_fake_client(fake_kimi, FAKE_KIMI_MULTITURN_SCRIPT)
     stop = _start_fake_upstream(19245, handler)
 
     try:
-        proc = _run_claude_tap(
+        proc = _run_agent_tap(
             Path(__file__).parent,
             trace_dir,
             fake_bin_dir,
@@ -2737,14 +2737,14 @@ def test_kimi_code_client_reverse_proxy():
         await resp.write_eof()
         return resp
 
-    trace_dir = tempfile.mkdtemp(prefix="claude_tap_test_kimi_code_")
+    trace_dir = tempfile.mkdtemp(prefix="agent_tap_test_kimi_code_")
     fake_bin_dir = tempfile.mkdtemp(prefix="fake_bin_kimi_code_")
     fake_kimi = Path(fake_bin_dir) / "kimi"
     _write_fake_client(fake_kimi, FAKE_KIMI_CODE_SCRIPT)
     stop = _start_fake_upstream(19246, handler)
 
     try:
-        proc = _run_claude_tap(
+        proc = _run_agent_tap(
             Path(__file__).parent,
             trace_dir,
             fake_bin_dir,
@@ -2814,14 +2814,14 @@ except Exception as e:
     sys.exit(1)
 """
 
-    trace_dir = tempfile.mkdtemp(prefix="claude_tap_test_zstd_")
+    trace_dir = tempfile.mkdtemp(prefix="agent_tap_test_zstd_")
     fake_bin_dir = tempfile.mkdtemp(prefix="fake_bin_zstd_")
     fake_codex = Path(fake_bin_dir) / "codex"
     _write_fake_client(fake_codex, zstd_codex_script)
     stop = _start_fake_upstream(19243, handler)
 
     try:
-        proc = _run_claude_tap(
+        proc = _run_agent_tap(
             Path(__file__).parent,
             trace_dir,
             fake_bin_dir,
@@ -2842,7 +2842,7 @@ except Exception as e:
 ## ---------------------------------------------------------------------------
 def test_filter_headers():
     """Test filter_headers strips hop-by-hop headers and optionally redacts secrets."""
-    from claude_tap import filter_headers
+    from agent_tap import filter_headers
 
     headers = {
         "Content-Type": "application/json",
@@ -2954,7 +2954,7 @@ except Exception as e:
     sys.exit(1)
 '''
 
-    trace_dir = tempfile.mkdtemp(prefix="claude_tap_test_double_serial_")
+    trace_dir = tempfile.mkdtemp(prefix="agent_tap_test_double_serial_")
     fake_bin_dir = tempfile.mkdtemp(prefix="fake_bin_double_serial_")
     fake_claude = Path(fake_bin_dir) / "claude"
     _write_fake_client(fake_claude, double_serial_script)
@@ -2964,7 +2964,7 @@ except Exception as e:
     stop = _start_fake_upstream(upstream_port, handler)
 
     try:
-        proc = _run_claude_tap(
+        proc = _run_agent_tap(
             Path(__file__).parent,
             trace_dir,
             fake_bin_dir,
@@ -2997,7 +2997,7 @@ except Exception as e:
 
 def test_sse_reassembler():
     """Test SSEReassembler handles various edge cases correctly."""
-    from claude_tap import SSEReassembler
+    from agent_tap import SSEReassembler
 
     # Basic: valid events
     r = SSEReassembler()
@@ -3105,7 +3105,7 @@ def test_upstream_unreachable():
     returns 502 and the trace contains no records (since we can't reach upstream)."""
 
     project_dir = PROJECT_ROOT
-    trace_dir = tempfile.mkdtemp(prefix="claude_tap_test_unreachable_")
+    trace_dir = tempfile.mkdtemp(prefix="agent_tap_test_unreachable_")
     fake_bin_dir = _create_fake_claude(FAKE_CLAUDE_UNREACHABLE_SCRIPT)
 
     # Point --tap-target at a port that nothing is listening on
@@ -3118,7 +3118,7 @@ def test_upstream_unreachable():
             [
                 sys.executable,
                 "-m",
-                "claude_tap",
+                "agent_tap",
                 "--tap-output-dir",
                 trace_dir,
                 "--tap-no-open",
@@ -3169,7 +3169,7 @@ async def test_reverse_proxy_ssl_error_returns_ca_diagnostics():
     import aiohttp
     from aiohttp import web
 
-    from claude_tap.proxy import proxy_handler
+    from agent_tap.proxy import proxy_handler
 
     with tempfile.TemporaryDirectory() as tmpdir:
         tmpdir_path = Path(tmpdir)
@@ -3219,7 +3219,7 @@ async def test_reverse_proxy_ssl_error_returns_ca_diagnostics():
 
 def test_detect_installer():
     """Test _detect_installer returns 'uv' or 'pip'."""
-    from claude_tap import _detect_installer
+    from agent_tap import _detect_installer
 
     result = _detect_installer()
     assert result in ("uv", "pip"), f"Unexpected installer: {result}"
@@ -3260,20 +3260,20 @@ def test_startup_does_not_contact_pypi():
     t.start()
 
     project_dir = PROJECT_ROOT
-    trace_dir = tempfile.mkdtemp(prefix="claude_tap_test_update_")
+    trace_dir = tempfile.mkdtemp(prefix="agent_tap_test_update_")
     fake_bin_dir = _create_fake_claude(FAKE_CLAUDE_NOOP_SCRIPT)
 
     try:
         env = os.environ.copy()
         env["PATH"] = fake_bin_dir + ":" + env.get("PATH", "")
         env = e2e_env(env, trace_dir)
-        env["CLAUDE_TAP_PYPI_URL"] = f"http://127.0.0.1:{pypi_port}/pypi/claude-tap/json"
+        env["AGENT_TAP_PYPI_URL"] = f"http://127.0.0.1:{pypi_port}/pypi/agent-tap/json"
 
         proc = subprocess.run(
             [
                 sys.executable,
                 "-m",
-                "claude_tap",
+                "agent_tap",
                 "--tap-output-dir",
                 trace_dir,
                 "--tap-no-open",
@@ -3294,7 +3294,7 @@ def test_startup_does_not_contact_pypi():
         assert requests == []
         print("  test_startup_does_not_contact_pypi PASSED")
     except subprocess.TimeoutExpired as exc:
-        raise AssertionError("claude_tap subprocess timed out (30s) — possible port conflict or hang") from exc
+        raise AssertionError("agent_tap subprocess timed out (30s) — possible port conflict or hang") from exc
     finally:
         server.shutdown()
         server.server_close()
@@ -3308,7 +3308,7 @@ def test_startup_does_not_contact_pypi():
 
 def test_trace_cleanup():
     """Test cleanup_trace_sessions removes oldest sessions while keeping newest."""
-    from claude_tap import cleanup_trace_sessions, get_trace_store, reset_trace_store
+    from agent_tap import cleanup_trace_sessions, get_trace_store, reset_trace_store
 
     with tempfile.TemporaryDirectory() as tmpdir:
         db_path = Path(tmpdir) / "cleanup.sqlite3"
@@ -3332,7 +3332,7 @@ def test_trace_cleanup():
 
 def test_trace_tagging_safety():
     """Test that cleanup only removes stored sessions."""
-    from claude_tap import cleanup_trace_sessions, get_trace_store, reset_trace_store
+    from agent_tap import cleanup_trace_sessions, get_trace_store, reset_trace_store
 
     with tempfile.TemporaryDirectory() as tmpdir:
         db_path = Path(tmpdir) / "cleanup.sqlite3"
@@ -3352,7 +3352,7 @@ def test_trace_tagging_safety():
 
 def test_manifest_migration():
     """Test that existing trace files without SQLite rows are migrated."""
-    from claude_tap import get_trace_store, migrate_legacy_traces, reset_trace_store
+    from agent_tap import get_trace_store, migrate_legacy_traces, reset_trace_store
 
     with tempfile.TemporaryDirectory() as tmpdir:
         output_dir = Path(tmpdir)
@@ -3377,18 +3377,18 @@ def test_manifest_migration():
 
 
 def test_e2e_with_cleanup():
-    """E2E test: pre-fill sessions, run claude-tap with --tap-max-traces, verify cleanup."""
-    from claude_tap import get_trace_store, reset_trace_store
+    """E2E test: pre-fill sessions, run agent-tap with --tap-max-traces, verify cleanup."""
+    from agent_tap import get_trace_store, reset_trace_store
 
     stop_upstream, upstream_port = run_fake_upstream_in_thread()
 
     project_dir = PROJECT_ROOT
-    trace_dir = tempfile.mkdtemp(prefix="claude_tap_test_cleanup_")
+    trace_dir = tempfile.mkdtemp(prefix="agent_tap_test_cleanup_")
     output_dir = Path(trace_dir)
     fake_bin_dir = _create_fake_claude(FAKE_CLAUDE_SCRIPT)
 
     try:
-        db_path = output_dir / "claude-tap-test.sqlite3"
+        db_path = output_dir / "agent-tap-test.sqlite3"
         os.environ["CLOUDTAP_DB"] = str(db_path)
         reset_trace_store()
         store = get_trace_store()
@@ -3404,7 +3404,7 @@ def test_e2e_with_cleanup():
             [
                 sys.executable,
                 "-m",
-                "claude_tap",
+                "agent_tap",
                 "--tap-output-dir",
                 trace_dir,
                 "--tap-no-open",
@@ -3446,7 +3446,7 @@ def test_e2e_with_cleanup():
 
 def test_live_viewer_scroll_preservation():
     """Verify viewer.html contains preserveDetail parameter chain for scroll fix."""
-    from claude_tap.viewer import _read_viewer_template
+    from agent_tap.viewer import _read_viewer_template
 
     html = _read_viewer_template()
 
@@ -3468,7 +3468,7 @@ def test_live_viewer_scroll_preservation():
 
 def test_live_viewer_diff_nav_update():
     """Verify viewer.html contains dynamic diff nav button update logic."""
-    from claude_tap.viewer import _read_viewer_template
+    from agent_tap.viewer import _read_viewer_template
 
     html = _read_viewer_template()
 
@@ -3487,11 +3487,11 @@ async def test_live_viewer_sse_incremental():
     """Test that LiveViewerServer correctly handles incremental SSE broadcasts."""
     import aiohttp
 
-    from claude_tap import LiveViewerServer
+    from agent_tap import LiveViewerServer
 
     with tempfile.TemporaryDirectory() as tmpdir:
         os.environ["CLOUDTAP_DB"] = str(Path(tmpdir) / "live.sqlite3")
-        from claude_tap.trace_store import get_trace_store, reset_trace_store
+        from agent_tap.trace_store import get_trace_store, reset_trace_store
 
         reset_trace_store()
         session_id = get_trace_store().create_session()
@@ -3524,7 +3524,7 @@ async def test_live_viewer_sse_incremental():
 
 def test_parse_args_new_flags():
     """Test storage flags and legacy update flag compatibility."""
-    from claude_tap import parse_args
+    from agent_tap import parse_args
 
     # Defaults
     a = parse_args([])
@@ -3553,7 +3553,7 @@ def test_parse_args_new_flags():
 
 def test_parse_dashboard_args():
     """Test standalone dashboard argument parsing."""
-    from claude_tap import parse_dashboard_args
+    from agent_tap import parse_dashboard_args
 
     a = parse_dashboard_args([])
     assert a.command is None
@@ -3588,7 +3588,7 @@ def test_parse_dashboard_args():
 
 def test_cert_generation():
     """Test CA and per-host certificate generation."""
-    from claude_tap.certs import CertificateAuthority, ensure_ca
+    from agent_tap.certs import CertificateAuthority, ensure_ca
 
     with tempfile.TemporaryDirectory() as tmpdir:
         ca_dir = Path(tmpdir)
@@ -3641,7 +3641,7 @@ def test_cert_generation():
 
 def test_parse_args_proxy_mode():
     """Test --tap-proxy-mode flag parsing."""
-    from claude_tap import parse_args
+    from agent_tap import parse_args
 
     # Default is reverse
     a = parse_args([])
@@ -3682,7 +3682,7 @@ def test_codex_upstream_url_construction(monkeypatch, tmp_path):
 
     See: .agents/docs/error-experience/entries/2026-03-10-codex-strip-prefix-url-mismatch.md
     """
-    from claude_tap import parse_args
+    from agent_tap import parse_args
 
     monkeypatch.setenv("CODEX_HOME", str(tmp_path / "codex-home"))
     monkeypatch.delenv("OPENAI_BASE_URL", raising=False)
@@ -3736,7 +3736,7 @@ def test_codex_upstream_url_construction(monkeypatch, tmp_path):
 
 
 def test_forward_proxy_trace_skip_rules_are_narrow():
-    from claude_tap.forward_proxy import _should_skip_trace_record
+    from agent_tap.forward_proxy import _should_skip_trace_record
 
     json_headers = {"Content-Type": "application/json"}
     binary_headers = {"Content-Type": "application/octet-stream"}
@@ -3783,7 +3783,7 @@ def test_forward_proxy_trace_skip_rules_are_narrow():
 
 @pytest.mark.asyncio
 async def test_forward_proxy_unrecorded_response_closes_upstream_on_client_disconnect():
-    from claude_tap.forward_proxy import ForwardProxyServer
+    from agent_tap.forward_proxy import ForwardProxyServer
 
     class FakeContent:
         async def iter_chunked(self, size):
@@ -3825,7 +3825,7 @@ async def test_forward_proxy_unrecorded_response_closes_upstream_on_client_disco
 
 
 def test_forward_proxy_upstream_base_url_is_safe_and_supports_path_prefixes():
-    from claude_tap.forward_proxy import _upstream_base_url
+    from agent_tap.forward_proxy import _upstream_base_url
 
     assert _upstream_base_url("/health", "/health") is None
     assert (
@@ -3852,8 +3852,8 @@ async def test_forward_proxy_connect():
 
     import aiohttp
 
-    from claude_tap.certs import CertificateAuthority, ensure_ca
-    from claude_tap.forward_proxy import ForwardProxyServer
+    from agent_tap.certs import CertificateAuthority, ensure_ca
+    from agent_tap.forward_proxy import ForwardProxyServer
 
     with tempfile.TemporaryDirectory() as tmpdir:
         tmpdir = Path(tmpdir)
@@ -3951,8 +3951,8 @@ async def test_forward_proxy_skips_package_noise_but_keeps_long_model_payloads(m
 
     import aiohttp
 
-    from claude_tap.certs import CertificateAuthority, ensure_ca
-    from claude_tap.forward_proxy import ForwardProxyServer
+    from agent_tap.certs import CertificateAuthority, ensure_ca
+    from agent_tap.forward_proxy import ForwardProxyServer
 
     with tempfile.TemporaryDirectory() as tmpdir:
         tmpdir_path = Path(tmpdir)
@@ -4058,8 +4058,8 @@ async def test_forward_proxy_client_filter_relays_noise_but_traces_codexapp_http
 
     import aiohttp
 
-    from claude_tap.certs import CertificateAuthority, ensure_ca
-    from claude_tap.forward_proxy import ForwardProxyServer
+    from agent_tap.certs import CertificateAuthority, ensure_ca
+    from agent_tap.forward_proxy import ForwardProxyServer
 
     with tempfile.TemporaryDirectory() as tmpdir:
         tmpdir_path = Path(tmpdir)
@@ -4139,9 +4139,9 @@ async def test_forward_proxy_client_filter_relays_noise_but_traces_codexapp_http
 
 
 def test_forward_proxy_client_filter_matches_methods_and_paths(tmp_path: Path) -> None:
-    from claude_tap.forward_proxy import ForwardProxyServer
-    from claude_tap.trace import TraceWriter
-    from claude_tap.trace_store import TraceStore
+    from agent_tap.forward_proxy import ForwardProxyServer
+    from agent_tap.trace import TraceWriter
+    from agent_tap.trace_store import TraceStore
 
     store = TraceStore(tmp_path / "traces.sqlite3")
     session_id = store.create_session(client="codexapp", proxy_mode="forward")
@@ -4170,8 +4170,8 @@ async def test_forward_proxy_local_reverse_bridge():
 
     import aiohttp
 
-    from claude_tap.certs import CertificateAuthority, ensure_ca
-    from claude_tap.forward_proxy import ForwardProxyServer
+    from agent_tap.certs import CertificateAuthority, ensure_ca
+    from agent_tap.forward_proxy import ForwardProxyServer
 
     with tempfile.TemporaryDirectory() as tmpdir:
         tmpdir_path = Path(tmpdir)
@@ -4237,8 +4237,8 @@ async def test_forward_proxy_records_upstream_error():
 
     import aiohttp
 
-    from claude_tap.certs import CertificateAuthority, ensure_ca
-    from claude_tap.forward_proxy import ForwardProxyServer
+    from agent_tap.certs import CertificateAuthority, ensure_ca
+    from agent_tap.forward_proxy import ForwardProxyServer
 
     with tempfile.TemporaryDirectory() as tmpdir:
         tmpdir_path = Path(tmpdir)
@@ -4303,8 +4303,8 @@ async def test_forward_proxy_connect_websocket():
 
     import aiohttp
 
-    from claude_tap.certs import CertificateAuthority, ensure_ca
-    from claude_tap.forward_proxy import ForwardProxyServer
+    from agent_tap.certs import CertificateAuthority, ensure_ca
+    from agent_tap.forward_proxy import ForwardProxyServer
 
     with tempfile.TemporaryDirectory() as tmpdir:
         tmpdir = Path(tmpdir)
@@ -4399,8 +4399,8 @@ async def test_forward_proxy_client_filter_traces_codexapp_websocket_but_not_noi
 
     import aiohttp
 
-    from claude_tap.certs import CertificateAuthority, ensure_ca
-    from claude_tap.forward_proxy import ForwardProxyServer
+    from agent_tap.certs import CertificateAuthority, ensure_ca
+    from agent_tap.forward_proxy import ForwardProxyServer
 
     with tempfile.TemporaryDirectory() as tmpdir:
         tmpdir_path = Path(tmpdir)
@@ -4487,8 +4487,8 @@ async def test_forward_proxy_flushes_each_codexapp_websocket_response_before_clo
 
     import aiohttp
 
-    from claude_tap.certs import CertificateAuthority, ensure_ca
-    from claude_tap.forward_proxy import ForwardProxyServer
+    from agent_tap.certs import CertificateAuthority, ensure_ca
+    from agent_tap.forward_proxy import ForwardProxyServer
 
     with tempfile.TemporaryDirectory() as tmpdir:
         tmpdir_path = Path(tmpdir)
@@ -4563,9 +4563,9 @@ async def test_forward_proxy_flushes_each_codexapp_websocket_response_before_clo
 
 @pytest.mark.asyncio
 async def test_forward_proxy_client_filter_records_traced_websocket_connect_failure(tmp_path: Path) -> None:
-    from claude_tap.forward_proxy import ForwardProxyServer
-    from claude_tap.trace import TraceWriter
-    from claude_tap.trace_store import TraceStore
+    from agent_tap.forward_proxy import ForwardProxyServer
+    from agent_tap.trace import TraceWriter
+    from agent_tap.trace_store import TraceStore
 
     class FailingSession:
         trust_env = False
@@ -4624,8 +4624,8 @@ async def test_forward_proxy_connect_websocket_capture_only(monkeypatch: pytest.
 
     import aiohttp
 
-    from claude_tap.certs import CertificateAuthority, ensure_ca
-    from claude_tap.forward_proxy import ForwardProxyServer
+    from agent_tap.certs import CertificateAuthority, ensure_ca
+    from agent_tap.forward_proxy import ForwardProxyServer
 
     with tempfile.TemporaryDirectory() as tmpdir:
         tmpdir = Path(tmpdir)
@@ -4717,8 +4717,8 @@ async def test_forward_proxy_connect_websocket_honors_env_proxy(monkeypatch):
 
     import aiohttp
 
-    from claude_tap.certs import CertificateAuthority, ensure_ca
-    from claude_tap.forward_proxy import ForwardProxyServer
+    from agent_tap.certs import CertificateAuthority, ensure_ca
+    from agent_tap.forward_proxy import ForwardProxyServer
 
     with tempfile.TemporaryDirectory() as tmpdir:
         tmpdir = Path(tmpdir)
@@ -4736,7 +4736,7 @@ async def test_forward_proxy_connect_websocket_honors_env_proxy(monkeypatch):
         session = aiohttp.ClientSession(connector=upstream_conn, auto_decompress=False, trust_env=True)
 
         monkeypatch.setattr(
-            "claude_tap.forward_proxy._get_ws_proxy_settings",
+            "agent_tap.forward_proxy._get_ws_proxy_settings",
             lambda _url: (URL("http://proxy.local:8080"), aiohttp.BasicAuth("user", "pass")),
         )
 
@@ -5188,11 +5188,11 @@ async def test_live_viewer_server():
     """Test LiveViewerServer SSE functionality."""
     import aiohttp
 
-    from claude_tap import LiveViewerServer
+    from agent_tap import LiveViewerServer
 
     with tempfile.TemporaryDirectory() as tmpdir:
         os.environ["CLOUDTAP_DB"] = str(Path(tmpdir) / "live.sqlite3")
-        from claude_tap.trace_store import get_trace_store, reset_trace_store
+        from agent_tap.trace_store import get_trace_store, reset_trace_store
 
         reset_trace_store()
         session_id = get_trace_store().create_session()
@@ -5239,14 +5239,14 @@ async def test_dashboard_main_serves_viewer(monkeypatch, tmp_path):
 
     import aiohttp
 
-    from claude_tap import dashboard_main, parse_dashboard_args
+    from agent_tap import dashboard_main, parse_dashboard_args
 
     opened_urls: list[str] = []
-    monkeypatch.setattr("claude_tap.cli._open_browser", opened_urls.append)
+    monkeypatch.setattr("agent_tap.cli._open_browser", opened_urls.append)
     monkeypatch.setenv("CLOUDTAP_DB", str(tmp_path / "dashboard.sqlite3"))
-    monkeypatch.setattr("claude_tap.cli.is_dashboard_healthy", AsyncMock(return_value=False))
+    monkeypatch.setattr("agent_tap.cli.is_dashboard_healthy", AsyncMock(return_value=False))
     monkeypatch.setattr(
-        "claude_tap.cli.migrate_legacy_traces",
+        "agent_tap.cli.migrate_legacy_traces",
         lambda _output_dir: (_ for _ in ()).throw(AssertionError("dashboard_main should not pre-migrate")),
     )
 
@@ -5283,12 +5283,12 @@ async def test_dashboard_main_bind_all_opens_loopback_url(monkeypatch, tmp_path)
 
     import aiohttp
 
-    from claude_tap import dashboard_main, parse_dashboard_args
+    from agent_tap import dashboard_main, parse_dashboard_args
 
     opened_urls: list[str] = []
-    monkeypatch.setattr("claude_tap.cli._open_browser", opened_urls.append)
+    monkeypatch.setattr("agent_tap.cli._open_browser", opened_urls.append)
     monkeypatch.setenv("CLOUDTAP_DB", str(tmp_path / "dashboard.sqlite3"))
-    monkeypatch.setattr("claude_tap.cli.is_dashboard_healthy", AsyncMock(return_value=False))
+    monkeypatch.setattr("agent_tap.cli.is_dashboard_healthy", AsyncMock(return_value=False))
 
     with socket.socket() as sock:
         sock.bind(("127.0.0.1", 0))
@@ -5324,14 +5324,14 @@ async def test_dashboard_main_opens_reused_dashboard(monkeypatch, tmp_path):
     """The standalone dashboard command should honor browser opens when reusing a server."""
     from unittest.mock import AsyncMock
 
-    from claude_tap import dashboard_main, parse_dashboard_args
+    from agent_tap import dashboard_main, parse_dashboard_args
 
     opened_urls: list[str] = []
     migration_calls: list[Path] = []
-    monkeypatch.setattr("claude_tap.cli._open_browser", opened_urls.append)
+    monkeypatch.setattr("agent_tap.cli._open_browser", opened_urls.append)
     monkeypatch.setenv("CLOUDTAP_DB", str(tmp_path / "dashboard.sqlite3"))
-    monkeypatch.setattr("claude_tap.cli.is_dashboard_healthy", AsyncMock(return_value=True))
-    monkeypatch.setattr("claude_tap.cli.migrate_legacy_traces", migration_calls.append)
+    monkeypatch.setattr("agent_tap.cli.is_dashboard_healthy", AsyncMock(return_value=True))
+    monkeypatch.setattr("agent_tap.cli.migrate_legacy_traces", migration_calls.append)
 
     args = parse_dashboard_args(["--tap-output-dir", str(tmp_path), "--tap-live-port", "23456"])
 
@@ -5345,11 +5345,11 @@ async def test_dashboard_main_stops_stale_dashboard_before_start(monkeypatch, tm
     """The standalone dashboard command should replace stale dashboard processes."""
     from unittest.mock import AsyncMock
 
-    from claude_tap import dashboard_main, parse_dashboard_args
+    from agent_tap import dashboard_main, parse_dashboard_args
 
     calls: list[tuple[str, object]] = []
     monkeypatch.setenv("CLOUDTAP_DB", str(tmp_path / "dashboard.sqlite3"))
-    monkeypatch.setattr("claude_tap.cli._is_dashboard_reusable", AsyncMock(return_value=False))
+    monkeypatch.setattr("agent_tap.cli._is_dashboard_reusable", AsyncMock(return_value=False))
 
     async def fake_stop_stale(host: str, port: int, url: str) -> None:
         calls.append(("stop_stale", (host, port, url)))
@@ -5370,8 +5370,8 @@ async def test_dashboard_main_stops_stale_dashboard_before_start(monkeypatch, tm
         async def stop(self) -> None:
             calls.append(("stop", None))
 
-    monkeypatch.setattr("claude_tap.cli.stop_incompatible_dashboard_if_running", fake_stop_stale)
-    monkeypatch.setattr("claude_tap.cli.LiveViewerServer", FakeServer)
+    monkeypatch.setattr("agent_tap.cli.stop_incompatible_dashboard_if_running", fake_stop_stale)
+    monkeypatch.setattr("agent_tap.cli.LiveViewerServer", FakeServer)
 
     args = parse_dashboard_args(["--tap-output-dir", str(tmp_path), "--tap-live-port", "23456", "--tap-no-open"])
 
@@ -5390,12 +5390,12 @@ async def test_dashboard_main_stops_running_dashboard(monkeypatch, tmp_path):
     """The dashboard stop command should stop an existing dashboard."""
     from unittest.mock import AsyncMock
 
-    from claude_tap import dashboard_main, parse_dashboard_args
+    from agent_tap import dashboard_main, parse_dashboard_args
 
     monkeypatch.setenv("CLOUDTAP_DB", str(tmp_path / "dashboard.sqlite3"))
-    monkeypatch.setattr("claude_tap.cli.is_dashboard_healthy", AsyncMock(return_value=True))
+    monkeypatch.setattr("agent_tap.cli.is_dashboard_healthy", AsyncMock(return_value=True))
     stop_dashboard = AsyncMock(return_value=True)
-    monkeypatch.setattr("claude_tap.cli.stop_dashboard_service", stop_dashboard)
+    monkeypatch.setattr("agent_tap.cli.stop_dashboard_service", stop_dashboard)
 
     args = parse_dashboard_args(["stop", "--tap-live-port", "23456"])
 
@@ -5408,12 +5408,12 @@ async def test_dashboard_main_quit_alias_stops_running_dashboard(monkeypatch, tm
     """The dashboard quit alias should route to the same stop flow."""
     from unittest.mock import AsyncMock
 
-    from claude_tap import dashboard_main, parse_dashboard_args
+    from agent_tap import dashboard_main, parse_dashboard_args
 
     monkeypatch.setenv("CLOUDTAP_DB", str(tmp_path / "dashboard.sqlite3"))
-    monkeypatch.setattr("claude_tap.cli.is_dashboard_healthy", AsyncMock(return_value=True))
+    monkeypatch.setattr("agent_tap.cli.is_dashboard_healthy", AsyncMock(return_value=True))
     stop_dashboard = AsyncMock(return_value=True)
-    monkeypatch.setattr("claude_tap.cli.stop_dashboard_service", stop_dashboard)
+    monkeypatch.setattr("agent_tap.cli.stop_dashboard_service", stop_dashboard)
 
     args = parse_dashboard_args(["quit", "--tap-live-port", "23456"])
 
@@ -5426,12 +5426,12 @@ async def test_dashboard_main_stop_reports_missing_dashboard(monkeypatch, tmp_pa
     """The dashboard stop command should fail clearly when no dashboard is running."""
     from unittest.mock import AsyncMock
 
-    from claude_tap import dashboard_main, parse_dashboard_args
+    from agent_tap import dashboard_main, parse_dashboard_args
 
     monkeypatch.setenv("CLOUDTAP_DB", str(tmp_path / "dashboard.sqlite3"))
-    monkeypatch.setattr("claude_tap.cli.is_dashboard_healthy", AsyncMock(return_value=False))
+    monkeypatch.setattr("agent_tap.cli.is_dashboard_healthy", AsyncMock(return_value=False))
     stop_dashboard = AsyncMock(return_value=True)
-    monkeypatch.setattr("claude_tap.cli.stop_dashboard_service", stop_dashboard)
+    monkeypatch.setattr("agent_tap.cli.stop_dashboard_service", stop_dashboard)
 
     args = parse_dashboard_args(["stop", "--tap-live-port", "23456"])
 
@@ -5444,12 +5444,12 @@ async def test_dashboard_main_stop_reports_stop_failure(monkeypatch, tmp_path):
     """The dashboard stop command should report stop failures after health succeeds."""
     from unittest.mock import AsyncMock
 
-    from claude_tap import dashboard_main, parse_dashboard_args
+    from agent_tap import dashboard_main, parse_dashboard_args
 
     monkeypatch.setenv("CLOUDTAP_DB", str(tmp_path / "dashboard.sqlite3"))
-    monkeypatch.setattr("claude_tap.cli.is_dashboard_healthy", AsyncMock(return_value=True))
+    monkeypatch.setattr("agent_tap.cli.is_dashboard_healthy", AsyncMock(return_value=True))
     stop_dashboard = AsyncMock(return_value=False)
-    monkeypatch.setattr("claude_tap.cli.stop_dashboard_service", stop_dashboard)
+    monkeypatch.setattr("agent_tap.cli.stop_dashboard_service", stop_dashboard)
 
     args = parse_dashboard_args(["stop", "--tap-live-port", "23456"])
 

@@ -1,6 +1,6 @@
 # Session Dashboard Evidence
 
-Generated from a real local `.traces/` capture served through `claude-tap dashboard`:
+Generated from a real local `.traces/` capture served through `agent-tap dashboard`:
 
 - `.traces/dashboard-multi-agent-20260520-191156/`
 

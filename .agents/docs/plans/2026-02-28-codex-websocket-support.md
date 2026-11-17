@@ -11,7 +11,7 @@ status: active
 ## 背景
 
 Codex CLI v0.106.0+ 默认对 `/v1/responses` API 调用使用 WebSocket 传输
-（`responses_websockets` 和 `responses_websockets_v2` 特性）。当前 claude-tap
+（`responses_websockets` 和 `responses_websockets_v2` 特性）。当前 agent-tap
 通过自动注入 `--disable responses_websockets` 的方式绕过该行为并强制使用 HTTP，
 从而使现有 HTTP reverse proxy 能捕获全部请求。
 
@@ -20,8 +20,8 @@ Codex CLI v0.106.0+ 默认对 `/v1/responses` API 调用使用 WebSocket 传输
 
 ## 目标
 
-在 claude-tap 的 reverse proxy mode 中原生支持 WebSocket 拦截，使 Codex
-可使用默认 WebSocket 传输，同时 claude-tap 仍能捕获全部 API 调用。
+在 agent-tap 的 reverse proxy mode 中原生支持 WebSocket 拦截，使 Codex
+可使用默认 WebSocket 传输，同时 agent-tap 仍能捕获全部 API 调用。
 
 ## 方案选项
 

@@ -31,26 +31,26 @@ DEFAULT_THRESHOLDS = {
     "viewer_css_selector_min": 65.0,
     "viewer_css_diff_min": 80.0,
 }
-VIEWER_HTML_SOURCE = "claude_tap/viewer.html"
-VIEWER_LEGACY_JS_SOURCE = "claude_tap/viewer_assets/viewer.js"
+VIEWER_HTML_SOURCE = "agent_tap/viewer.html"
+VIEWER_LEGACY_JS_SOURCE = "agent_tap/viewer_assets/viewer.js"
 VIEWER_JS_SOURCES = (
-    "claude_tap/viewer_assets/state.js",
-    "claude_tap/viewer_assets/responses.js",
-    "claude_tap/viewer_assets/lazy_loading.js",
-    "claude_tap/viewer_assets/i18n_ui.js",
-    "claude_tap/viewer_assets/live_bootstrap.js",
-    "claude_tap/viewer_assets/filters_search.js",
-    "claude_tap/viewer_assets/sidebar.js",
-    "claude_tap/viewer_assets/detail_trace.js",
-    "claude_tap/viewer_assets/renderers.js",
-    "claude_tap/viewer_assets/sections_json.js",
-    "claude_tap/viewer_assets/diff.js",
-    "claude_tap/viewer_assets/utilities_mobile.js",
+    "agent_tap/viewer_assets/state.js",
+    "agent_tap/viewer_assets/responses.js",
+    "agent_tap/viewer_assets/lazy_loading.js",
+    "agent_tap/viewer_assets/i18n_ui.js",
+    "agent_tap/viewer_assets/live_bootstrap.js",
+    "agent_tap/viewer_assets/filters_search.js",
+    "agent_tap/viewer_assets/sidebar.js",
+    "agent_tap/viewer_assets/detail_trace.js",
+    "agent_tap/viewer_assets/renderers.js",
+    "agent_tap/viewer_assets/sections_json.js",
+    "agent_tap/viewer_assets/diff.js",
+    "agent_tap/viewer_assets/utilities_mobile.js",
 )
-VIEWER_CSS_SOURCE = "claude_tap/viewer_assets/viewer.css"
-VIEWER_DIFF_PATHS = ["claude_tap/*.py", VIEWER_HTML_SOURCE, "claude_tap/viewer_assets/*"]
-VIEWER_STYLE_TEMPLATE_ANCHOR = "<!-- CLAUDE_TAP_VIEWER_STYLE -->"
-VIEWER_SCRIPT_TEMPLATE_ANCHOR = "<!-- CLAUDE_TAP_VIEWER_SCRIPT -->"
+VIEWER_CSS_SOURCE = "agent_tap/viewer_assets/viewer.css"
+VIEWER_DIFF_PATHS = ["agent_tap/*.py", VIEWER_HTML_SOURCE, "agent_tap/viewer_assets/*"]
+VIEWER_STYLE_TEMPLATE_ANCHOR = "<!-- AGENT_TAP_VIEWER_STYLE -->"
+VIEWER_SCRIPT_TEMPLATE_ANCHOR = "<!-- AGENT_TAP_VIEWER_SCRIPT -->"
 
 
 @dataclass(frozen=True)
@@ -196,7 +196,7 @@ def _filter_pure_viewer_asset_split(changed_lines: dict[str, set[int]], base: st
 
 def load_thresholds(config_path: Path = DEFAULT_CONFIG) -> dict[str, float]:
     data = tomllib.loads(config_path.read_text(encoding="utf-8"))
-    configured = data.get("tool", {}).get("claude_tap", {}).get("coverage", {})
+    configured = data.get("tool", {}).get("agent_tap", {}).get("coverage", {})
     thresholds = dict(DEFAULT_THRESHOLDS)
     for key in thresholds:
         if key in configured:
@@ -226,7 +226,7 @@ def check_python_coverage(
     covered_changed = 0
     files = coverage.get("files", {})
     for path, changed in changed_lines.items():
-        if not path.startswith("claude_tap/") or not path.endswith(".py"):
+        if not path.startswith("agent_tap/") or not path.endswith(".py"):
             continue
         file_cov = files.get(path)
         if not file_cov:
@@ -511,8 +511,8 @@ def collect_viewer_js_coverage() -> tuple[float, set[str], int, int]:
         compact_html_path = tmp_path / "compact_coverage.html"
         compact_bundle_path = tmp_path / "compact_coverage.ctap.json"
         remote_html_path = tmp_path / "remote_coverage.html"
-        from claude_tap.compact_trace import build_compact_trace_bundle
-        from claude_tap.viewer import (
+        from agent_tap.compact_trace import build_compact_trace_bundle
+        from agent_tap.viewer import (
             _extract_metadata_from_record,
             _generate_html_viewer_from_compact_bundle,
             _generate_html_viewer_from_metadata,
@@ -831,14 +831,14 @@ def collect_viewer_js_coverage() -> tuple[float, set[str], int, int]:
                   selectEntry(0);
                   const compactPayload = parsed.records[0];
                   const compactRecord = compactPayload.record;
-                  const refPath = parseCompactRefPath(compactPayload.__claude_tap_compact_record__.refs[0].path);
+                  const refPath = parseCompactRefPath(compactPayload.__agent_tap_compact_record__.refs[0].path);
                   const blobRef = compactRecord.request.body.instructions;
                   isCompactBlobRef(blobRef);
                   loadCompactBlobRef(blobRef, parsed.blobs, new Map());
                   materializeCompactRefPath(compactRecord, refPath, parsed.blobs, new Map());
                   materializeCompactRecord(compactPayload, parsed.blobs, new Map());
                   const legacyPayload = {
-                    __claude_tap_compact_record__: {
+                    __agent_tap_compact_record__: {
                       version: 1,
                       encoding: 'json-blob-ref',
                     },

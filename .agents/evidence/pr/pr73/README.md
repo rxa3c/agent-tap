@@ -12,8 +12,8 @@ Command:
 
 ```bash
 cd /Users/liaohch3
-uv run --project /Users/liaohch3/src/github.com/liaohch3/claude-tap \
-  python -m claude_tap \
+uv run --project /Users/liaohch3/src/github.com/liaohch3/agent-tap \
+  python -m agent_tap \
   --tap-client codex \
   --tap-proxy-mode forward \
   --tap-output-dir /tmp/codex-forward-real \
@@ -50,9 +50,9 @@ cxx exec "run pwd and reply with exactly the pwd"
 
 Artifacts:
 
-- JSONL: `/Users/liaohch3/.claude-tap-traces/2026-04-20/trace_011853.jsonl`
-- HTML: `/Users/liaohch3/.claude-tap-traces/2026-04-20/trace_011853.html`
-- Log: `/Users/liaohch3/.claude-tap-traces/2026-04-20/trace_011853.log`
+- JSONL: `/Users/liaohch3/.agent-tap-traces/2026-04-20/trace_011853.jsonl`
+- HTML: `/Users/liaohch3/.agent-tap-traces/2026-04-20/trace_011853.html`
+- Log: `/Users/liaohch3/.agent-tap-traces/2026-04-20/trace_011853.log`
 
 Observed in log:
 
@@ -77,9 +77,9 @@ cxx exec "run pwd and reply with exactly the pwd"
 
 Artifacts:
 
-- JSONL: `/Users/liaohch3/.claude-tap-traces/2026-04-20/trace_104528.jsonl`
-- HTML: `/Users/liaohch3/.claude-tap-traces/2026-04-20/trace_104528.html`
-- Log: `/Users/liaohch3/.claude-tap-traces/2026-04-20/trace_104528.log`
+- JSONL: `/Users/liaohch3/.agent-tap-traces/2026-04-20/trace_104528.jsonl`
+- HTML: `/Users/liaohch3/.agent-tap-traces/2026-04-20/trace_104528.html`
+- Log: `/Users/liaohch3/.agent-tap-traces/2026-04-20/trace_104528.log`
 
 Observed in log:
 
@@ -101,7 +101,7 @@ Observed behavior:
   - Source viewer: `/tmp/codex-forward-real-fixed/2026-04-20/trace_112817.html`
   - Captures the repaired direct forward-mode run with websocket upgrade and visible final assistant output
 - `pr73-cxx-forward-websocket-fixed-output.png`
-  - Source viewer: `/Users/liaohch3/.claude-tap-traces/2026-04-20/trace_104528.html`
+  - Source viewer: `/Users/liaohch3/.agent-tap-traces/2026-04-20/trace_104528.html`
   - Captures the repaired alias run with visible final assistant output
 
 ## Local validation
@@ -117,9 +117,9 @@ uv run pytest tests/test_ws_proxy.py -k build_ws_record_merges_incremental_reque
 uv run pytest tests/test_responses_browser.py -x --timeout=120
 uv run python scripts/check_screenshots.py .agents/evidence/pr/pr73
 uv run python scripts/verify_screenshots.py \
-  /Users/liaohch3/.claude-tap-traces/2026-04-20/trace_011853.html \
+  /Users/liaohch3/.agent-tap-traces/2026-04-20/trace_011853.html \
   /tmp/codex-forward-real/2026-04-20/trace_011250.html
-uv run python scripts/verify_screenshots.py /Users/liaohch3/.claude-tap-traces/2026-04-20/trace_104528.html
+uv run python scripts/verify_screenshots.py /Users/liaohch3/.agent-tap-traces/2026-04-20/trace_104528.html
 ```
 
 Results:

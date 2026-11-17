@@ -5,8 +5,8 @@ checkout on Windows. The session used an isolated local database and custom
 dashboard port:
 
 ```powershell
-$env:CLOUDTAP_DB = "D:\projects\goal\.tmp\pr319-evidence\claude-tap.sqlite3"
-.\.venv\Scripts\python.exe -m claude_tap --tap-no-launch --tap-no-open `
+$env:CLOUDTAP_DB = "D:\projects\goal\.tmp\pr319-evidence\agent-tap.sqlite3"
+.\.venv\Scripts\python.exe -m agent_tap --tap-no-launch --tap-no-open `
   --tap-live-port 31927 `
   --tap-output-dir D:\projects\goal\.tmp\pr319-evidence\.traces
 ```

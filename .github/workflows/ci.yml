@@ -131,11 +131,11 @@ jobs:
         run: python -m pytest tests/test_windows_compat.py -x --timeout=60
       - name: Install the real npm Claude Code shim
         run: npm install --global @anthropic-ai/claude-code
-      - name: Launch the real npm shim through claude-tap
-        run: claude-tap --tap-client claude --tap-no-live --tap-no-open -- --version
+      - name: Launch the real npm shim through agent-tap
+        run: agent-tap --tap-client claude --tap-no-live --tap-no-open -- --version
 
   coverage:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04  # Playwright has no chromium build for ubuntu-latest (26.04) yet
     steps:
       - uses: actions/checkout@v4
         with:

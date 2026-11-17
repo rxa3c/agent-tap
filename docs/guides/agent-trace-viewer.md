@@ -1,6 +1,6 @@
 # Local AI Agent Trace Viewer
 
-`claude-tap` is a local trace viewer and HTML exporter for AI coding agents. It helps you inspect Claude Code traces, Codex traces, OpenAI Responses API traces, Anthropic Messages traces, Gemini traces, and other agent runs without uploading private data to a hosted dashboard.
+`agent-tap` is a local trace viewer and HTML exporter for AI coding agents. It helps you inspect Claude Code traces, Codex traces, OpenAI Responses API traces, Anthropic Messages traces, Gemini traces, and other agent runs without uploading private data to a hosted dashboard.
 
 English guide | [Simplified Chinese guide](agent-trace-viewer.zh.md)
 
@@ -20,11 +20,11 @@ These details are hard to recover from terminal output alone. The terminal shows
 
 Many observability products are useful for production systems, but local debugging has a different job. When a coding agent touches private code, private prompts, repository metadata, or internal tools, the safest default is to inspect the trace on your own machine.
 
-`claude-tap` keeps trace sessions local by default. Common auth headers are redacted before recording, and exported HTML files are static artifacts that you control.
+`agent-tap` keeps trace sessions local by default. Common auth headers are redacted before recording, and exported HTML files are static artifacts that you control.
 
 ## Supported traces and clients
 
-`claude-tap` can trace and inspect sessions from:
+`agent-tap` can trace and inspect sessions from:
 
 - Claude Code
 - Codex CLI
@@ -43,32 +43,32 @@ It also supports trace shapes from Anthropic Messages, OpenAI Responses, OpenAI 
 
 ## How to view a trace
 
-Install `claude-tap`:
+Install `agent-tap`:
 
 ```bash
-uv tool install claude-tap
+uv tool install git+https://github.com/rxa3c/agent-tap
 ```
 
-Run the client through `claude-tap`:
+Run the client through `agent-tap`:
 
 ```bash
 # Claude Code
-claude-tap
+agent-tap
 
 # Codex CLI
-claude-tap --tap-client codex
+agent-tap --tap-client codex
 
 # Codex App backend capture through the forward proxy
-claude-tap --tap-client codexapp
+agent-tap --tap-client codexapp
 
 # Gemini CLI
-claude-tap --tap-client gemini -- -p "hello"
+agent-tap --tap-client gemini -- -p "hello"
 ```
 
 Open the local dashboard or export a standalone HTML file with embedded compact trace data:
 
 ```bash
-claude-tap export trace.jsonl --format html
+agent-tap export trace.jsonl --format html
 ```
 
 ## What to inspect first
@@ -85,11 +85,11 @@ The trace viewer is designed around these debugging questions.
 
 ## Claude trace viewer
 
-For Claude Code and Anthropic-compatible traffic, `claude-tap` shows Anthropic Messages requests, tool calls, streaming responses, token usage, and Claude-compatible gateway metadata. It can be used as a local Claude trace viewer when you want to inspect Claude Code runs without uploading session data.
+For Claude Code and Anthropic-compatible traffic, `agent-tap` shows Anthropic Messages requests, tool calls, streaming responses, token usage, and Claude-compatible gateway metadata. It can be used as a local Claude trace viewer when you want to inspect Claude Code runs without uploading session data.
 
 ## Codex trace viewer
 
-For Codex CLI, `claude-tap` supports OpenAI API key mode and ChatGPT subscription OAuth mode. For Codex App, it launches the desktop app through a local forward proxy and records completed HTTP/WebSocket model calls to `/backend-api/codex/responses`; other product traffic is relayed without being stored. Quit an already-running Codex App first so the launched process inherits the proxy and CA configuration. The viewer can inspect request context, tool calls, reasoning/output sections, token usage, and request diffs.
+For Codex CLI, `agent-tap` supports OpenAI API key mode and ChatGPT subscription OAuth mode. For Codex App, it launches the desktop app through a local forward proxy and records completed HTTP/WebSocket model calls to `/backend-api/codex/responses`; other product traffic is relayed without being stored. Quit an already-running Codex App first so the launched process inherits the proxy and CA configuration. The viewer can inspect request context, tool calls, reasoning/output sections, token usage, and request diffs.
 
 ## Export traces to HTML
 
@@ -106,10 +106,10 @@ The exported file is self-contained and can be opened without a hosted dashboard
 
 Use a local trace viewer when you want fast inspection of private agent runs. Use hosted observability when you need production monitoring, team-wide dashboards, alerts, or long-term telemetry.
 
-`claude-tap` is focused on the local debugging and review loop: capture a real run, inspect the request flow, and export a static artifact when needed.
+`agent-tap` is focused on the local debugging and review loop: capture a real run, inspect the request flow, and export a static artifact when needed.
 
 ## Next steps
 
-- [Open the GitHub repository](https://github.com/liaohch3/claude-tap)
+- [Open the GitHub repository](https://github.com/rxa3c/agent-tap)
 - [Check supported clients](../support-matrix.md)
 - [Read the Chinese guide](agent-trace-viewer.zh.md)

@@ -9,7 +9,7 @@ JS; the assertions here are deliberately the mirror image of those.
 
 from __future__ import annotations
 
-from claude_tap.viewer import (
+from agent_tap.viewer import (
     _block_input_text,
     _classify_user_input_origin,
     _clean_session_user_text,
@@ -26,7 +26,7 @@ INJECTED_OPENERS = [
     "<environment_context>\ncwd: /tmp\n</environment_context>",
     "<session_context>\nid: abc\n</session_context>",
     "<local-command-caveat>\nOutput below\n</local-command-caveat>",
-    "<additional_metadata>\nrepo: claude-tap\n</additional_metadata>",
+    "<additional_metadata>\nrepo: agent-tap\n</additional_metadata>",
     "# AGENTS.md instructions\n\nRun ruff before committing.",
     "# Files mentioned by the user:\n\n- viewer.py",
 ]
@@ -184,7 +184,7 @@ def test_an_import_is_payload_only_when_the_statement_ends_the_line() -> None:
         "import json, sys\n",
         "from collections import defaultdict\n",
         "from typing import (\n    Any,\n)",
-        "from claude_tap.viewer import *\n",
+        "from agent_tap.viewer import *\n",
         "from __future__ import annotations\n\nimport json",
     ):
         assert _classify_user_input_origin(pasted) == "payload", pasted

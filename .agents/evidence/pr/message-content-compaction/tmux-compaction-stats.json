@@ -4,12 +4,12 @@
   "codex_cli_version_seen_in_tui": "0.135.0",
   "model_seen_in_tui": "gpt-5.5",
   "prompt_method": "tmux paste-buffer + send-keys into one interactive Codex TUI session",
-  "workspace": "/var/tmp/claude-tap-codex-tmux-compaction-315/workspace",
-  "trace_db": "/var/tmp/claude-tap-codex-tmux-compaction-315/trace.sqlite3",
+  "workspace": "/var/tmp/agent-tap-codex-tmux-compaction-315/workspace",
+  "trace_db": "/var/tmp/agent-tap-codex-tmux-compaction-315/trace.sqlite3",
   "outputs": {
-    "full_json": "/var/tmp/claude-tap-codex-tmux-compaction-315/out/tmux-real-full.json",
-    "compact_bundle": "/var/tmp/claude-tap-codex-tmux-compaction-315/out/tmux-real.ctap.json",
-    "html": "/var/tmp/claude-tap-codex-tmux-compaction-315/out/tmux-real.html"
+    "full_json": "/var/tmp/agent-tap-codex-tmux-compaction-315/out/tmux-real-full.json",
+    "compact_bundle": "/var/tmp/agent-tap-codex-tmux-compaction-315/out/tmux-real.ctap.json",
+    "html": "/var/tmp/agent-tap-codex-tmux-compaction-315/out/tmux-real.html"
   },
   "tmux_user_turns": 5,
   "declared_shell_tool_calls_by_turn": [

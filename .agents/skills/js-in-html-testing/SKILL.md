@@ -45,7 +45,7 @@ Best for: button disabled states, overlay show/hide, keyboard events, click navi
 
 ```python
 def _build_test_html():
-    from claude_tap.viewer import VIEWER_SCRIPT_ANCHOR, _read_viewer_template
+    from agent_tap.viewer import VIEWER_SCRIPT_ANCHOR, _read_viewer_template
 
     template = _read_viewer_template()
     records = [json.dumps(e) for e in TEST_ENTRIES]

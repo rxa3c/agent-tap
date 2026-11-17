@@ -13,16 +13,16 @@ import pytest
 from aiohttp import web
 from yarl import URL
 
-from claude_tap.cli_clients import _extend_no_proxy
-from claude_tap.proxy import proxy_handler
-from claude_tap.trace import TraceWriter
-from claude_tap.trace_store import get_trace_store, reset_trace_store
-from claude_tap.ws_proxy import _build_ws_record, _get_ws_proxy_settings
+from agent_tap.cli_clients import _extend_no_proxy
+from agent_tap.proxy import proxy_handler
+from agent_tap.trace import TraceWriter
+from agent_tap.trace_store import get_trace_store, reset_trace_store
+from agent_tap.ws_proxy import _build_ws_record, _get_ws_proxy_settings
 
 
 @pytest.fixture
 def trace_dir():
-    d = tempfile.mkdtemp(prefix="claude_tap_ws_test_")
+    d = tempfile.mkdtemp(prefix="agent_tap_ws_test_")
     saved_no_proxy = {key: os.environ.get(key) for key in ("NO_PROXY", "no_proxy")}
     _extend_no_proxy(os.environ, ("localhost", "127.0.0.1", "::1"))
     os.environ["CLOUDTAP_DB"] = str(Path(d) / "ws-test.sqlite3")
@@ -1333,7 +1333,7 @@ class TestGetWsProxySettings:
         # Mock get_env_proxy_for_url to raise LookupError (no proxy configured).
         # Necessary because macOS system proxy settings bypass env vars.
         monkeypatch.setattr(
-            "claude_tap.ws_proxy.get_env_proxy_for_url",
+            "agent_tap.ws_proxy.get_env_proxy_for_url",
             lambda url: (_ for _ in ()).throw(LookupError("no proxy")),
         )
         result = _get_ws_proxy_settings("wss://api.openai.com/v1/responses")

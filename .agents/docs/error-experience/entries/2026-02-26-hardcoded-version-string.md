@@ -15,7 +15,7 @@
 
 ## 修复
 
-将硬编码值替换为 `importlib.metadata.version("claude-tap")`，
+将硬编码值替换为 `importlib.metadata.version("agent-tap")`，
 使其始终与 `pyproject.toml` 和 PyPI package metadata 一致。
 
 ## 经验

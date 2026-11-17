@@ -6,8 +6,8 @@ from pathlib import Path
 
 import pytest
 
-from claude_tap import cli_clients, parse_args
-from claude_tap.cli import CLIENT_CONFIGS, ClientConfig, run_client
+from agent_tap import cli_clients, parse_args
+from agent_tap.cli import CLIENT_CONFIGS, ClientConfig, run_client
 
 SUPPORTED_CLIENTS = {
     "agy",
@@ -27,6 +27,7 @@ SUPPORTED_CLIENTS = {
     "cursor",
     "qoder",
     "codebuddy",
+    "workbuddy",
 }
 
 SINGLE_REVERSE_ENV_CLIENTS = SUPPORTED_CLIENTS - {"claude", "codexapp", "gemini", "kimi-code", "openclaw"}
@@ -49,6 +50,7 @@ SUPPORTED_DEFAULT_PROXY_MODES = {
     "cursor": "forward",
     "qoder": "forward",
     "codebuddy": "reverse",
+    "workbuddy": "forward",
 }
 
 
@@ -75,7 +77,7 @@ def test_client_matrix_contains_only_supported_clients() -> None:
 def test_forward_proxy_desktop_clients_auto_trust_ca_on_macos() -> None:
     auto_trust_clients = {client for client, cfg in CLIENT_CONFIGS.items() if cfg.auto_trust_ca_macos}
 
-    assert auto_trust_clients == {"agy", "codexapp"}
+    assert auto_trust_clients == {"agy", "codexapp", "workbuddy"}
 
 
 @pytest.mark.parametrize("client", sorted(SUPPORTED_CLIENTS))
@@ -219,7 +221,7 @@ async def test_run_client_reverse_sets_all_base_url_envs_and_settings(
         return _DummyProc()
 
     monkeypatch.setitem(CLIENT_CONFIGS, "multi-env", cfg)
-    monkeypatch.setattr("claude_tap.cli.shutil.which", lambda name: f"/tmp/{name}")
+    monkeypatch.setattr("agent_tap.cli.shutil.which", lambda name: f"/tmp/{name}")
     monkeypatch.setattr(asyncio, "create_subprocess_exec", fake_create_subprocess_exec)
     monkeypatch.setattr("sys.stdin.isatty", lambda: False)
 
@@ -277,7 +279,7 @@ async def test_run_client_openclaw_reverse_patches_temp_config(
         return _DummyProc()
 
     monkeypatch.setattr(Path, "home", lambda: tmp_path)
-    monkeypatch.setattr("claude_tap.cli.shutil.which", lambda name: f"/tmp/{name}")
+    monkeypatch.setattr("agent_tap.cli.shutil.which", lambda name: f"/tmp/{name}")
     monkeypatch.setattr(asyncio, "create_subprocess_exec", fake_create_subprocess_exec)
     monkeypatch.setattr("sys.stdin.isatty", lambda: False)
 
@@ -326,7 +328,7 @@ async def test_run_client_openclaw_reverse_patches_model_arg_provider(
         return _DummyProc()
 
     monkeypatch.setattr(Path, "home", lambda: tmp_path)
-    monkeypatch.setattr("claude_tap.cli.shutil.which", lambda name: f"/tmp/{name}")
+    monkeypatch.setattr("agent_tap.cli.shutil.which", lambda name: f"/tmp/{name}")
     monkeypatch.setattr(asyncio, "create_subprocess_exec", fake_create_subprocess_exec)
     monkeypatch.setattr("sys.stdin.isatty", lambda: False)
 
@@ -376,7 +378,7 @@ async def test_run_client_openclaw_reverse_cleans_temp_config_on_spawn_error(
         raise OSError("spawn failed")
 
     monkeypatch.setattr(Path, "home", lambda: tmp_path)
-    monkeypatch.setattr("claude_tap.cli.shutil.which", lambda name: f"/tmp/{name}")
+    monkeypatch.setattr("agent_tap.cli.shutil.which", lambda name: f"/tmp/{name}")
     monkeypatch.setattr(asyncio, "create_subprocess_exec", fake_create_subprocess_exec)
     monkeypatch.setattr("sys.stdin.isatty", lambda: False)
 
@@ -540,7 +542,7 @@ async def test_run_client_agy_forward_sets_proxy_ca_and_cloud_code_url(
         captured["env"] = kwargs["env"]
         return _DummyProc()
 
-    monkeypatch.setattr("claude_tap.cli.shutil.which", lambda name: f"/tmp/{name}")
+    monkeypatch.setattr("agent_tap.cli.shutil.which", lambda name: f"/tmp/{name}")
     monkeypatch.setattr(asyncio, "create_subprocess_exec", fake_create_subprocess_exec)
     monkeypatch.setattr("sys.stdin.isatty", lambda: False)
 
@@ -549,7 +551,7 @@ async def test_run_client_agy_forward_sets_proxy_ca_and_cloud_code_url(
         ["--print", "ok"],
         client="agy",
         proxy_mode="forward",
-        ca_cert_path=Path("/tmp/claude-tap-ca.pem"),
+        ca_cert_path=Path("/tmp/agent-tap-ca.pem"),
     )
 
     assert code == 0

@@ -5,7 +5,7 @@ Generated from a real CodeBuddy CLI run on 2026-05-24 against the iOA login depl
 ## Command
 
 ```bash
-uv run claude-tap --tap-live --tap-client codebuddy
+uv run agent-tap --tap-live --tap-client codebuddy
 # Then in the launched CodeBuddy session: type `hi`
 ```
 
@@ -33,7 +33,7 @@ Both screenshots are ≥1280px viewport and use real trace data (no mocks).
 ## Validation
 
 ```bash
-uv run ruff check claude_tap/cli.py tests/test_codebuddy_launch.py
-uv run ruff format --check claude_tap/cli.py tests/test_codebuddy_launch.py
+uv run ruff check agent_tap/cli.py tests/test_codebuddy_launch.py
+uv run ruff format --check agent_tap/cli.py tests/test_codebuddy_launch.py
 uv run pytest tests/ -x --timeout=60          # 443 passed, 25 skipped
 ```

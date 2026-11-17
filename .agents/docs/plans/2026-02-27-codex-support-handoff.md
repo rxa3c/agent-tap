@@ -6,7 +6,7 @@ status: completed
 
 Date: 2026-02-27
 Branch: `feat/codex-client-support`
-Repository: `liaohch3/claude-tap`
+Repository: `rxa3c/agent-tap`
 
 ## 1. Goal, Scope, and Current Status
 
@@ -29,7 +29,7 @@ Real Codex validation must be successful end-to-end. Any `403` is considered a h
 
 ### A. CLI and Runtime Behavior
 
-#### File: `claude_tap/cli.py`
+#### File: `agent_tap/cli.py`
 
 Changes made:
 
@@ -53,7 +53,7 @@ Reason:
 
 ### B. Trace Model Enhancement for Viewer
 
-#### File: `claude_tap/proxy.py`
+#### File: `agent_tap/proxy.py`
 
 Changes made:
 
@@ -68,7 +68,7 @@ Reason:
 
 ### C. Forward Proxy Consistency
 
-#### File: `claude_tap/forward_proxy.py`
+#### File: `agent_tap/forward_proxy.py`
 
 Changes made:
 
@@ -80,7 +80,7 @@ Reason:
 
 ### D. Viewer Behavior
 
-#### File: `claude_tap/viewer.html`
+#### File: `agent_tap/viewer.html`
 
 Changes made:
 
@@ -98,7 +98,7 @@ Reason:
 
 Changes made:
 
-- Extended `_run_claude_tap(...)` helper with `tap_client` argument.
+- Extended `_run_agent_tap(...)` helper with `tap_client` argument.
 - `test_parse_args` now validates Codex defaults:
   - `--tap-client codex`
   - default target -> `https://api.openai.com`
@@ -179,7 +179,7 @@ Additional targeted tests run:
 Real Codex smoke run attempted and failed (as expected in this env):
 
 - Command pattern:
-  - `uv run python -m claude_tap --tap-client codex --tap-target https://api.openai.com --tap-no-update-check --tap-no-open -- exec "Reply with exactly: CODEX_REAL_OK" --skip-git-repo-check --json`
+  - `uv run python -m agent_tap --tap-client codex --tap-target https://api.openai.com --tap-no-update-check --tap-no-open -- exec "Reply with exactly: CODEX_REAL_OK" --skip-git-repo-check --json`
 - Failure indicators:
   - `403 Forbidden` with missing `api.model.read`
   - Codex exits non-zero
@@ -194,10 +194,10 @@ Important context:
 
 Files intended for this task commit:
 
-- `claude_tap/cli.py`
-- `claude_tap/proxy.py`
-- `claude_tap/forward_proxy.py`
-- `claude_tap/viewer.html`
+- `agent_tap/cli.py`
+- `agent_tap/proxy.py`
+- `agent_tap/forward_proxy.py`
+- `agent_tap/viewer.html`
 - `tests/test_e2e.py`
 - `.agents/docs/plans/2026-02-27-codex-support-plan.md`
 - `.agents/docs/plans/2026-02-27-codex-support-handoff.md` (this file)

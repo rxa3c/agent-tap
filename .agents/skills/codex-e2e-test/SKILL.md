@@ -1,12 +1,12 @@
 ---
 name: codex-e2e-test
-description: Run PR-grade real Codex E2E validation through claude-tap, including resume turns, multiple tool calls, optional image input, viewer verification, and screenshot evidence.
+description: Run PR-grade real Codex E2E validation through agent-tap, including resume turns, multiple tool calls, optional image input, viewer verification, and screenshot evidence.
 tags: testing, e2e, codex, responses-api
 ---
 
 # Codex E2E Test Skill
 
-Run real end-to-end validation that starts `claude-tap` from local source,
+Run real end-to-end validation that starts `agent-tap` from local source,
 connects to the real Codex CLI via OAuth, captures OpenAI Responses API traces,
 and produces viewer screenshots suitable for PR evidence.
 
@@ -49,7 +49,7 @@ are only smoke tests for checking local setup.
 ### Simple (single tool call)
 
 ```bash
-claude-tap --tap-client codex \
+agent-tap --tap-client codex \
   --tap-target https://chatgpt.com/backend-api/codex \
   --tap-output-dir /tmp/codex-e2e \
   --tap-no-open \
@@ -63,7 +63,7 @@ Use a task that requires shell tool use — this forces the agent to make multip
 Responses API calls (models lookup + actual responses):
 
 ```bash
-claude-tap --tap-client codex \
+agent-tap --tap-client codex \
   --tap-target https://chatgpt.com/backend-api/codex \
   --tap-output-dir /tmp/codex-e2e \
   --tap-no-open \
@@ -84,9 +84,9 @@ content. This is the default PR evidence flow.
 ### 1. Prepare an isolated workspace
 
 ```bash
-mkdir -p /tmp/claude-tap-real-codex-workspace
-printf 'project = "claude-tap-real-codex-e2e"\n' \
-  > /tmp/claude-tap-real-codex-workspace/project.toml
+mkdir -p /tmp/agent-tap-real-codex-workspace
+printf 'project = "agent-tap-real-codex-e2e"\n' \
+  > /tmp/agent-tap-real-codex-workspace/project.toml
 ```
 
 Create or copy a small valid PNG into the workspace. If you need a deterministic
@@ -109,23 +109,23 @@ png = (
     + chunk(b"IDAT", zlib.compress(rows))
     + chunk(b"IEND", b"")
 )
-Path("/tmp/claude-tap-real-codex-workspace/input.png").write_bytes(png)
+Path("/tmp/agent-tap-real-codex-workspace/input.png").write_bytes(png)
 PY
 ```
 
-### 2. Start a real Codex session through claude-tap
+### 2. Start a real Codex session through agent-tap
 
 Run from the repository, but point Codex at the isolated workspace with `-C`.
 The prompt should explicitly require several tool calls so the viewer has
 enough messages, tool calls, and response blocks to inspect.
 
 ```bash
-uv run claude-tap --tap-client codex \
+uv run agent-tap --tap-client codex \
   --tap-target https://chatgpt.com/backend-api/codex \
-  --tap-output-dir /tmp/claude-tap-real-codex-traces \
+  --tap-output-dir /tmp/agent-tap-real-codex-traces \
   --tap-no-open \
-  -- exec -C /tmp/claude-tap-real-codex-workspace \
-  --image /tmp/claude-tap-real-codex-workspace/input.png \
+  -- exec -C /tmp/agent-tap-real-codex-workspace \
+  --image /tmp/agent-tap-real-codex-workspace/input.png \
   --dangerously-bypass-approvals-and-sandbox \
   "Inspect this workspace and the attached image. Use shell tools to run pwd, list files, inspect project.toml, inspect input.png, then write codex_e2e_report.txt with your findings. Keep all writes inside this workspace."
 ```
@@ -137,14 +137,14 @@ on `--last` on busy maintainer machines because it can resume an unrelated
 recent Codex session.
 
 ```bash
-uv run claude-tap --tap-client codex \
+uv run agent-tap --tap-client codex \
   --tap-target https://chatgpt.com/backend-api/codex \
-  --tap-output-dir /tmp/claude-tap-real-codex-traces \
+  --tap-output-dir /tmp/agent-tap-real-codex-traces \
   --tap-no-open \
   -- exec resume <SESSION_ID_FROM_FIRST_RUN> \
-  --image /tmp/claude-tap-real-codex-workspace/input.png \
+  --image /tmp/agent-tap-real-codex-workspace/input.png \
   --dangerously-bypass-approvals-and-sandbox \
-  "Continue the same investigation in /tmp/claude-tap-real-codex-workspace. Use shell tools to read /tmp/claude-tap-real-codex-workspace/codex_e2e_report.txt, compute the byte size of /tmp/claude-tap-real-codex-workspace/input.png, and write /tmp/claude-tap-real-codex-workspace/codex_e2e_followup.txt. Then summarize what changed since the previous turn."
+  "Continue the same investigation in /tmp/agent-tap-real-codex-workspace. Use shell tools to read /tmp/agent-tap-real-codex-workspace/codex_e2e_report.txt, compute the byte size of /tmp/agent-tap-real-codex-workspace/input.png, and write /tmp/agent-tap-real-codex-workspace/codex_e2e_followup.txt. Then summarize what changed since the previous turn."
 ```
 
 ### 4. Capture multi-position viewer screenshots
@@ -160,9 +160,9 @@ uv run python - <<'PY'
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 
-html_files = sorted(Path("/tmp/claude-tap-real-codex-traces").rglob("trace_*.html"))
+html_files = sorted(Path("/tmp/agent-tap-real-codex-traces").rglob("trace_*.html"))
 if not html_files:
-    raise SystemExit("No viewer HTML found in /tmp/claude-tap-real-codex-traces")
+    raise SystemExit("No viewer HTML found in /tmp/agent-tap-real-codex-traces")
 html = html_files[-1]
 out_dir = Path(".agents/evidence/pr/codex-real-e2e")
 
@@ -232,7 +232,7 @@ uv run python scripts/check_screenshots.py .agents/evidence/pr/codex-real-e2e
 ### 5. Verify the trace
 
 - The output directory contains at least two real `.jsonl` traces and generated
-  `.html` viewers from `claude-tap`.
+  `.html` viewers from `agent-tap`.
 - The trace includes multiple `POST /v1/responses` entries with status 200 and
   non-zero token usage.
 - At least one request contains image content from the `--image` attachment.

@@ -1,9 +1,9 @@
 # PR #22 WebSocket Verification Report
 
 Date: 2026-03-03
-PR: https://github.com/liaohch3/claude-tap/pull/22
+PR: upstream PR 22
 Branch: `feat/ws-proxy`
-Workspace: `/private/tmp/claude-tap-pr22-ws-verify-20260303`
+Workspace: `/private/tmp/agent-tap-pr22-ws-verify-20260303`
 Evidence root: `/tmp/pr22-ws-unblock-evidence-20260303/`
 
 ## Scope Decision
@@ -28,7 +28,7 @@ This report applies the "truthful high-confidence" merge policy:
      - `/tmp/pr22-ws-unblock-evidence-20260303/ctap-tmux-simple-1772532398/trace_20260303_180638.jsonl`
 
 3. Real Codex reverse-proxy run (default transport)
-   - Command: `uv run python -m claude_tap --tap-client codex ... -- exec "Reply with exactly: PR22_CODEX_PROXY_OK" ...`
+   - Command: `uv run python -m agent_tap --tap-client codex ... -- exec "Reply with exactly: PR22_CODEX_PROXY_OK" ...`
    - Result: PASS (response completed through proxy)
    - Transport observed: HTTP/SSE (`POST /v1/responses`, no WS upgrade)
    - Evidence:
@@ -53,7 +53,7 @@ This report applies the "truthful high-confidence" merge policy:
 
 ## What Is Implemented
 
-- Reverse proxy WS handler is implemented in `claude_tap/proxy.py`.
+- Reverse proxy WS handler is implemented in `agent_tap/proxy.py`.
 - Root cause fixed: removed hardcoded `proxy=None` override from upstream `session.ws_connect(...)`, so WS now follows the same `ClientSession(trust_env=True)` proxy behavior as HTTP/SSE.
 - WS relay and trace recording (`transport=websocket`, `method=WEBSOCKET`, `ws_events`) are implemented.
 - Upstream WS connection failure path returns `502` and records an error.

@@ -37,6 +37,6 @@ diff 质量取决于是否比较了相关 turn。
 
 viewer UX 相关工作应保持聚焦且可验证。
 
-- 可行时优先在 `claude_tap/viewer.html` 中做受限改动。
+- 可行时优先在 `agent_tap/viewer.html` 中做受限改动。
 - 在改进移动端 UX 的同时保持桌面行为稳定。
 - 通过测试与手动 trace-viewer 验证来确认行为。

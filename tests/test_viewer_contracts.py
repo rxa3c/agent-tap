@@ -14,8 +14,8 @@ from typing import Any
 
 import pytest
 
-from claude_tap.compact_trace import build_compact_trace_bundle
-from claude_tap.viewer import _generate_html_viewer, _generate_html_viewer_from_compact_bundle, _read_viewer_template
+from agent_tap.compact_trace import build_compact_trace_bundle
+from agent_tap.viewer import _generate_html_viewer, _generate_html_viewer_from_compact_bundle, _read_viewer_template
 from tests.conftest import playwright_skip_reason
 
 try:
@@ -635,11 +635,11 @@ def _opencode_chat_completions_record() -> dict[str, Any]:
                     {
                         "role": "tool",
                         "tool_call_id": "call_one",
-                        "content": "OPENCODE_TOOL_ONE\n/home/liaohch3/src/github.com/liaohch3/claude-tap-3\n",
+                        "content": "OPENCODE_TOOL_ONE\n/home/liaohch3/src/github.com/rxa3c/agent-tap-3\n",
                     },
                     {
                         "role": "assistant",
-                        "content": "OPENCODE_TOOL_ONE\n/home/liaohch3/src/github.com/liaohch3/claude-tap-3",
+                        "content": "OPENCODE_TOOL_ONE\n/home/liaohch3/src/github.com/rxa3c/agent-tap-3",
                     },
                     {
                         "role": "user",
@@ -717,7 +717,7 @@ def _opencode_chat_completions_record() -> dict[str, Any]:
                         "type": "text",
                         "text": (
                             "Path from OPENCODE_TOOL_ONE: "
-                            "`/home/liaohch3/src/github.com/liaohch3/claude-tap-3`\n\n"
+                            "`/home/liaohch3/src/github.com/rxa3c/agent-tap-3`\n\n"
                             "New command output:\n```\nOPENCODE_TOOL_TWO\npyproject.toml\n```"
                         ),
                     },
@@ -755,8 +755,7 @@ def _opencode_chat_completions_record() -> dict[str, Any]:
                             {
                                 "delta": {
                                     "content": (
-                                        "Path from OPENCODE_TOOL_ONE: "
-                                        "`/home/liaohch3/src/github.com/liaohch3/claude-tap-3`"
+                                        "Path from OPENCODE_TOOL_ONE: `/home/liaohch3/src/github.com/rxa3c/agent-tap-3`"
                                     )
                                 }
                             }
@@ -814,9 +813,7 @@ def _opencode_openai_oauth_responses_record() -> dict[str, Any]:
                     {
                         "type": "function_call_output",
                         "call_id": "call_oauth_bash",
-                        "output": (
-                            "OPENCODE_OPENAI_OAUTH_TOOL_ONE\n/home/liaohch3/src/github.com/liaohch3/claude-tap-3\n"
-                        ),
+                        "output": ("OPENCODE_OPENAI_OAUTH_TOOL_ONE\n/home/liaohch3/src/github.com/rxa3c/agent-tap-3\n"),
                     },
                 ],
                 "tools": [
@@ -838,8 +835,7 @@ def _opencode_openai_oauth_responses_record() -> dict[str, Any]:
                             {
                                 "type": "output_text",
                                 "text": (
-                                    "OPENCODE_OPENAI_OAUTH_TOOL_ONE\n"
-                                    "/home/liaohch3/src/github.com/liaohch3/claude-tap-3"
+                                    "OPENCODE_OPENAI_OAUTH_TOOL_ONE\n/home/liaohch3/src/github.com/rxa3c/agent-tap-3"
                                 ),
                             }
                         ],
@@ -865,7 +861,7 @@ def _opencode_openai_oauth_responses_record() -> dict[str, Any]:
                                     "type": "output_text",
                                     "text": (
                                         "OPENCODE_OPENAI_OAUTH_TOOL_ONE\n"
-                                        "/home/liaohch3/src/github.com/liaohch3/claude-tap-3"
+                                        "/home/liaohch3/src/github.com/rxa3c/agent-tap-3"
                                     ),
                                 }
                             ],
@@ -913,7 +909,7 @@ def _pi_openai_oauth_websocket_record() -> dict[str, Any]:
             {
                 "type": "function_call_output",
                 "call_id": "call_pi_bash",
-                "output": "PI_TOOL_ONE\n/home/liaohch3/src/github.com/liaohch3/claude-tap-3\n",
+                "output": "PI_TOOL_ONE\n/home/liaohch3/src/github.com/rxa3c/agent-tap-3\n",
             }
         ],
     }
@@ -945,7 +941,7 @@ def _pi_openai_oauth_websocket_record() -> dict[str, Any]:
                         "content": [
                             {
                                 "type": "output_text",
-                                "text": "PI_TOOL_ONE\n/home/liaohch3/src/github.com/liaohch3/claude-tap-3",
+                                "text": "PI_TOOL_ONE\n/home/liaohch3/src/github.com/rxa3c/agent-tap-3",
                             }
                         ],
                     }
@@ -1011,7 +1007,7 @@ def _pi_openai_oauth_websocket_record() -> dict[str, Any]:
                         "content": [
                             {
                                 "type": "output_text",
-                                "text": "PI_TOOL_ONE\n/home/liaohch3/src/github.com/liaohch3/claude-tap-3",
+                                "text": "PI_TOOL_ONE\n/home/liaohch3/src/github.com/rxa3c/agent-tap-3",
                             }
                         ],
                     },
@@ -1031,7 +1027,7 @@ def _pi_openai_oauth_websocket_record() -> dict[str, Any]:
                                 "content": [
                                     {
                                         "type": "output_text",
-                                        "text": "PI_TOOL_ONE\n/home/liaohch3/src/github.com/liaohch3/claude-tap-3",
+                                        "text": "PI_TOOL_ONE\n/home/liaohch3/src/github.com/rxa3c/agent-tap-3",
                                     }
                                 ],
                             }
@@ -1296,7 +1292,7 @@ def _user_input_provenance_records() -> tuple[dict[str, Any], ...]:
                     "content": [
                         {"type": "text", "text": human_ask},
                         {"type": "text", "text": "<system-reminder>Budget is nearly spent.</system-reminder>"},
-                        {"type": "text", "text": "diff --git a/claude_tap/viewer.py b/claude_tap/viewer.py"},
+                        {"type": "text", "text": "diff --git a/agent_tap/viewer.py b/agent_tap/viewer.py"},
                     ],
                 },
             ],
@@ -1430,7 +1426,7 @@ def _contract_cases() -> tuple[ViewerContractCase, ...]:
             expected_usage={"input_tokens": 14070, "output_tokens": 109, "cache_read_input_tokens": 13952},
             required_detail_text=(
                 "OPENCODE_TOOL_ONE",
-                "/home/liaohch3/src/github.com/liaohch3/claude-tap-3",
+                "/home/liaohch3/src/github.com/rxa3c/agent-tap-3",
                 "OPENCODE_TOOL_TWO",
                 "pyproject.toml",
             ),
@@ -1450,7 +1446,7 @@ def _contract_cases() -> tuple[ViewerContractCase, ...]:
             expected_usage={"input_tokens": 12424, "output_tokens": 115, "cache_read_input_tokens": 11776},
             required_detail_text=(
                 "OPENCODE_OPENAI_OAUTH_TOOL_ONE",
-                "/home/liaohch3/src/github.com/liaohch3/claude-tap-3",
+                "/home/liaohch3/src/github.com/rxa3c/agent-tap-3",
                 "bash",
             ),
             min_stream_events=1,
@@ -1470,7 +1466,7 @@ def _contract_cases() -> tuple[ViewerContractCase, ...]:
             expected_usage={"input_tokens": 655, "output_tokens": 29},
             required_detail_text=(
                 "PI_TOOL_ONE",
-                "/home/liaohch3/src/github.com/liaohch3/claude-tap-3",
+                "/home/liaohch3/src/github.com/rxa3c/agent-tap-3",
                 "printf 'PI_TOOL_ONE",
             ),
             min_stream_events=2,
@@ -2606,7 +2602,7 @@ def test_viewer_renders_embedded_and_dropped_compact_trace_bundle(tmp_path: Path
         embedded_state = page.evaluate(
             """() => ({
               entryCount: entries.length,
-              hasBlobRef: JSON.stringify(EMBEDDED_TRACE_COMPACT_DATA).includes('__claude_tap_blob_ref__'),
+              hasBlobRef: JSON.stringify(EMBEDDED_TRACE_COMPACT_DATA).includes('__agent_tap_blob_ref__'),
               detailText: document.querySelector('#detail')?.innerText || '',
             })"""
         )
@@ -2677,7 +2673,7 @@ def test_viewer_sidebar_order_can_switch_between_model_turn_and_session_sequence
     html_path = _generate_case_html(tmp_path, "sidebar_order", _sidebar_order_records())
 
     page = chromium_browser.new_page()
-    page.add_init_script("localStorage.setItem('claude-tap-sidebar-order', 'model')")
+    page.add_init_script("localStorage.setItem('agent-tap-sidebar-order', 'model')")
     try:
         errors = _open_viewer_with_error_capture(page, html_path)
         model_state = page.evaluate(
@@ -2758,7 +2754,7 @@ def test_viewer_session_order_groups_claude_code_tool_loop_rounds(tmp_path: Path
     html_path = _generate_case_html(tmp_path, "claude_code_session_rounds", _claude_code_session_round_records())
 
     page = chromium_browser.new_page()
-    page.add_init_script("localStorage.setItem('claude-tap-sidebar-order', 'session')")
+    page.add_init_script("localStorage.setItem('agent-tap-sidebar-order', 'session')")
     try:
         errors = _open_viewer_with_error_capture(page, html_path)
         state = page.evaluate(
@@ -2787,7 +2783,7 @@ def test_viewer_session_order_groups_large_codex_app_sessions_in_virtual_mode(tm
     html_path = _generate_case_html(tmp_path, "codex_app_large_sessions", _codex_app_large_session_records())
 
     page = chromium_browser.new_page()
-    page.add_init_script("localStorage.setItem('claude-tap-sidebar-order', 'session')")
+    page.add_init_script("localStorage.setItem('agent-tap-sidebar-order', 'session')")
     try:
         errors = _open_viewer_with_error_capture(page, html_path)
         state = page.evaluate(
@@ -2842,7 +2838,7 @@ def test_viewer_virtual_group_title_stays_inside_its_fixed_row(tmp_path: Path, c
     html_path = _generate_case_html(tmp_path, "virtual_group_title_clamp", records)
 
     page = chromium_browser.new_page()
-    page.add_init_script("localStorage.setItem('claude-tap-sidebar-order', 'session')")
+    page.add_init_script("localStorage.setItem('agent-tap-sidebar-order', 'session')")
     try:
         errors = _open_viewer_with_error_capture(page, html_path)
         overflowing = page.evaluate(
@@ -3192,7 +3188,7 @@ def test_viewer_session_group_hover_shows_full_truncated_user_input(tmp_path: Pa
     )
 
     page = chromium_browser.new_page()
-    page.add_init_script("localStorage.setItem('claude-tap-sidebar-order', 'session')")
+    page.add_init_script("localStorage.setItem('agent-tap-sidebar-order', 'session')")
     try:
         errors = _open_viewer_with_error_capture(page, html_path)
         header = page.locator(".sidebar-group-header").nth(0)
@@ -3247,7 +3243,7 @@ def test_viewer_session_group_hover_shows_titles_cut_by_the_line_clamp(tmp_path:
     html_path = _generate_case_html(tmp_path, "session_clamped_title", (record,))
 
     page = chromium_browser.new_page()
-    page.add_init_script("localStorage.setItem('claude-tap-sidebar-order', 'session')")
+    page.add_init_script("localStorage.setItem('agent-tap-sidebar-order', 'session')")
     try:
         errors = _open_viewer_with_error_capture(page, html_path)
         header = page.locator(".sidebar-group-header").nth(0)
@@ -3854,7 +3850,7 @@ def test_viewer_session_identical_prompts_image_tags_and_early_title_generation(
 
     html_path = _generate_case_html(tmp_path, "identical_prompts_and_image_tags", records)
     page = chromium_browser.new_page()
-    page.add_init_script("localStorage.setItem('claude-tap-sidebar-order', 'session')")
+    page.add_init_script("localStorage.setItem('agent-tap-sidebar-order', 'session')")
     try:
         errors = _open_viewer_with_error_capture(page, html_path)
         state = page.evaluate(
@@ -4100,7 +4096,7 @@ def test_viewer_tool_bloat_badges_and_banner(tmp_path: Path, chromium_browser) -
 def test_viewer_labels_user_input_provenance_and_titles_groups_by_human_prose(tmp_path: Path, chromium_browser) -> None:
     html_path = _generate_case_html(tmp_path, "user_input_provenance", _user_input_provenance_records())
     page = chromium_browser.new_page()
-    page.add_init_script("localStorage.setItem('claude-tap-sidebar-order', 'session')")
+    page.add_init_script("localStorage.setItem('agent-tap-sidebar-order', 'session')")
     try:
         errors = _open_viewer_with_error_capture(page, html_path)
 
@@ -4169,7 +4165,7 @@ def test_viewer_translates_provenance_kind_in_badges(tmp_path: Path, chromium_br
     html_path = _generate_case_html(tmp_path, "user_input_provenance", _user_input_provenance_records())
     page = chromium_browser.new_page()
     page.add_init_script(
-        "localStorage.setItem('claude-tap-sidebar-order', 'session');localStorage.setItem('claude-tap-lang', 'zh-CN')"
+        "localStorage.setItem('agent-tap-sidebar-order', 'session');localStorage.setItem('agent-tap-lang', 'zh-CN')"
     )
     try:
         errors = _open_viewer_with_error_capture(page, html_path)
@@ -4285,7 +4281,7 @@ def test_detect_tool_bloat_sizes_by_bytes_and_skips_images() -> None:
     A CJK result short enough to pass a character-count check still crosses the
     byte threshold, and an image payload must never be counted as context text.
     """
-    from claude_tap.viewer import TOOL_BLOAT_MIN_BYTES, _detect_tool_bloat
+    from agent_tap.viewer import TOOL_BLOAT_MIN_BYTES, _detect_tool_bloat
 
     cjk_chars = TOOL_BLOAT_MIN_BYTES // 3 + 10  # 3 bytes each in UTF-8
     assert cjk_chars < TOOL_BLOAT_MIN_BYTES
@@ -4342,7 +4338,7 @@ def test_tool_result_text_flattens_every_content_shape_seen_on_the_wire() -> Non
     list, a scalar where a block was expected, a dict content instead of a list,
     and a stray None.
     """
-    from claude_tap.viewer import TOOL_BLOAT_MIN_BYTES, _detect_tool_bloat, _tool_result_text
+    from agent_tap.viewer import TOOL_BLOAT_MIN_BYTES, _detect_tool_bloat, _tool_result_text
 
     # Anthropic sends a bare string content; a list may also hold bare strings.
     assert _tool_result_text("plain") == "plain"
@@ -4389,7 +4385,7 @@ def test_a_text_field_collapses_the_part_only_for_a_real_text_block() -> None:
     A text-ish type is not enough either: an `output_text` part is dumped whole too,
     so whitelisting it would hide the same 25 KB behind a two-byte measurement.
     """
-    from claude_tap.viewer import TOOL_BLOAT_MIN_BYTES, _detect_tool_bloat, _tool_result_text
+    from agent_tap.viewer import TOOL_BLOAT_MIN_BYTES, _detect_tool_bloat, _tool_result_text
 
     # The one type renderContent renders as bare text keeps collapsing.
     assert _tool_result_text([{"type": "text", "text": "hello"}]) == "hello"
@@ -4440,7 +4436,7 @@ def test_a_structured_type_field_is_payload_rather_than_an_image_tag() -> None:
     unguarded membership test turns one crafted result into a viewer that
     cannot be generated at all.
     """
-    from claude_tap.viewer import TOOL_BLOAT_MIN_BYTES, _detect_tool_bloat, _tool_result_text
+    from agent_tap.viewer import TOOL_BLOAT_MIN_BYTES, _detect_tool_bloat, _tool_result_text
 
     for bad_type in ([], {}, 7, None):
         part = {"type": bad_type, "logs": "y" * 25000}
@@ -4461,7 +4457,7 @@ def test_an_empty_result_part_keeps_its_separator_in_both_detectors() -> None:
     are genuinely dropped -- images and nulls -- lose their separator on both
     sides alike.
     """
-    from claude_tap.viewer import TOOL_BLOAT_MIN_BYTES, _tool_result_text
+    from agent_tap.viewer import TOOL_BLOAT_MIN_BYTES, _tool_result_text
 
     below = "x" * (TOOL_BLOAT_MIN_BYTES - 1)
     assert len(_tool_result_text([below, ""]).encode("utf-8")) == TOOL_BLOAT_MIN_BYTES
@@ -4481,7 +4477,7 @@ def test_a_call_output_without_output_sizes_the_same_raw_leftovers() -> None:
     threshold in the detail banner while the sidebar, measuring the compact
     form, stays below it.
     """
-    from claude_tap.viewer import _response_tool_result_content, _tool_result_text
+    from agent_tap.viewer import _response_tool_result_content, _tool_result_text
 
     item = {"type": "function_call_output", "call_id": "c1", "status": "completed", "results": ["x"] * 1500}
     payload = _response_tool_result_content(item, for_bloat=True)
@@ -4500,7 +4496,7 @@ def test_a_cjk_result_measures_the_same_in_both_detectors() -> None:
     threshold under the escaped measurement gets a sidebar badge whose detail
     view then renders no warning.
     """
-    from claude_tap.viewer import TOOL_BLOAT_MIN_BYTES, _detect_tool_bloat, _tool_result_text
+    from agent_tap.viewer import TOOL_BLOAT_MIN_BYTES, _detect_tool_bloat, _tool_result_text
 
     payload = {"value": "中" * 1666}  # ~5 KB unescaped, ~10 KB escaped
     text = _tool_result_text(payload)
@@ -4525,7 +4521,7 @@ def test_a_gemini_function_response_measures_the_same_in_both_detectors() -> Non
     """
     import json
 
-    from claude_tap.viewer import (
+    from agent_tap.viewer import (
         TOOL_BLOAT_MIN_BYTES,
         _detect_tool_bloat,
         _extract_gemini_request_messages,
@@ -4571,7 +4567,7 @@ def test_a_gemini_response_keeps_the_fields_beside_output() -> None:
     Widening only the bloat payload would trade that for the opposite bug, a badge
     whose bytes the reader cannot find, so both sides read the same object.
     """
-    from claude_tap.viewer import (
+    from agent_tap.viewer import (
         TOOL_BLOAT_MIN_BYTES,
         _detect_tool_bloat,
         _extract_gemini_request_messages,
@@ -4607,7 +4603,7 @@ def test_integral_floats_serialize_like_json_stringify() -> None:
     browser, so lazy metadata would badge a turn the opened entry then
     treats as clean.
     """
-    from claude_tap.viewer import TOOL_BLOAT_MIN_BYTES, _bloat_json, _detect_tool_bloat
+    from agent_tap.viewer import TOOL_BLOAT_MIN_BYTES, _bloat_json, _detect_tool_bloat
 
     assert _bloat_json({"n": 1.0}) == '{"n":1}'
     payload = [1.0] * 2500
@@ -4626,7 +4622,7 @@ def test_numbers_outside_pythons_positional_range_match_json_stringify() -> None
     browser writes five characters, so 500 such values measured 11,501 bytes in
     the sidebar against 3,001 in the opened entry.
     """
-    from claude_tap.viewer import TOOL_BLOAT_MIN_BYTES, _bloat_json, _detect_tool_bloat
+    from agent_tap.viewer import TOOL_BLOAT_MIN_BYTES, _bloat_json, _detect_tool_bloat
 
     assert _bloat_json({"n": 1e21}) == '{"n":1e+21}'
     assert _bloat_json({"n": 1e16}) == '{"n":10000000000000000}'
@@ -4649,7 +4645,7 @@ def test_json_integers_are_measured_as_the_doubles_js_parses() -> None:
     sidebar against 3,007 in the opened entry, and ``9007199254740993`` kept a
     digit the browser had already rounded away.
     """
-    from claude_tap.viewer import TOOL_BLOAT_MIN_BYTES, _bloat_json, _detect_tool_bloat
+    from agent_tap.viewer import TOOL_BLOAT_MIN_BYTES, _bloat_json, _detect_tool_bloat
 
     assert _bloat_json({"n": 999999999999999999999999}) == '{"n":1e+24}'
     assert _bloat_json({"n": 9007199254740993}) == '{"n":9007199254740992}'
@@ -4674,7 +4670,7 @@ def test_lone_surrogates_are_escaped_like_json_stringify() -> None:
     when the size is measured, so 2,000 of them came to 6,012 bytes here against
     12,012 in the browser -- the sidebar dropped a badge the opened entry showed.
     """
-    from claude_tap.viewer import TOOL_BLOAT_MIN_BYTES, _bloat_json, _detect_tool_bloat, _text_size_bytes
+    from agent_tap.viewer import TOOL_BLOAT_MIN_BYTES, _bloat_json, _detect_tool_bloat, _text_size_bytes
 
     assert _bloat_json({"v": "\ud800"}) == '{"v":"\\ud800"}'
     assert _bloat_json({"v": "\udfff"}) == '{"v":"\\udfff"}'
@@ -4695,7 +4691,7 @@ def test_gemini_function_responses_are_sized_separately() -> None:
     result would badge two 6 KB replies that the opened entry then shows
     without a warning.
     """
-    from claude_tap.viewer import TOOL_BLOAT_MIN_BYTES, _detect_tool_bloat, _extract_request_messages
+    from agent_tap.viewer import TOOL_BLOAT_MIN_BYTES, _detect_tool_bloat, _extract_request_messages
 
     mid = "x" * 6000
     body = {
@@ -4739,7 +4735,7 @@ def test_a_function_call_output_is_sized_by_its_output_field() -> None:
     Reading `content` sizes every one of them as empty, so an oversized
     Responses-shaped result would never be flagged from either scan.
     """
-    from claude_tap.viewer import _detect_tool_bloat
+    from agent_tap.viewer import _detect_tool_bloat
 
     for block_type in ("function_call_output", "computer_call_output", "custom_tool_call_output"):
         found = _detect_tool_bloat([{"role": "tool", "content": [{"type": block_type, "output": "z" * 25000}]}])
@@ -4757,7 +4753,7 @@ def test_an_array_valued_tool_role_payload_is_scanned() -> None:
     scan, so a list payload that it skipped would show a warning in the detail
     view with no badge on the row.
     """
-    from claude_tap.viewer import _detect_tool_bloat, _text_size_bytes, _tool_result_text
+    from agent_tap.viewer import _detect_tool_bloat, _text_size_bytes, _tool_result_text
 
     # A list of bare strings and a list of text blocks are both results.
     assert _detect_tool_bloat([{"role": "tool", "content": ["z" * 25000]}]) is not None
@@ -4795,7 +4791,7 @@ def test_a_normalized_computer_screenshot_is_not_counted_as_text() -> None:
     Serializing it to a string would count the base64 as result text, badging
     the turn for a payload that is billed by dimension instead.
     """
-    from claude_tap.viewer import _detect_tool_bloat, _extract_request_messages
+    from agent_tap.viewer import _detect_tool_bloat, _extract_request_messages
 
     data_url = "data:image/png;base64," + "x" * 60000
     body = {
@@ -4823,7 +4819,7 @@ def test_lone_surrogates_match_text_encoder_replacement_bytes() -> None:
     `\\ud800` * 4000 would stay under the threshold while the opened entry
     crosses it.
     """
-    from claude_tap.viewer import _detect_tool_bloat, _text_size_bytes
+    from agent_tap.viewer import _detect_tool_bloat, _text_size_bytes
 
     lone = "\ud800" * 4000
     assert _text_size_bytes(lone) == 12000
@@ -4836,7 +4832,7 @@ def test_a_domain_image_field_is_still_measured_as_text() -> None:
     Skipping any truthy `image` key would hide a textual result that still
     consumes context tokens.
     """
-    from claude_tap.viewer import _detect_tool_bloat, _is_image_payload
+    from agent_tap.viewer import _detect_tool_bloat, _is_image_payload
 
     payload = {"image": "myorg/app:latest", "logs": "z" * 25000}
     assert _is_image_payload(payload) is False
@@ -4851,7 +4847,7 @@ def test_tool_search_output_bloat_uses_raw_tool_definitions() -> None:
     A tool_search_output with short names and large input schemas would otherwise
     look tiny in lazy metadata and in the opened banner.
     """
-    from claude_tap.viewer import (
+    from agent_tap.viewer import (
         _detect_tool_bloat,
         _extract_metadata_from_record,
         _extract_request_messages,

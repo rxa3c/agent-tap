@@ -1,4 +1,4 @@
-# Playbook：为 claude-tap 添加新的 LLM Client
+# Playbook：为 agent-tap 添加新的 LLM Client
 
 提炼自 Codex 集成（PR #12，2026-02-28）。将其作为可复用框架，用于为任意新的 LLM client（如 Gemini CLI、Grok CLI 等）添加支持。
 
@@ -38,7 +38,7 @@ mitmproxy --mode reverse:https://api.example.com --listen-port 8080
 
 ### Checklist
 
-- [ ] 设置正确的 env var，将流量重定向到 claude-tap 本地 proxy
+- [ ] 设置正确的 env var，将流量重定向到 agent-tap 本地 proxy
 - [ ] 处理路径映射（client 发送 `/v1/responses`，upstream 期望 `/responses`）
 - [ ] 处理请求体编码（zstd、gzip 等）
 - [ ] 处理响应流（SSE events、chunked transfer）
@@ -48,8 +48,8 @@ mitmproxy --mode reverse:https://api.example.com --listen-port 8080
 ### 验证检查点
 
 ```bash
-# Run the client through claude-tap
-uv run python -m claude_tap --tap-client <name> -- <simple prompt>
+# Run the client through agent-tap
+uv run python -m agent_tap --tap-client <name> -- <simple prompt>
 
 # Check trace file has actual API calls (not just /models)
 wc -l .traces/trace_*.jsonl  # Should be > 1
@@ -100,7 +100,7 @@ with open('.traces/trace_<latest>.jsonl') as f:
 
 每次新增 client 集成都需要：
 
-1. **终端录制**：展示 client 通过 claude-tap 运行的真实 E2E 会话
+1. **终端录制**：展示 client 通过 agent-tap 运行的真实 E2E 会话
    - 工具：`asciinema rec` → `agg`（GIF）→ `ffmpeg`（MP4）
    - 必须展示：启动 banner、至少 2-3 轮对话、如适用的 tool calls
 

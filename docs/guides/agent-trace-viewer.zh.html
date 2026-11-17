@@ -3,15 +3,15 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>本地 AI Agent Trace Viewer 指南 - claude-tap</title>
+    <title>本地 AI Agent Trace Viewer 指南 - agent-tap</title>
     <meta
       name="description"
-      content="使用 claude-tap 在本地查看 Claude Code、Codex、OpenAI Responses API、Gemini 和其他 AI 编程 Agent traces。"
+      content="使用 agent-tap 在本地查看 Claude Code、Codex、OpenAI Responses API、Gemini 和其他 AI 编程 Agent traces。"
     >
-    <link rel="canonical" href="https://liaohch3.com/claude-tap/guides/agent-trace-viewer.zh.html">
-    <link rel="alternate" hreflang="en" href="https://liaohch3.com/claude-tap/guides/agent-trace-viewer.html">
-    <link rel="alternate" hreflang="zh-Hans" href="https://liaohch3.com/claude-tap/guides/agent-trace-viewer.zh.html">
-    <link rel="alternate" hreflang="x-default" href="https://liaohch3.com/claude-tap/guides/agent-trace-viewer.html">
+    <link rel="canonical" href="https://rxa3c.github.io/agent-tap/guides/agent-trace-viewer.zh.html">
+    <link rel="alternate" hreflang="en" href="https://rxa3c.github.io/agent-tap/guides/agent-trace-viewer.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://rxa3c.github.io/agent-tap/guides/agent-trace-viewer.zh.html">
+    <link rel="alternate" hreflang="x-default" href="https://rxa3c.github.io/agent-tap/guides/agent-trace-viewer.html">
     <style>
       :root {
         --color-bg: #f4f7fb;
@@ -321,12 +321,12 @@
   <body>
     <header class="topbar">
       <div class="shell topbar-inner">
-        <a class="brand" href="../index.zh.html"><span class="brand-mark">ct</span><strong>claude-tap</strong></a>
+        <a class="brand" href="../index.zh.html"><span class="brand-mark">ct</span><strong>agent-tap</strong></a>
         <nav class="nav" aria-label="主导航">
           <a href="../index.zh.html">首页</a>
           <a href="../support-matrix.zh.html">客户端</a>
           <a class="lang" href="agent-trace-viewer.html">English</a>
-          <a class="primary" href="https://github.com/liaohch3/claude-tap">GitHub</a>
+          <a class="primary" href="https://github.com/rxa3c/agent-tap">GitHub</a>
         </nav>
       </div>
     </header>
@@ -337,10 +337,10 @@
           <p class="eyebrow">指南</p>
           <h1>本地 AI Agent Trace Viewer</h1>
           <p class="lead">
-            使用 claude-tap 在本地查看 Claude Code、Codex、OpenAI Responses API、Gemini 和其他 AI 编程 Agent traces。
+            使用 agent-tap 在本地查看 Claude Code、Codex、OpenAI Responses API、Gemini 和其他 AI 编程 Agent traces。
           </p>
           <div class="hero-actions">
-            <a class="button dark" href="https://github.com/liaohch3/claude-tap">打开 GitHub</a>
+            <a class="button dark" href="https://github.com/rxa3c/agent-tap">打开 GitHub</a>
             <a class="button light" href="../index.zh.html">返回概览</a>
           </div>
         </div>
@@ -359,11 +359,11 @@
 
         <article>
           <p>
-            <code>claude-tap</code> 是面向 AI 编程 Agent 的本地 trace viewer 和 HTML 导出工具。它可以查看 prompt、工具调用、token 用量、延迟、流式响应、请求 diff 和原始 API 请求结构，不需要把私有运行记录上传到云端 dashboard。
+            <code>agent-tap</code> 是面向 AI 编程 Agent 的本地 trace viewer 和 HTML 导出工具。它可以查看 prompt、工具调用、token 用量、延迟、流式响应、请求 diff 和原始 API 请求结构，不需要把私有运行记录上传到云端 dashboard。
           </p>
 
           <figure>
-            <img src="../viewer-zh.png" alt="claude-tap 本地 AI agent trace viewer，展示请求、工具调用、token 用量和延迟">
+            <img src="../viewer-zh.png" alt="agent-tap 本地 AI agent trace viewer，展示请求、工具调用、token 用量和延迟">
             <figcaption>面向真实 agent session 的本地 viewer，而不是从终端日志反推出来的记录。</figcaption>
           </figure>
 
@@ -383,11 +383,11 @@
             很多 observability 产品适合生产系统，但本地调试的目标不同。当编程 Agent 接触私有代码、私有 prompt、仓库元数据或内部工具时，最稳妥的默认方式是在自己的机器上检查 trace。
           </p>
           <p class="note">
-            claude-tap 默认把 trace session 留在本地。常见认证 header 会在记录前脱敏，导出的 HTML 文件也是由你自己控制的静态 artifact。
+            agent-tap 默认把 trace session 留在本地。常见认证 header 会在记录前脱敏，导出的 HTML 文件也是由你自己控制的静态 artifact。
           </p>
 
           <h2 id="supported">支持的 traces 和客户端</h2>
-          <p>claude-tap 可以追踪和查看这些客户端的会话：</p>
+          <p>agent-tap 可以追踪和查看这些客户端的会话：</p>
           <ul>
             <li>Claude Code</li>
             <li>Codex CLI</li>
@@ -405,22 +405,22 @@
           <p>它也支持 Anthropic Messages、OpenAI Responses、OpenAI Chat Completions、Gemini 和 Claude 兼容网关等 trace 形态。</p>
 
           <h2 id="how">如何查看 trace</h2>
-          <p>安装 claude-tap：</p>
-          <pre><code>uv tool install claude-tap</code></pre>
-          <p>通过 claude-tap 启动客户端：</p>
+          <p>安装 agent-tap：</p>
+          <pre><code>uv tool install git+https://github.com/rxa3c/agent-tap</code></pre>
+          <p>通过 agent-tap 启动客户端：</p>
           <pre><code># Claude Code
-claude-tap
+agent-tap
 
 # Codex CLI
-claude-tap --tap-client codex
+agent-tap --tap-client codex
 
 # 通过 forward proxy 捕获 Codex App 后端请求
-claude-tap --tap-client codexapp
+agent-tap --tap-client codexapp
 
 # Gemini CLI
-claude-tap --tap-client gemini -- -p "hello"</code></pre>
+agent-tap --tap-client gemini -- -p "hello"</code></pre>
           <p>打开本地 dashboard，或导出独立 HTML 文件：</p>
-          <pre><code>claude-tap export trace.jsonl --format html</code></pre>
+          <pre><code>agent-tap export trace.jsonl --format html</code></pre>
 
           <h2 id="inspect">先看哪些内容？</h2>
           <ul>
@@ -433,12 +433,12 @@ claude-tap --tap-client gemini -- -p "hello"</code></pre>
 
           <h2>Claude trace viewer</h2>
           <p>
-            对于 Claude Code 和 Anthropic 兼容流量，claude-tap 可以展示 Anthropic Messages 请求、工具调用、流式响应、token 用量和 Claude 兼容网关元数据。
+            对于 Claude Code 和 Anthropic 兼容流量，agent-tap 可以展示 Anthropic Messages 请求、工具调用、流式响应、token 用量和 Claude 兼容网关元数据。
           </p>
 
           <h2>Codex trace viewer</h2>
           <p>
-            对于 Codex CLI，claude-tap 支持 OpenAI API key 模式和 ChatGPT 订阅 OAuth 模式。对于 Codex App，它会通过本地 forward proxy 启动桌面 App，并记录 /backend-api/codex/responses 上已完成的 HTTP/WebSocket 模型调用；其他产品流量只转发而不存储。请先退出已经运行的 Codex App，让新进程继承代理和 CA 配置。Viewer 可以查看请求上下文、工具调用、reasoning/output 区块、token 用量和请求 diff。
+            对于 Codex CLI，agent-tap 支持 OpenAI API key 模式和 ChatGPT 订阅 OAuth 模式。对于 Codex App，它会通过本地 forward proxy 启动桌面 App，并记录 /backend-api/codex/responses 上已完成的 HTTP/WebSocket 模型调用；其他产品流量只转发而不存储。请先退出已经运行的 Codex App，让新进程继承代理和 CA 配置。Viewer 可以查看请求上下文、工具调用、reasoning/output 区块、token 用量和请求 diff。
           </p>
 
           <h2 id="export">导出 trace 到 HTML</h2>
@@ -455,6 +455,6 @@ claude-tap --tap-client gemini -- -p "hello"</code></pre>
         </article>
       </div>
     </main>
-    <footer class="footer"><div class="shell">claude-tap 是 MIT 协议开源项目。</div></footer>
+    <footer class="footer"><div class="shell">agent-tap 是 MIT 协议开源项目。</div></footer>
   </body>
 </html>

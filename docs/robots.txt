@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://liaohch3.com/claude-tap/sitemap.xml
+Sitemap: https://rxa3c.github.io/agent-tap/sitemap.xml

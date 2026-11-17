@@ -1,6 +1,6 @@
 # 工程实践指南
 
-本文档对 claude-tap 项目的工程标准进行规范化。
+本文档对 agent-tap 项目的工程标准进行规范化。
 
 ## Python 代码风格
 
@@ -87,18 +87,18 @@ docs: update engineering practices guide
 
 ```bash
 # Create worktree for new feature
-git worktree add -b feat/my-feature /tmp/claude-tap-my-feature main
+git worktree add -b feat/my-feature /tmp/agent-tap-my-feature main
 
 # Work in the worktree
-cd /tmp/claude-tap-my-feature
+cd /tmp/agent-tap-my-feature
 # ... make changes, run tests ...
 
 # Merge back (fast-forward only)
-cd /path/to/claude-tap
+cd /path/to/agent-tap
 git merge --ff-only feat/my-feature
 
 # Clean up
-git worktree remove /tmp/claude-tap-my-feature
+git worktree remove /tmp/agent-tap-my-feature
 git branch -d feat/my-feature
 ```
 

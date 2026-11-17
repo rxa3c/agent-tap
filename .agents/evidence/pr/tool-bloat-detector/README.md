@@ -8,14 +8,14 @@ result in that turn. Sizes are measured in UTF-8 bytes, threshold 10,000 bytes.
 
 ## Real-trace recording
 
-Recorded with a live `claude-tap` run against Claude Code, prompting it to read
+Recorded with a live `agent-tap` run against Claude Code, prompting it to read
 two large repo files so the follow-up request carries oversized `tool_result`
 blocks:
 
 ```bash
-uv run python -m claude_tap --tap-client claude \
+uv run python -m agent_tap --tap-client claude \
   --tap-output-dir .traces/tool-bloat-evidence --tap-no-open --tap-no-live \
-  -- -p "Read the file claude_tap/viewer_assets/renderers.js in full, then read claude_tap/viewer_assets/sidebar.js in full, then tell me the total line count of both files added together. Use the Read tool for both." \
+  -- -p "Read the file agent_tap/viewer_assets/renderers.js in full, then read agent_tap/viewer_assets/sidebar.js in full, then tell me the total line count of both files added together. Use the Read tool for both." \
   --permission-mode acceptEdits
 ```
 

@@ -43,7 +43,7 @@ def fetch_stargazer_timestamps(
                 "Authorization": f"Bearer {token}",
                 "Accept": "application/vnd.github+json",
                 "X-GitHub-Api-Version": "2026-03-10",
-                "User-Agent": "claude-tap-star-history",
+                "User-Agent": "agent-tap-star-history",
             },
             method="GET",
         )
@@ -170,14 +170,14 @@ def render_charts(repo: str, timestamps: list[datetime], output_dir: Path) -> No
             output_dir / f"star-history-{name}.png",
             dpi=100,
             facecolor=colors["background"],
-            metadata={"Software": "claude-tap"},
+            metadata={"Software": "agent-tap"},
         )
         plt.close(fig)
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--repo", default="liaohch3/claude-tap")
+    parser.add_argument("--repo", default="rxa3c/agent-tap")
     parser.add_argument("--output-dir", type=Path, required=True)
     args = parser.parse_args()
 

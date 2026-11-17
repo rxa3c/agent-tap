@@ -2,7 +2,7 @@
 
 [简体中文](CONTRIBUTING.zh.md)
 
-Thanks for considering a contribution to `claude-tap`.
+Thanks for considering a contribution to `agent-tap`.
 
 This project is a local proxy and trace viewer for AI coding clients. Changes can affect request routing, credential handling, trace files, and generated HTML output, so small, well-scoped pull requests are easiest to review.
 
@@ -18,15 +18,15 @@ Maintainer and automation-specific workflow notes live in `AGENTS.md`. External 
 ## Development Setup
 
 ```bash
-git clone https://github.com/liaohch3/claude-tap.git
-cd claude-tap
+git clone https://github.com/rxa3c/agent-tap.git
+cd agent-tap
 uv sync --extra dev
 ```
 
 Install the local CLI during development:
 
 ```bash
-uv run python -m claude_tap --help
+uv run python -m agent_tap --help
 ```
 
 ## Local Checks

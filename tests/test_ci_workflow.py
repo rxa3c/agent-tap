@@ -47,7 +47,7 @@ def test_playwright_is_pinned_where_pip_can_read_it() -> None:
 
 def test_dependency_group_does_not_redeclare_dev_tooling() -> None:
     """The uv group aliases the extra so both installers agree on one list."""
-    assert _pyproject()["dependency-groups"]["dev"] == ["claude-tap[dev]"]
+    assert _pyproject()["dependency-groups"]["dev"] == ["agent-tap[dev]"]
 
 
 def test_browser_cache_key_hashes_the_file_that_pins_playwright() -> None:

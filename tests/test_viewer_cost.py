@@ -13,8 +13,8 @@ from pathlib import Path
 
 import pytest
 
-from claude_tap.compact_trace import build_compact_trace_bundle
-from claude_tap.viewer import (
+from agent_tap.compact_trace import build_compact_trace_bundle
+from agent_tap.viewer import (
     _build_cost_index,
     _cache_ttl_1h,
     _completed_web_search_calls,

@@ -14,7 +14,7 @@ the stateful continuation warning.
 ## After
 
 `after-codex-http-full-context.png` was captured after launching Codex with the
-temporary `claude-tap-openai` provider and `supports_websockets=false`. The
+temporary `agent-tap-openai` provider and `supports_websockets=false`. The
 initial run and resumed turn produced four `POST /v1/responses` records and no
 WebSocket records. Every POST contained a user message; tool-result POSTs also
 contained the preceding tool call and output, with no `previous_response_id`.

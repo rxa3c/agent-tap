@@ -5,9 +5,9 @@
 ## `check_coverage.py`
 
 Enforce project and incremental coverage targets for backend Python code and the
-inline JavaScript and CSS in `claude_tap/viewer.html`.
+inline JavaScript and CSS in `agent_tap/viewer.html`.
 
-Targets are configured in `pyproject.toml` under `[tool.claude_tap.coverage]`:
+Targets are configured in `pyproject.toml` under `[tool.agent_tap.coverage]`:
 
 - Python project coverage: `python_total_min`
 - Python changed executable package lines: `python_diff_min`
@@ -59,7 +59,7 @@ the existing required `lint` job.
 
 ## `translate_i18n.py`
 
-Translate missing i18n strings in `claude_tap/viewer_i18n.json` using OpenRouter.
+Translate missing i18n strings in `agent_tap/viewer_i18n.json` using OpenRouter.
 
 It parses the viewer i18n JSON source, finds keys present in both `en` and `zh-CN` but missing in other supported languages (`ja`, `ko`, `fr`, `ar`, `de`, `ru`), and writes new translations back into the same file.
 
@@ -86,7 +86,7 @@ python scripts/translate_i18n.py --model google/gemini-2.5-flash
 ```bash
 # Use a custom file/object name (future CLI i18n support)
 python scripts/translate_i18n.py --target cli --dry-run
-python scripts/translate_i18n.py --file claude_tap/cli.py --object-name I18N --dry-run
+python scripts/translate_i18n.py --file agent_tap/cli.py --object-name I18N --dry-run
 ```
 
 ## `check_changelog.py`

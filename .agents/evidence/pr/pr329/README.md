@@ -7,5 +7,5 @@ Screenshot showing the `←` back button in `.detail-page-head` bar on the dashb
 - Clears `state.selectedSessionId` before returning to list (fixes stale-fetch race)
 
 **Source:**
-- Local dashboard at `http://localhost:3000` (via `claude-tap dashboard`)
+- Local dashboard at `http://localhost:3000` (via `agent-tap dashboard`)
 - Real trace: session detail page with actual trace data from local SQLite store

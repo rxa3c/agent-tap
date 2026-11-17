@@ -3,19 +3,19 @@
 Date: 2026-05-09
 
 This evidence validates the Codex / OpenAI Responses cache-read token mapping
-against a real Codex CLI run captured through `claude-tap`.
+against a real Codex CLI run captured through `agent-tap`.
 
 ## Environment
 
 - Codex CLI: 0.125.0
-- claude-tap mode: reverse proxy
+- agent-tap mode: reverse proxy
 - Upstream target: `https://chatgpt.com/backend-api/codex`
 - Trace source: `.traces/issue143-codex-cache/2026-05-09/trace_093315.jsonl`
 - HTML source: `.traces/issue143-codex-cache/2026-05-09/trace_093315.html`
 
 The trace files are local evidence and are not committed because they may
 contain request headers or prompt context. Authentication headers are redacted
-by `claude-tap`.
+by `agent-tap`.
 
 ## Observed Trace Summary
 

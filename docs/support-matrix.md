@@ -1,5 +1,5 @@
 ---
-owner: claude-tap-maintainers
+owner: agent-tap-maintainers
 last_reviewed: 2026-08-13
 source_of_truth: AGENTS.md
 ---
@@ -46,6 +46,7 @@ Simplified Chinese version: [支持矩阵](support-matrix.zh.md).
 | Qoder CLI | Qoder login / `QODER_PERSONAL_ACCESS_TOKEN` / `QODER_JOB_TOKEN` | Forward proxy (Qoder endpoints) | n/a | HTTP/SSE | Real E2E verified |
 | Antigravity CLI | Antigravity login | Forward proxy + `CLOUD_CODE_URL` bridge to `https://daily-cloudcode-pa.googleapis.com` | `CLOUD_CODE_URL` | HTTP/SSE | Manual E2E verified; launch env, Code Assist bridge, and automatic macOS user-keychain CA trust are unit-tested |
 | CodeBuddy CLI | CodeBuddy login (iOA / WeChat / Google-Github / Enterprise Domain) | Auto-detected from `~/.codebuddy/local_storage/` cache; default `https://copilot.tencent.com/v2` | `CODEBUDDY_BASE_URL` | HTTP/SSE Chat Completions | Real E2E verified on iOA |
+| WorkBuddy (macOS desktop app, 5.9.x–5.11.x) | WorkBuddy account login | Forward proxy to the account's WorkBuddy endpoint (default `https://www.workbuddy.cn/v2`) | n/a | HTTP/SSE Chat Completions (`POST */chat/completions` only; account, login, update, and telemetry traffic relayed but not traced) | Unit-tested; real E2E verified manually on 5.9.3 and 5.11.3 |
 
 ## Default Proxy Mode by Client
 
@@ -67,10 +68,11 @@ Each client in `CLIENT_CONFIGS` declares a `default_proxy_mode` used when
 | `openclaw` | `reverse` | Patches the selected OpenClaw provider config when possible, otherwise falls back to provider-specific base URL env vars |
 | `pi` | `forward` | Multi-provider; Pi can use OpenAI Codex OAuth and custom model registry providers, so forward proxy captures traffic without relying on a single base URL override |
 | `hermes` | `forward` | Multi-provider Python agent; `httpx` and `requests` honor `HTTPS_PROXY` natively, so forward proxy capture is the natural default |
-| `cursor` | `transcript` (neither reverse nor forward) | Conversation comes only from `~/.cursor/projects/*/agent-transcripts/*.jsonl`. Bare `claude-tap --tap-client cursor` launches `cursor-agent` and live-watches transcripts into the dashboard (**one tap session per Cursor conversation JSONL**); `--tap-no-launch` is IDE watch-only. No HTTPS proxy / CA |
+| `cursor` | `transcript` (neither reverse nor forward) | Conversation comes only from `~/.cursor/projects/*/agent-transcripts/*.jsonl`. Bare `agent-tap --tap-client cursor` launches `cursor-agent` and live-watches transcripts into the dashboard (**one tap session per Cursor conversation JSONL**); `--tap-no-launch` is IDE watch-only. No HTTPS proxy / CA |
 | `qoder` | `forward` | Qoder CLI uses multiple Qoder service endpoints and has no reliable single base URL override |
-| `agy` | `forward` | Antigravity uses multiple Google / Antigravity endpoints; claude-tap sets `HTTPS_PROXY` for auxiliary traffic and `CLOUD_CODE_URL` for Code Assist model traffic |
+| `agy` | `forward` | Antigravity uses multiple Google / Antigravity endpoints; agent-tap sets `HTTPS_PROXY` for auxiliary traffic and `CLOUD_CODE_URL` for Code Assist model traffic |
 | `codebuddy` | `reverse` | Single provider, native `CODEBUDDY_BASE_URL` env var; supports `--settings` env injection. Endpoint auto-detected from CodeBuddy's login cache |
+| `workbuddy` | `forward` | Electron desktop app whose host strips `CODEBUDDY_*`, `HTTPS_PROXY`, and `NODE_EXTRA_CA_CERTS` before spawning its bundled agent CLI, then re-adds only its own proxy and keychain-derived CA bundle; reverse mode is rejected |
 
 Users can override proxy-backed clients with `--tap-proxy-mode {reverse,forward}`.
 
@@ -78,7 +80,7 @@ Users can override proxy-backed clients with `--tap-proxy-mode {reverse,forward}
 
 Some clients delegate to OS service managers (launchd / systemd / schtasks) for
 their long-running daemons. The spawned daemon does **not** inherit the
-proxy / CA env we inject, so trace capture would silently fail. claude-tap
+proxy / CA env we inject, so trace capture would silently fail. agent-tap
 detects these patterns and rewrites the argv to the foreground equivalent:
 
 | Client | Detected argv | Rewritten to | Reason |
@@ -91,7 +93,7 @@ the daemonised behaviour (and accept that no traffic will be captured).
 
 > **Note:** Gateway mode only produces traces when a configured messaging platform (Slack, Telegram, etc.)
 > delivers a message to the bot. Without an active platform integration, the gateway makes no LLM calls
-> and no traces are recorded. Use TUI mode (`claude-tap --tap-client hermes`) for local trace capture.
+> and no traces are recorded. Use TUI mode (`agent-tap --tap-client hermes`) for local trace capture.
 
 ## URL Construction Rules
 
@@ -151,64 +153,70 @@ strip = CLIENT_CONFIGS[client].reverse_strip_path_prefix(target)
 - `test_auto_ca_trust_*` — verifies Antigravity automatically requests macOS user-keychain CA trust without sudo
 - `test_macos_*_ca_command_*` — verifies CA trust commands use the user login keychain and do not invoke sudo
 - `test_codebuddy_*` — verifies CodeBuddy registration, parse_args default reverse mode, settings injection, forward/reverse env, target detection from `CODEBUDDY_BASE_URL` env, and the login-time endpoint cache reader
+- `test_workbuddy_*` (`tests/test_workbuddy_launch.py`) — verifies WorkBuddy executable resolution (bundle id check, `WORKBUDDY_EXECUTABLE` override), refusal to launch while WorkBuddy is running, forward-proxy launch env, the stale `~/.workbuddy/system-ca-bundle.pem` warning, and fake-upstream capture of a gzip-encoded `/v2/chat/completions` stream while account traffic is not persisted
 
 ### Manual (pre-merge for proxy changes)
 
 ```bash
 # API Key mode
-uv run python -m claude_tap --tap-client codex --tap-no-launch --tap-port 0
+uv run python -m agent_tap --tap-client codex --tap-no-launch --tap-port 0
 # Verify log shows correct upstream URL
 
 # OAuth mode
-uv run python -m claude_tap --tap-client codex \
+uv run python -m agent_tap --tap-client codex \
   --tap-target https://chatgpt.com/backend-api/codex --tap-no-launch --tap-port 0
 # Verify log shows correct upstream URL
 
 # Cursor: launch cursor-agent + live transcript watch + dashboard
-uv run python -m claude_tap --tap-client cursor
+uv run python -m agent_tap --tap-client cursor
 # Chat in the launched agent, then verify dashboard shows readable transcript turns
 
 # IDE Agent watch only
-uv run python -m claude_tap --tap-client cursor --tap-no-launch
+uv run python -m agent_tap --tap-client cursor --tap-no-launch
 
 # Codex App
-uv run python -m claude_tap --tap-client codexapp
+uv run python -m agent_tap --tap-client codexapp
 # Quit any already-running Codex App first so the launched process inherits the proxy/CA env.
 # Start or continue a Codex App task and verify the dashboard receives backend HTTP/WebSocket records
 # for /backend-api/codex/responses only; other Codex App product traffic is relayed but not traced.
 
 # Qoder CLI
-uv run python -m claude_tap --tap-client qoder -- -p "Reply OK" --permission-mode dont_ask
+uv run python -m agent_tap --tap-client qoder -- -p "Reply OK" --permission-mode dont_ask
 # Verify stdout contains the assistant response and the trace contains Qoder endpoint records
 
 # Antigravity CLI (macOS)
-uv run python -m claude_tap --tap-client agy --tap-live
+uv run python -m agent_tap --tap-client agy --tap-live
 # On first run, verify macOS prompts only for the user login keychain, not sudo/admin System keychain writes.
 # Then verify the trace contains /v1internal:streamGenerateContent model records.
 
 # Kimi CLI (legacy kimi-cli)
-uv run python -m claude_tap --tap-client kimi -- --thinking
+uv run python -m agent_tap --tap-client kimi -- --thinking
 
 # Kimi Code CLI
-uv run python -m claude_tap --tap-client kimi-code -- --thinking
+uv run python -m agent_tap --tap-client kimi-code -- --thinking
 # Verify the trace contains /chat/completions records and thinking/text output
 
 # Gemini CLI
-uv run python -m claude_tap --tap-client gemini -- -p "Reply OK" --yolo --output-format text
+uv run python -m agent_tap --tap-client gemini -- -p "Reply OK" --yolo --output-format text
 # Verify the trace contains Google OAuth / Code Assist API records
 
 # Grok Build CLI
-uv run python -m claude_tap --tap-client grok -- -p "Reply OK"
+uv run python -m agent_tap --tap-client grok -- -p "Reply OK"
 # Verify the trace contains /v1/responses records with Grok request, response, and token usage
 
 # Pi
-uv run python -m claude_tap --tap-client pi -- \
+uv run python -m agent_tap --tap-client pi -- \
   --model openai-codex/gpt-5.3-codex-spark -p "Reply OK"
 # Verify the trace contains chatgpt.com/backend-api records and readable OpenAI Responses sections
 
 # CodeBuddy (auto-detected endpoint after login)
-uv run python -m claude_tap --tap-client codebuddy -- -p "Reply OK"
+uv run python -m agent_tap --tap-client codebuddy -- -p "Reply OK"
 # Verify the trace contains /v2/chat/completions records and the response body has non-zero token counts
+
+# WorkBuddy (macOS; quit WorkBuddy completely first)
+uv run python -m agent_tap --tap-client workbuddy
+# Send a message that triggers a tool call; verify the dashboard shows /v2/chat/completions records
+# with the request messages, streamed reply, and tool calls; account/login traffic must not appear.
 ```
 
 ### Real E2E (optional, when auth is available)
@@ -216,29 +224,29 @@ uv run python -m claude_tap --tap-client codebuddy -- -p "Reply OK"
 ```bash
 # tmux-based real verification
 tmux new-session -d -s verify \
-  "uv run python -m claude_tap --tap-client codex --tap-target TARGET --tap-no-launch --tap-port 8080"
+  "uv run python -m agent_tap --tap-client codex --tap-target TARGET --tap-no-launch --tap-port 8080"
 # In another window:
 OPENAI_BASE_URL=http://127.0.0.1:8080/v1 codex exec "Reply: OK"
 ```
 
 ```bash
 # Cursor CLI real verification (transcript-only)
-uv run python -m claude_tap --tap-client cursor -- -p --trust --model auto \
+uv run python -m agent_tap --tap-client cursor -- -p --trust --model auto \
   "Use tools to inspect the workspace and reply OK"
 # Verify the generated HTML contains cursor-transcript turns and tool_use blocks.
-# Or watch IDE Agent: claude-tap --tap-client cursor --tap-no-launch
+# Or watch IDE Agent: agent-tap --tap-client cursor --tap-no-launch
 ```
 
 ```bash
 # Gemini CLI real verification
-uv run python -m claude_tap --tap-client gemini -- -p \
+uv run python -m agent_tap --tap-client gemini -- -p \
   "Use tools to inspect the workspace and reply OK" --yolo --output-format text
 # Verify the trace contains cloudcode-pa.googleapis.com / streamGenerateContent records.
 ```
 
 ```bash
 # Pi real verification with OpenAI Codex OAuth
-uv run python -m claude_tap --tap-client pi -- \
+uv run python -m agent_tap --tap-client pi -- \
   --model openai-codex/gpt-5.3-codex-spark --tools bash -p \
   "Use bash to inspect the workspace and reply OK"
 # Verify the generated viewer shows Tools, System Prompt, Messages, Response,

@@ -10,10 +10,10 @@ from typing import Any, Callable
 
 import pytest
 
-from claude_tap.cli_clients import CLIENT_CONFIGS
-from claude_tap.forward_proxy import ForwardProxyServer, _decode_request_body_for_trace
-from claude_tap.trace import TraceWriter
-from claude_tap.trace_store import get_trace_store, reset_trace_store
+from agent_tap.cli_clients import CLIENT_CONFIGS
+from agent_tap.forward_proxy import ForwardProxyServer, _decode_request_body_for_trace
+from agent_tap.trace import TraceWriter
+from agent_tap.trace_store import get_trace_store, reset_trace_store
 
 try:
     from compression import zstd
@@ -35,6 +35,9 @@ class _MemoryWriter:
 
     async def drain(self) -> None:
         return None
+
+    def is_closing(self) -> bool:
+        return False
 
 
 @pytest.mark.parametrize(

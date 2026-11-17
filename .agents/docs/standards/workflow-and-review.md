@@ -1,5 +1,5 @@
 ---
-owner: claude-tap-maintainers
+owner: agent-tap-maintainers
 last_reviewed: 2026-05-29
 source_of_truth: AGENTS.md
 ---
@@ -9,12 +9,12 @@ source_of_truth: AGENTS.md
 使用 git worktree 进行隔离的 feature 开发：
 
 ```bash
-git worktree add -b feat/<name> /tmp/claude-tap-<name> main
-cd /tmp/claude-tap-<name>
+git worktree add -b feat/<name> /tmp/agent-tap-<name> main
+cd /tmp/agent-tap-<name>
 uv run pytest tests/ -x --timeout=60
-cd /path/to/claude-tap
+cd /path/to/agent-tap
 git merge --ff-only feat/<name>
-git worktree remove /tmp/claude-tap-<name>
+git worktree remove /tmp/agent-tap-<name>
 git branch -d feat/<name>
 ```
 

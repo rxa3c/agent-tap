@@ -2,7 +2,7 @@
 
 import pytest
 
-from claude_tap.proxy import _is_allowed_path
+from agent_tap.proxy import _is_allowed_path
 
 
 @pytest.mark.parametrize(

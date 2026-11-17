@@ -19,7 +19,7 @@ Because capture-only detection received a string instead of a request object, it
 
 ## What fixed it
 
-- Enable Node environment proxy support when claude-tap launches Pi in forward mode.
+- Enable Node environment proxy support when agent-tap launches Pi in forward mode.
 - Decompress zstd request bodies for trace parsing while preserving the original compressed bytes and headers for upstream forwarding.
 - Add a capture-only regression test that fails if the compressed Pi request reaches upstream or if the stored body is not the original JSON object.
 

@@ -3,23 +3,23 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Local AI Agent Trace Viewer Guide - claude-tap</title>
+    <title>Local AI Agent Trace Viewer Guide - agent-tap</title>
     <meta
       name="description"
-      content="How to view Claude Code, Codex, OpenAI Responses API, Gemini, and other AI coding agent traces locally with claude-tap."
+      content="How to view Claude Code, Codex, OpenAI Responses API, Gemini, and other AI coding agent traces locally with agent-tap."
     >
-    <link rel="canonical" href="https://liaohch3.com/claude-tap/guides/agent-trace-viewer.html">
-    <link rel="alternate" hreflang="en" href="https://liaohch3.com/claude-tap/guides/agent-trace-viewer.html">
-    <link rel="alternate" hreflang="zh-Hans" href="https://liaohch3.com/claude-tap/guides/agent-trace-viewer.zh.html">
-    <link rel="alternate" hreflang="x-default" href="https://liaohch3.com/claude-tap/guides/agent-trace-viewer.html">
-    <meta property="og:title" content="Local AI Agent Trace Viewer Guide - claude-tap">
+    <link rel="canonical" href="https://rxa3c.github.io/agent-tap/guides/agent-trace-viewer.html">
+    <link rel="alternate" hreflang="en" href="https://rxa3c.github.io/agent-tap/guides/agent-trace-viewer.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://rxa3c.github.io/agent-tap/guides/agent-trace-viewer.zh.html">
+    <link rel="alternate" hreflang="x-default" href="https://rxa3c.github.io/agent-tap/guides/agent-trace-viewer.html">
+    <meta property="og:title" content="Local AI Agent Trace Viewer Guide - agent-tap">
     <meta
       property="og:description"
       content="Inspect prompts, tool calls, token usage, latency, streaming output, and request diffs in local AI agent traces."
     >
     <meta property="og:type" content="article">
-    <meta property="og:url" content="https://liaohch3.com/claude-tap/guides/agent-trace-viewer.html">
-    <meta property="og:image" content="https://liaohch3.com/claude-tap/viewer-light.png">
+    <meta property="og:url" content="https://rxa3c.github.io/agent-tap/guides/agent-trace-viewer.html">
+    <meta property="og:image" content="https://rxa3c.github.io/agent-tap/viewer-light.png">
     <meta name="twitter:card" content="summary_large_image">
     <style>
       :root {
@@ -332,12 +332,12 @@
   <body>
     <header class="topbar">
       <div class="shell topbar-inner">
-        <a class="brand" href="../index.html"><span class="brand-mark">ct</span><strong>claude-tap</strong></a>
+        <a class="brand" href="../index.html"><span class="brand-mark">ct</span><strong>agent-tap</strong></a>
         <nav class="nav" aria-label="Main navigation">
           <a href="../index.html">Home</a>
           <a href="../support-matrix.html">Clients</a>
           <a class="lang" href="agent-trace-viewer.zh.html">中文</a>
-          <a class="primary" href="https://github.com/liaohch3/claude-tap">GitHub</a>
+          <a class="primary" href="https://github.com/rxa3c/agent-tap">GitHub</a>
         </nav>
       </div>
     </header>
@@ -349,10 +349,10 @@
           <h1>Local AI Agent Trace Viewer</h1>
           <p class="lead">
             A practical guide to viewing Claude Code, Codex, OpenAI Responses API, Gemini, and other AI coding
-            agent traces locally with claude-tap.
+            agent traces locally with agent-tap.
           </p>
           <div class="hero-actions">
-            <a class="button dark" href="https://github.com/liaohch3/claude-tap">Open GitHub</a>
+            <a class="button dark" href="https://github.com/rxa3c/agent-tap">Open GitHub</a>
             <a class="button light" href="../index.html">Back to overview</a>
           </div>
         </div>
@@ -371,13 +371,13 @@
 
         <article>
           <p>
-            <code>claude-tap</code> is a local trace viewer and HTML exporter for AI coding agents. It helps you
+            <code>agent-tap</code> is a local trace viewer and HTML exporter for AI coding agents. It helps you
             inspect prompts, tool calls, token usage, latency, streaming responses, request diffs, and raw API
             request shapes without sending private runs to a hosted dashboard.
           </p>
 
           <figure>
-            <img src="../viewer-light.png" alt="claude-tap local AI agent trace viewer showing requests, tool calls, token usage, and latency">
+            <img src="../viewer-light.png" alt="agent-tap local AI agent trace viewer showing requests, tool calls, token usage, and latency">
             <figcaption>A local viewer for real agent sessions, not reconstructed terminal logs.</figcaption>
           </figure>
 
@@ -402,12 +402,12 @@
             safest default is to inspect the trace on your own machine.
           </p>
           <p class="note">
-            claude-tap keeps trace sessions local by default. Common auth headers are redacted before recording, and
+            agent-tap keeps trace sessions local by default. Common auth headers are redacted before recording, and
             exported HTML files are static artifacts that you control.
           </p>
 
           <h2 id="supported">Supported traces and clients</h2>
-          <p>claude-tap can trace and inspect sessions from:</p>
+          <p>agent-tap can trace and inspect sessions from:</p>
           <ul>
             <li>Claude Code</li>
             <li>Codex CLI</li>
@@ -428,22 +428,22 @@
           </p>
 
           <h2 id="how">How to view a trace</h2>
-          <p>Install claude-tap:</p>
-          <pre><code>uv tool install claude-tap</code></pre>
-          <p>Run the client through claude-tap:</p>
+          <p>Install agent-tap:</p>
+          <pre><code>uv tool install git+https://github.com/rxa3c/agent-tap</code></pre>
+          <p>Run the client through agent-tap:</p>
           <pre><code># Claude Code
-claude-tap
+agent-tap
 
 # Codex CLI
-claude-tap --tap-client codex
+agent-tap --tap-client codex
 
 # Codex App backend capture through the forward proxy
-claude-tap --tap-client codexapp
+agent-tap --tap-client codexapp
 
 # Gemini CLI
-claude-tap --tap-client gemini -- -p "hello"</code></pre>
+agent-tap --tap-client gemini -- -p "hello"</code></pre>
           <p>Open the local dashboard or export a standalone HTML file:</p>
-          <pre><code>claude-tap export trace.jsonl --format html</code></pre>
+          <pre><code>agent-tap export trace.jsonl --format html</code></pre>
 
           <h2 id="inspect">What to inspect first</h2>
           <ul>
@@ -456,13 +456,13 @@ claude-tap --tap-client gemini -- -p "hello"</code></pre>
 
           <h2>Claude trace viewer</h2>
           <p>
-            For Claude Code and Anthropic-compatible traffic, claude-tap shows Anthropic Messages requests, tool calls,
+            For Claude Code and Anthropic-compatible traffic, agent-tap shows Anthropic Messages requests, tool calls,
             streaming responses, token usage, and Claude-compatible gateway metadata.
           </p>
 
           <h2>Codex trace viewer</h2>
           <p>
-            For Codex CLI, claude-tap supports OpenAI API key mode and ChatGPT subscription OAuth mode. For Codex App,
+            For Codex CLI, agent-tap supports OpenAI API key mode and ChatGPT subscription OAuth mode. For Codex App,
             it launches the desktop app through a local forward proxy and records completed HTTP/WebSocket model calls
             to /backend-api/codex/responses; other product traffic is relayed without being stored. Quit an already-running
             Codex App first so the launched process inherits the proxy and CA configuration. The viewer can inspect request
@@ -484,6 +484,6 @@ claude-tap --tap-client gemini -- -p "hello"</code></pre>
         </article>
       </div>
     </main>
-    <footer class="footer"><div class="shell">claude-tap is open source under the MIT License.</div></footer>
+    <footer class="footer"><div class="shell">agent-tap is open source under the MIT License.</div></footer>
   </body>
 </html>

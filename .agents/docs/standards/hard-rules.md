@@ -1,5 +1,5 @@
 ---
-owner: claude-tap-maintainers
+owner: agent-tap-maintainers
 last_reviewed: 2026-05-06
 source_of_truth: AGENTS.md
 ---

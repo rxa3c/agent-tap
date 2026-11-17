@@ -4,7 +4,7 @@ Date: 2026-03-10
 
 ## What broke
 
-Codex CLI through claude-tap proxy returned 404 (HTTP) and 502 (WebSocket) for all requests.
+Codex CLI through agent-tap proxy returned 404 (HTTP) and 502 (WebSocket) for all requests.
 
 ## Root cause
 

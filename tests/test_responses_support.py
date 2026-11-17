@@ -5,8 +5,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from claude_tap.sse import SSEReassembler
-from claude_tap.viewer import _extract_metadata, _extract_request_messages
+from agent_tap.sse import SSEReassembler
+from agent_tap.viewer import _extract_metadata, _extract_request_messages
 
 
 def test_sse_reassembler_reconstructs_openai_responses_completed_event() -> None:
@@ -455,7 +455,7 @@ def test_extract_metadata_counts_responses_function_call_input_items() -> None:
                     {
                         "type": "function_call_output",
                         "call_id": "call_1",
-                        "output": '[project]\nname = "claude-tap"',
+                        "output": '[project]\nname = "agent-tap"',
                     },
                 ],
                 "tools": [{"type": "function", "name": "read_file"}],
@@ -487,7 +487,7 @@ def test_extract_request_messages_normalizes_responses_function_call_input_items
                 {
                     "type": "function_call_output",
                     "call_id": "call_1",
-                    "output": '[project]\nname = "claude-tap"',
+                    "output": '[project]\nname = "agent-tap"',
                 },
                 {
                     "type": "function_call",
@@ -516,7 +516,7 @@ def test_extract_request_messages_normalizes_responses_function_call_input_items
         "role": "assistant",
         "content": [{"type": "tool_use", "name": "read_file", "input": {"path": "pyproject.toml"}}],
     }
-    assert messages[2] == {"role": "tool", "content": '[project]\nname = "claude-tap"'}
+    assert messages[2] == {"role": "tool", "content": '[project]\nname = "agent-tap"'}
     assert messages[3]["content"][0]["input"] == "not json"
     assert messages[4]["content"][0]["input"] == {}
     assert messages[5] == {

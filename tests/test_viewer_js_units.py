@@ -20,7 +20,7 @@ def test_viewer_split_js_core_units_run_without_playwright() -> None:
         const vm = require('vm');
 
         const repoRoot = process.argv.at(-1);
-        const assetDir = path.join(repoRoot, 'claude_tap', 'viewer_assets');
+        const assetDir = path.join(repoRoot, 'agent_tap', 'viewer_assets');
 
         function classList() {
           return { add() {}, remove() {}, toggle() {}, contains() { return false; } };
@@ -254,7 +254,7 @@ def test_viewer_split_js_core_units_run_without_playwright() -> None:
             status: 200,
             body: {
               content: [
-                { type: 'tool_use', name: 'WebSearch', input: { search_term: 'claude-tap' } },
+                { type: 'tool_use', name: 'WebSearch', input: { search_term: 'agent-tap' } },
               ],
             },
           },
@@ -346,7 +346,7 @@ def test_viewer_split_js_core_units_run_without_playwright() -> None:
         );
 
         const compactBundle = {
-          __claude_tap_compact_trace__: { version: 1 },
+          __agent_tap_compact_trace__: { version: 1 },
           blobs: {
             hash_1: {
               kind: 'json',
@@ -358,14 +358,14 @@ def test_viewer_split_js_core_units_run_without_playwright() -> None:
             },
           },
           records: [{
-            __claude_tap_compact_record__: {
+            __agent_tap_compact_record__: {
               version: 1,
               refs: [{ path: '/request', hash: 'hash_1', bytes: 100 }],
             },
             record: {
               turn: 1,
               request: {
-                __claude_tap_blob_ref__: { version: 1, kind: 'json', hash: 'hash_1' },
+                __agent_tap_blob_ref__: { version: 1, kind: 'json', hash: 'hash_1' },
               },
               response: {
                 status: 200,
@@ -376,7 +376,7 @@ def test_viewer_split_js_core_units_run_without_playwright() -> None:
                       type: 'output_text',
                       text: 'marker-shaped user payload',
                       metadata: {
-                        __claude_tap_blob_ref__: {
+                        __agent_tap_blob_ref__: {
                           version: 1,
                           kind: 'json',
                           hash: 'user-controlled-marker-shape',
@@ -390,7 +390,7 @@ def test_viewer_split_js_core_units_run_without_playwright() -> None:
           }],
         };
         const fakeUserMarker = {
-          __claude_tap_blob_ref__: {
+          __agent_tap_blob_ref__: {
             version: 1,
             kind: 'json',
             hash: 'user-controlled-marker-shape',
@@ -423,7 +423,7 @@ def test_viewer_split_js_core_units_run_without_playwright() -> None:
         );
 
         const legacyCompactBundle = {
-          __claude_tap_compact_trace__: { version: 1 },
+          __agent_tap_compact_trace__: { version: 1 },
           blobs: {
             hash_legacy_instructions: {
               kind: 'json',
@@ -438,7 +438,7 @@ def test_viewer_split_js_core_units_run_without_playwright() -> None:
             },
           },
           records: [{
-            __claude_tap_compact_record__: {
+            __agent_tap_compact_record__: {
               version: 1,
               encoding: 'json-blob-ref',
             },
@@ -447,11 +447,11 @@ def test_viewer_split_js_core_units_run_without_playwright() -> None:
               request: {
                 body: {
                   instructions: {
-                    __claude_tap_blob_ref__: { version: 1, kind: 'json', hash: 'hash_legacy_instructions' },
+                    __agent_tap_blob_ref__: { version: 1, kind: 'json', hash: 'hash_legacy_instructions' },
                   },
                   input: [
                     {
-                      __claude_tap_blob_ref__: { version: 1, kind: 'json', hash: 'hash_legacy_input' },
+                      __agent_tap_blob_ref__: { version: 1, kind: 'json', hash: 'hash_legacy_input' },
                     },
                     {
                       role: 'user',
@@ -1430,10 +1430,10 @@ def test_viewer_split_js_core_units_run_without_playwright() -> None:
              disagree, the cleaner wins the title and the classifier wins the badge,
              so a message ends up blanked and labelled human prose. */
           const injectedOpeners = [
-            '<environment_context>\\nrepo: claude-tap\\n</environment_context>',
+            '<environment_context>\\nrepo: agent-tap\\n</environment_context>',
             '<skills>\\nartifact-design\\n</skills>',
             '<user_information>\\nname: someone\\n</user_information>',
-            '<additional_metadata>\\nrepo: claude-tap\\n</additional_metadata>',
+            '<additional_metadata>\\nrepo: agent-tap\\n</additional_metadata>',
             '# AGENTS.md instructions\\nRun ruff before committing.',
             '<INSTRUCTIONS>\\nBe concise.\\n</INSTRUCTIONS>',
             '# Files mentioned by the user:\\n- viewer.py',
@@ -1455,7 +1455,7 @@ def test_viewer_split_js_core_units_run_without_playwright() -> None:
             'import json, sys\\n',
             'from collections import defaultdict\\n',
             'from typing import (\\n    Any,\\n)',
-            'from claude_tap.viewer import *\\n',
+            'from agent_tap.viewer import *\\n',
           ];
           for (const text of pastedImports) {
             assert.equal(classifyUserInputOrigin(text).origin, 'payload', text.slice(0, 32));
@@ -2081,8 +2081,8 @@ def test_viewer_cache_invalidation_diagnostics_units() -> None:
         const vm = require('vm');
 
         const repoRoot = process.argv.at(-1);
-        const assetDir = path.join(repoRoot, 'claude_tap', 'viewer_assets');
-        const i18n = JSON.parse(fs.readFileSync(path.join(repoRoot, 'claude_tap', 'viewer_i18n.json'), 'utf8'));
+        const assetDir = path.join(repoRoot, 'agent_tap', 'viewer_assets');
+        const i18n = JSON.parse(fs.readFileSync(path.join(repoRoot, 'agent_tap', 'viewer_i18n.json'), 'utf8'));
 
         function classList() {
           return { add() {}, remove() {}, toggle() {}, contains() { return false; } };
@@ -2102,7 +2102,7 @@ def test_viewer_cache_invalidation_diagnostics_units() -> None:
           setTimeout() {}, clearTimeout() {},
           requestAnimationFrame(cb) { if (typeof cb === 'function') cb(); return 1; },
           cancelAnimationFrame() {},
-          __CLAUDE_TAP_I18N__: i18n,
+          __AGENT_TAP_I18N__: i18n,
           window: {
             location: { search: '' },
             localStorage: { getItem() { return null; }, setItem() {} },

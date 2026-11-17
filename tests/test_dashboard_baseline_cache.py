@@ -4,8 +4,8 @@ import json
 
 import pytest
 
-from claude_tap.dashboard import list_trace_sessions, load_trace_session
-from claude_tap.trace_store import SessionQuery, get_trace_store
+from agent_tap.dashboard import list_trace_sessions, load_trace_session
+from agent_tap.trace_store import SessionQuery, get_trace_store
 
 
 def _record(turn: int, *, status: int) -> dict:

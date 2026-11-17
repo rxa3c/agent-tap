@@ -1,6 +1,6 @@
 # OpenCode Real Trace Evidence
 
-Generated from real OpenCode CLI runs through `claude-tap --tap-client opencode`
+Generated from real OpenCode CLI runs through `agent-tap --tap-client opencode`
 on 2026-05-13.
 
 ## Real Trace Inputs
@@ -17,7 +17,7 @@ on 2026-05-13.
 First turn:
 
 ```bash
-claude-tap --tap-client opencode \
+agent-tap --tap-client opencode \
   --tap-output-dir .traces/opencode-real-quality \
   --tap-no-open --tap-no-update-check -- \
   run -m opencode/deepseek-v4-flash-free \
@@ -28,7 +28,7 @@ claude-tap --tap-client opencode \
 Resume turn:
 
 ```bash
-claude-tap --tap-client opencode \
+agent-tap --tap-client opencode \
   --tap-output-dir .traces/opencode-real-quality \
   --tap-no-open --tap-no-update-check -- \
   run -m opencode/deepseek-v4-flash-free \
@@ -44,7 +44,7 @@ opencode providers login -p openai
 opencode providers list
 opencode models openai
 
-claude-tap --tap-client opencode \
+agent-tap --tap-client opencode \
   --tap-output-dir .traces/opencode-openai-oauth \
   --tap-no-open --tap-no-update-check -- \
   run -m openai/gpt-5.4-mini-fast \

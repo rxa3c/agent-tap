@@ -9,7 +9,7 @@
 
 ## 发生了什么
 
-- 通过 `claude_tap --tap-client codex` 的常规 Codex 运行经由 HTTP/SSE（`POST /v1/responses`）成功。
+- 通过 `agent_tap --tap-client codex` 的常规 Codex 运行经由 HTTP/SSE（`POST /v1/responses`）成功。
 - 强制 WS 运行（`--enable responses_websockets` 与 `--enable responses_websockets_v2`）反复连接上游失败：
   - `502 Bad Gateway`
   - 连接 `wss://chatgpt.com/backend-api/codex/responses` 超时

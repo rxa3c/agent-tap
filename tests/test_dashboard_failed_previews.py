@@ -8,10 +8,10 @@ from urllib.parse import urlencode
 import pytest
 from aiohttp.test_utils import make_mocked_request
 
-from claude_tap import dashboard
-from claude_tap.compact_trace import load_compact_trace, materialize_compact_trace_bundle
-from claude_tap.live import LiveViewerServer
-from claude_tap.trace_store import get_trace_store
+from agent_tap import dashboard
+from agent_tap.compact_trace import load_compact_trace, materialize_compact_trace_bundle
+from agent_tap.live import LiveViewerServer
+from agent_tap.trace_store import get_trace_store
 
 SECRET = "display-userinfo-secret"
 BAD = "https://user:" + SECRET + "@host：443/path?token=query-secret"

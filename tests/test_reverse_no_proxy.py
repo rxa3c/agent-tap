@@ -11,10 +11,10 @@ import aiohttp
 import pytest
 from aiohttp import web
 
-from claude_tap.cli_clients import run_client
-from claude_tap.proxy import proxy_handler
-from claude_tap.trace import TraceWriter
-from claude_tap.trace_store import TraceStore
+from agent_tap.cli_clients import run_client
+from agent_tap.proxy import proxy_handler
+from agent_tap.trace import TraceWriter
+from agent_tap.trace_store import TraceStore
 
 
 @pytest.mark.skipif(os.name == "nt", reason="The subprocess probe uses a POSIX executable shebang")
@@ -90,7 +90,7 @@ async def test_reverse_client_reaches_tap_despite_inherited_lowercase_proxy(monk
         monkeypatch.setenv("TEST_TAP_PORT", str(tap_port))
         monkeypatch.setenv("TEST_RESULT", str(result_path))
         monkeypatch.setenv("CODEX_HOME", str(tmp_path))
-        monkeypatch.setattr("claude_tap.cli_clients.shutil.which", lambda _cmd: str(probe))
+        monkeypatch.setattr("agent_tap.cli_clients.shutil.which", lambda _cmd: str(probe))
         monkeypatch.setattr("sys.stdin.isatty", lambda: False)
 
         assert await run_client(tap_port, [], client=client, proxy_mode="reverse") == 0

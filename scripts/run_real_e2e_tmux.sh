@@ -25,13 +25,13 @@ fi
 TS="$(date +%s)"
 TRACE_DIR="/tmp/ctap-tmux-simple-$TS"
 SESSION="ctap_simple_$TS"
-PANE_LOG="/tmp/claude-tap-recordings/tmux-simple-$TS.log"
+PANE_LOG="/tmp/agent-tap-recordings/tmux-simple-$TS.log"
 PERMISSION_MODE="${PERMISSION_MODE:-bypassPermissions}"
 PROMPT_ONE="${PROMPT_ONE:-Use the shell tool to run command ls in the current directory, then reply with any 5 filenames only.}"
 PROMPT_TWO="${PROMPT_TWO:-Thank you.}"
 SUBMIT_KEY="${SUBMIT_KEY:-Enter}"
 
-mkdir -p "$TRACE_DIR" /tmp/claude-tap-recordings
+mkdir -p "$TRACE_DIR" /tmp/agent-tap-recordings
 
 wait_for_prompt() {
   local timeout="${1:-60}"
@@ -97,7 +97,7 @@ cleanup() {
 trap cleanup EXIT
 
 tmux new-session -d -s "$SESSION" -x 160 -y 46
-tmux send-keys -t "$SESSION" -l "cd $REPO_ROOT && uv run python -m claude_tap --tap-output-dir $TRACE_DIR --tap-proxy-mode forward -- --permission-mode $PERMISSION_MODE"
+tmux send-keys -t "$SESSION" -l "cd $REPO_ROOT && uv run python -m agent_tap --tap-output-dir $TRACE_DIR --tap-proxy-mode forward -- --permission-mode $PERMISSION_MODE"
 tmux send-keys -t "$SESSION" Enter
 
 wait_for_prompt 90 || true
@@ -124,7 +124,7 @@ if [[ ! -f "$HTML" ]]; then
   uv run python - "$JSONL" "$HTML" <<'PY'
 import sys
 from pathlib import Path
-from claude_tap import _generate_html_viewer
+from agent_tap import _generate_html_viewer
 
 _generate_html_viewer(Path(sys.argv[1]), Path(sys.argv[2]))
 PY

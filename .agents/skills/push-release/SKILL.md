@@ -24,7 +24,7 @@ Push code to GitHub. If the pending commits contain feature changes, bump the ve
      - **minor** (0.1.4 → 0.2.0): new features
      - **major** (0.1.4 → 1.0.0): breaking changes
    - Update the `version` field in `pyproject.toml`
-   - Update `__version__` in `claude_tap/__init__.py`
+   - Update `__version__` in `agent_tap/__init__.py`
    - `git commit --amend` to fold the version bump into the last commit (avoids extra commits)
 
 4. **Push**:
@@ -34,7 +34,7 @@ Push code to GitHub. If the pending commits contain feature changes, bump the ve
 
 5. **Confirm CI status**:
    - Inform the user that CI will automatically: lint → test → auto-tag → PyPI publish
-   - Provide the GitHub Actions link: https://github.com/liaohch3/claude-tap/actions
+   - Provide the GitHub Actions link: https://github.com/rxa3c/agent-tap/actions
 
 ## Important: Version Bump = PyPI Release
 
@@ -42,5 +42,5 @@ The CI pipeline works as follows: push to main → auto-tag (only if version cha
 
 **A version bump is the ONLY way to trigger a new PyPI release.** If you push without bumping the version, CI will skip tagging and nothing gets published. So whenever commits include meaningful code changes (features, fixes, improvements), you MUST bump the version before pushing.
 
-- Version numbers in `pyproject.toml` and `claude_tap/__init__.py` must stay in sync
+- Version numbers in `pyproject.toml` and `agent_tap/__init__.py` must stay in sync
 - Only skip the bump for pure docs/test/CI changes that don't affect the published package

@@ -1,12 +1,12 @@
 ---
 name: translate-i18n
-description: Fill missing i18n translations in the viewer source JSON. Run this after adding or modifying English or Chinese UI strings in claude_tap/viewer_i18n.json — it auto-translates to ja, ko, fr, ar, de, ru via OpenRouter.
+description: Fill missing i18n translations in the viewer source JSON. Run this after adding or modifying English or Chinese UI strings in agent_tap/viewer_i18n.json — it auto-translates to ja, ko, fr, ar, de, ru via OpenRouter.
 user_invocable: true
 ---
 
 # Translate i18n
 
-Automatically fill missing translations for the viewer's `claude_tap/viewer_i18n.json` source file. The script uses English and Chinese as source languages and translates to Japanese, Korean, French, Arabic, German, and Russian.
+Automatically fill missing translations for the viewer's `agent_tap/viewer_i18n.json` source file. The script uses English and Chinese as source languages and translates to Japanese, Korean, French, Arabic, German, and Russian.
 
 ## Prerequisites
 
@@ -23,7 +23,7 @@ Always preview first to confirm which keys need translation:
 uv run python scripts/translate_i18n.py --dry-run
 ```
 
-This parses `claude_tap/viewer_i18n.json`, finds keys present in both `en` and `zh-CN` but missing in other languages, and lists them without modifying the file.
+This parses `agent_tap/viewer_i18n.json`, finds keys present in both `en` and `zh-CN` but missing in other languages, and lists them without modifying the file.
 
 ### 2. Run the translation
 
@@ -38,7 +38,7 @@ The script calls OpenRouter once per target language, then writes the translatio
 After translation, run the formatter and tests to make sure nothing broke:
 
 ```bash
-uv run python -m json.tool claude_tap/viewer_i18n.json >/dev/null
+uv run python -m json.tool agent_tap/viewer_i18n.json >/dev/null
 uv run pytest tests/test_translate_i18n.py -v
 ```
 
@@ -64,6 +64,6 @@ The script:
 
 ## Common scenarios
 
-**Added a new UI string**: Add the key to both `en` and `zh-CN` blocks in `claude_tap/viewer_i18n.json`, then run this skill. The other 6 languages will be filled automatically.
+**Added a new UI string**: Add the key to both `en` and `zh-CN` blocks in `agent_tap/viewer_i18n.json`, then run this skill. The other 6 languages will be filled automatically.
 
 **Changed an existing string**: The script only fills *missing* keys. To re-translate an existing key, first delete it from the target language blocks, then run the script.

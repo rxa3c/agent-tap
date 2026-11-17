@@ -1,12 +1,12 @@
 ---
 name: e2e-test
-description: Run claude-tap end-to-end tests with pytest
+description: Run agent-tap end-to-end tests with pytest
 user_invocable: true
 ---
 
-# claude-tap E2E Test
+# agent-tap E2E Test
 
-Run this skill after modifying core logic in claude-tap, especially:
+Run this skill after modifying core logic in agent-tap, especially:
 - Proxy handler / SSE reassembly (`__init__.py`)
 - TraceWriter (JSONL writing, flush behavior)
 - HTML viewer generation (`viewer.html`, `_generate_html_viewer`)
@@ -37,4 +37,4 @@ uv run pytest tests/test_e2e.py::test_startup_does_not_contact_pypi -v  # No sta
    - **test_trace_cleanup fails**: Manifest logic issue. Check `_load_manifest`, `_cleanup_traces`, `_register_trace`.
    - **test_startup_does_not_contact_pypi fails**: Startup made an unexpected update-related network request.
    - **test_live_viewer_* fails**: Viewer HTML issues. Check `viewer.html` for `preserveDetail` chain, `updateNavButtons`.
-   - **Timeout**: May be a network/port issue, not a claude-tap bug.
+   - **Timeout**: May be a network/port issue, not a agent-tap bug.

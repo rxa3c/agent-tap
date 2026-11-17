@@ -27,7 +27,7 @@ def test_fetch_stargazer_timestamps_paginates_and_authenticates():
         page = parse_qs(urlsplit(request.full_url).query)["page"][0]
         return first_page if page == "1" else second_page
 
-    timestamps = fetch_stargazer_timestamps("liaohch3/claude-tap", "test-token", request_json)
+    timestamps = fetch_stargazer_timestamps("rxa3c/agent-tap", "test-token", request_json)
 
     assert timestamps == [
         older_week,
@@ -39,7 +39,7 @@ def test_fetch_stargazer_timestamps_paginates_and_authenticates():
     for page, request in enumerate(requests, start=1):
         assert (
             request.full_url
-            == f"https://api.github.com/repos/liaohch3/claude-tap/stargazers/history?per_page=30&page={page}"
+            == f"https://api.github.com/repos/rxa3c/agent-tap/stargazers/history?per_page=30&page={page}"
         )
         assert request.method == "GET"
         assert request.data is None
@@ -63,7 +63,7 @@ def test_fetch_stargazer_timestamps_paginates_and_authenticates():
 )
 def test_fetch_stargazer_timestamps_rejects_malformed_payload(payload, message):
     with pytest.raises(RuntimeError, match=message):
-        fetch_stargazer_timestamps("liaohch3/claude-tap", "test-token", lambda _request: payload)
+        fetch_stargazer_timestamps("rxa3c/agent-tap", "test-token", lambda _request: payload)
 
 
 @pytest.mark.parametrize(
@@ -79,7 +79,7 @@ def test_http_errors_report_the_cause_without_exposing_the_token(body, expected)
         raise HTTPError(request.full_url, 403, "Forbidden", {}, BytesIO(body))
 
     with pytest.raises(RuntimeError) as caught:
-        fetch_stargazer_timestamps("liaohch3/claude-tap", "test-token", request_json)
+        fetch_stargazer_timestamps("rxa3c/agent-tap", "test-token", request_json)
     message = str(caught.value)
     assert "HTTP 403" in message
     assert expected in message
@@ -87,7 +87,7 @@ def test_http_errors_report_the_cause_without_exposing_the_token(body, expected)
     assert "\n" not in message
 
 
-@pytest.mark.parametrize("repo", ["claude-tap", "owner/repo/extra", "../repo"])
+@pytest.mark.parametrize("repo", ["agent-tap", "owner/repo/extra", "../repo"])
 def test_fetch_stargazer_timestamps_rejects_invalid_repo(repo):
     with pytest.raises(ValueError, match="OWNER/REPO"):
         fetch_stargazer_timestamps(repo, token="test-token", request_json=lambda _request: {})
@@ -95,7 +95,7 @@ def test_fetch_stargazer_timestamps_rejects_invalid_repo(repo):
 
 def test_fetch_stargazer_timestamps_requires_token():
     with pytest.raises(RuntimeError, match="GITHUB_TOKEN is required"):
-        fetch_stargazer_timestamps("liaohch3/claude-tap", token=None)
+        fetch_stargazer_timestamps("rxa3c/agent-tap", token=None)
 
 
 def test_render_charts_persists_valid_light_and_dark_pngs(tmp_path, monkeypatch):
@@ -109,7 +109,7 @@ def test_render_charts_persists_valid_light_and_dark_pngs(tmp_path, monkeypatch)
         datetime(2026, 1, 1, tzinfo=UTC),
     ]
 
-    render_charts("liaohch3/claude-tap", timestamps, tmp_path)
+    render_charts("rxa3c/agent-tap", timestamps, tmp_path)
 
     light = tmp_path / "star-history-light.png"
     dark = tmp_path / "star-history-dark.png"

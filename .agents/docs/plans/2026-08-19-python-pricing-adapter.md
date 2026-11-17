@@ -31,13 +31,13 @@ Price source: LiteLLM `model_prices_and_context_window.json`.
 ### Vendored price data
 
 The upstream file is 1.76 MB / 3055 entries, most of it irrelevant (embeddings,
-rerankers, image models, providers claude-tap never proxies). A refresh script
-prunes it to chat models from the providers claude-tap can capture, keeping only
+rerankers, image models, providers agent-tap never proxies). A refresh script
+prunes it to chat models from the providers agent-tap can capture, keeping only
 the cost, tier and context fields. That lands near 200 KB, comparable to the
 existing `viewer_i18n.json` + `viewer_assets/` package data, and keeps the viewer
 working offline with no new runtime dependency.
 
-- `claude_tap/model_prices.json` — pruned dataset plus a `__meta__` block
+- `agent_tap/model_prices.json` — pruned dataset plus a `__meta__` block
   recording source URL, upstream commit and fetch date.
 - `scripts/refresh_model_prices.py` — regenerates it; the only way it changes.
 
@@ -74,7 +74,7 @@ and omits the cost stats rather than guessing.
 
 ## TODO
 
-- [x] `claude_tap/pricing.py` adapter with tier + cache-TTL resolution
+- [x] `agent_tap/pricing.py` adapter with tier + cache-TTL resolution
 - [x] Vendored pruned dataset and refresh script
 - [x] `cache_read_in_input` provenance in `normalize_usage`
 - [x] Per-entry `cost` / `uncached_cost` / `saved` in viewer metadata

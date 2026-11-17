@@ -1,6 +1,6 @@
 # PR 139 Real Kimi CLI Evidence
 
-Generated on 2026-05-08 from a real interactive `kimi` CLI run through `claude-tap --tap-client kimi`.
+Generated on 2026-05-08 from a real interactive `kimi` CLI run through `agent-tap --tap-client kimi`.
 
 This evidence replaces the earlier deterministic fake-upstream screenshots. The fake upstream remains useful for repeatable pytest coverage, but PR evidence screenshots should show real client and real upstream behavior.
 
@@ -9,12 +9,12 @@ This evidence replaces the earlier deterministic fake-upstream screenshots. The 
 - JSONL: `.traces/regression-kimi-real-interactive-1778229907/2026-05-08/trace_164507.jsonl`
 - Viewer: `.traces/regression-kimi-real-interactive-1778229907/2026-05-08/trace_164507.html`
 - Client: `kimi, version 1.41.0`
-- Capture command shape: `claude-tap --tap-client kimi --tap-output-dir .traces/regression-kimi-real-interactive-1778229907 --tap-no-open --tap-no-update-check -- --yolo`
+- Capture command shape: `agent-tap --tap-client kimi --tap-output-dir .traces/regression-kimi-real-interactive-1778229907 --tap-no-open --tap-no-update-check -- --yolo`
 - Session shape: one continuous interactive Kimi CLI process with five consecutive user prompts in the same conversation.
 
 ## Coverage
 
-- Real Kimi CLI process launched by `claude-tap`
+- Real Kimi CLI process launched by `agent-tap`
 - Real upstream Kimi Chat Completions requests captured at `/chat/completions`
 - Captured records: 11
 - Response statuses: 11 x 200

@@ -1,5 +1,5 @@
 [project]
-name = "claude-tap"
+name = "agent-tap"
 dynamic = ["version"]
 description = "Trace AI CLI API requests via local reverse and forward proxies. Inspect system prompts, messages, tools, and token usage."
 requires-python = ">=3.11"
@@ -25,27 +25,27 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/liaohch3/claude-tap"
-Repository = "https://github.com/liaohch3/claude-tap"
-Issues = "https://github.com/liaohch3/claude-tap/issues"
+Homepage = "https://github.com/rxa3c/agent-tap"
+Repository = "https://github.com/rxa3c/agent-tap"
+Issues = "https://github.com/rxa3c/agent-tap/issues"
 
 [project.scripts]
-claude-tap = "claude_tap.cli:main_entry"
+agent-tap = "agent_tap.cli:main_entry"
 
 [build-system]
 requires = ["setuptools>=68.0", "setuptools-scm[toml]>=8.0"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
-packages = ["claude_tap", "claude_tap.viewer_assets"]
+packages = ["agent_tap", "agent_tap.viewer_assets"]
 
 [tool.setuptools_scm]
 version_scheme = "guess-next-dev"
 local_scheme = "no-local-version"
 
 [tool.setuptools.package-data]
-claude_tap = ["dashboard.html", "viewer.html", "viewer_i18n.json", "model_prices.json", "py.typed"]
-"claude_tap.viewer_assets" = ["*.css", "*.js"]
+agent_tap = ["dashboard.html", "viewer.html", "viewer_i18n.json", "model_prices.json", "py.typed"]
+"agent_tap.viewer_assets" = ["*.css", "*.js"]
 
 [project.optional-dependencies]
 dev = [
@@ -90,7 +90,7 @@ markers = [
 timeout = 60
 
 [tool.coverage.run]
-source = ["claude_tap"]
+source = ["agent_tap"]
 branch = true
 omit = ["tests/*"]
 
@@ -102,7 +102,7 @@ exclude_lines = [
 ]
 show_missing = true
 
-[tool.claude_tap.coverage]
+[tool.agent_tap.coverage]
 python_total_min = 65.0
 python_diff_min = 80.0
 viewer_js_function_min = 50.0
@@ -115,5 +115,5 @@ viewer_css_diff_min = 80.0
 # `pip install -e ".[dev]"` install the same set. Declare dev tooling in
 # [project.optional-dependencies] only — pip cannot read PEP 735 groups.
 dev = [
-    "claude-tap[dev]",
+    "agent-tap[dev]",
 ]
